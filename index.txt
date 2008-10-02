@@ -1,0 +1,183 @@
+.. _index:
+
+====================
+Django-Dokumentation
+====================
+
+.. rubric:: Alles, was du über Django wissen solltest (und mehr).
+
+Hilfe
+============
+
+Hast du Probleme? Wir würden dir gerne helfen!
+
+* Versuche es in der :ref:`FAQ <faq-index>` -- sie enthält Antworten zu
+  viele häufig gestellten Fragen.
+
+* Suchst du etwas Spezielles? Versuche den :ref:`genindex`, :ref:`modindex` oder
+  das :ref:`detailierte Inhaltsverzeichnis <contents>`.
+
+* Durchsuche das `Archiv der django-users-Mailinglist`_, oder `stelle dort eine
+  Frage`_.
+
+* Stelle eine Frage im `#django-IRC-Channel`_, oder durchsuche die `IRC-Protokolle`_, um
+  zu sehen, ob deine Frage vielleicht früher schon einmal beantwortet wurde.
+
+* Melde Bugs in Django im `Ticket-Tracker`_.
+
+.. _Archiv der django-users-Mailinglist: http://groups.google.com/group/django-users/
+.. _stelle dort eine Frage: http://groups.google.com/group/django-users/
+.. _#django-IRC-Channel: irc://irc.freenode.net/django
+.. _IRC-Protokolle: http://oebfare.com/logger/django/
+.. _Ticket-Tracker: http://code.djangoproject.com/
+
+Erste Schritte
+==============
+
+:ref:`Overview <intro-overview>`
+    See what writing a database-driven application with Django looks like.
+
+:ref:`Installation <intro-install>`
+    Get Django installed on your computer.
+
+Einführung: Schreibe deine erste Django-Anwendung
+=================================================
+
+:ref:`Teil 1 <intro-tutorial01>`
+    Beginne ein Projekt, baue Modelle und spiele mit der Datenbank-API.
+
+:ref:`Teil 2 <intro-tutorial02>`
+    Lerne den automatisch erzeugten Administrationsbereich kennen.
+
+:ref:`Teil 3 <intro-tutorial03>`
+    Schreibe Views für den öffentlichen Bereich.
+
+:ref:`Teil 4 <intro-tutorial04>`
+    Lerne, Formulare zu verarbeiten.
+
+Django nutzen
+=============
+
+:ref:`Modelle <topics-db-index>`
+    Entwirf eine Schnittstelle zu deinen Daten.
+
+:ref:`Mit Web-Requests umgehen <topics-http-index>`
+    Verarbeite Anfragen, binde sie an Views und gib Seiten zurück.
+
+:ref:`Formulare <topics-forms-index>`
+    Erzeuge und verarbeite HTML-Formulare.
+
+:ref:`Templates <topics-templates>`
+    Entwirf das Aussehen deiner Seite.
+
+Und mehr:
+---------
+
+    * :ref:`Authentikation <topics-auth>`
+    * :ref:`Caching <topics-cache>`
+    * :ref:`E-mail <topics-email>`
+    * :ref:`Datei-Upload <topics-files>`
+    * :ref:`topics-i18n`
+    * :ref:`topics-pagination`
+    * :ref:`Serialisierung <topics-serialization>`
+    * :ref:`Sessions <topics-http-sessions>`
+    * :ref:`Einstellungen/Konfiguration <topics-settings>`
+    * :ref:`topics-signals`
+    * :ref:`Testen <topics-testing>`
+
+Add-on ("contrib")-Anwendungen
+==============================
+
+:ref:`Djangos Administrationsbereich <ref-contrib-admin>`
+    Ein einfaches Webinterface für deine Daten.
+
+:ref:`Formularwerkzeuge <ref-contrib-formtools-index>`
+    Gehe einfach mit komplexen Fomular-Workflows um.
+
+:ref:`Feeds <ref-contrib-syndication>`
+    Erzeuge RSS- und Atom-Feeds für deine Daten.
+
+:ref:`"Local flavor" <ref-contrib-localflavor>`
+    Bereite deine Seiten für regionale Communities vor.
+
+Und mehr:
+---------
+
+    * :ref:`Kommentare <ref-contrib-comments-index>`
+    * :ref:`Content-Typen <ref-contrib-contenttypes>`
+    * :ref:`Cross Site Request Forgery-Schutz <ref-contrib-csrf>`
+    * :ref:`Databrowse <ref-contrib-databrowse>`
+    * :ref:`Flatpages <ref-contrib-flatpages>`
+    * :ref:`Humanize <ref-contrib-humanize>`
+    * :ref:`Redirects <ref-contrib-redirects>`
+    * :ref:`Sitemaps <ref-contrib-sitemaps>`
+    * :ref:`Sites <ref-contrib-sites>`
+    * :ref:`Webdesign-Helferfunktionen <ref-contrib-webdesign>`
+
+Bestimmte Probleme lösen
+========================
+
+:ref:`Auslieferung <howto-deployment-index>`
+    Lass dein Projekt auf die Welt los.
+
+:ref:`Importiere Daten aus einer Legacy-Datenbank <howto-legacy-databases>`
+    Use Django with an existing database or alongside other web development
+    toolkits.
+
+:ref:`Erstelle deine eigenen Templatetags <howto-custom-template-tags>`
+    Add your own extensions to Django's template language.
+
+:ref:`Erzeuge CSV <howto-outputting-csv>` & :ref:`PDF <howto-outputting-pdf>`
+    Produce non-HTML content with Django.
+
+Und mehr:
+---------
+
+    * :ref:`Authenticating in Apache <howto-apache-auth>`
+    * :ref:`howto-custom-file-storage`
+    * :ref:`howto-custom-management-commands`
+    * :ref:`howto-custom-model-fields`
+    * :ref:`Tracking code errors by e-mail <howto-error-reporting>`
+    * :ref:`howto-initial-data`
+    * :ref:`howto-jython`
+    * :ref:`Serving static files <howto-static-files>`
+
+Referenz
+========
+
+:ref:`Settings <ref-settings>`
+    See all of Django's settings and what they do.
+
+:ref:`Request & response objects <ref-request-response>`
+    Understand the classes Django uses to represent HTTP requests and responses.
+
+:ref:`Model API reference <ref-models-index>`
+    Revel in the gory details of Django's model system.
+
+:ref:`Form API reference <ref-forms-index>`
+    Learn the details of forms, fields and widgets.
+
+Und mehr:
+---------
+
+    * :ref:`ref-databases`
+    * :ref:`ref-django-admin`
+    * :ref:`ref-files-index`
+    * :ref:`ref-generic-views`
+    * :ref:`ref-middleware`
+    * :ref:`ref-templates-index`
+    * :ref:`ref-unicode`
+
+Alles Andere
+============
+
+:ref:`Internals <internals-index>`
+    Learn how Django works under the hood and how you can contribute to the
+    project.
+
+:ref:`Release notes <releases-index>`
+    See what is and was new in each release of Django.
+
+:ref:`Miscellany <misc-index>`
+    Stuff we can't find a more organized place for. Like that drawer in your
+    kitchen with the scissors, batteries and duct tape.
