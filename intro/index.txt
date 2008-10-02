@@ -1,0 +1,40 @@
+.. _intro-index:
+
+Auf gehts
+=========
+
+Wenn Django noch vollkommen neu für dich ist (oder allgemein Webdevelopment),
+dann bist du hier genau richtig. Die folgenden Artikel werden dir helfen, 
+so schnell wie möglich etwas auf die Beine zu stellen.
+
+.. toctree::
+   :maxdepth: 1
+    
+   overview
+   install
+   tutorial01
+   tutorial02
+   tutorial03
+   tutorial04
+   whatsnext
+   
+.. seealso::
+
+    Wenn du noch nie mit Python_ zu tun hattest, solltest du zuerst einmal
+    die Sprache kennen zu lernen. Django ist durch und durch Python, weshalb
+    selbst wenig Python-Erfahrung dir sehr helfen wird, Django zu verwenden.
+    
+    Wenn du vorher noch nie wirklich programmiert hast, sollte du zunächst
+    einen Blick auf diese `Liste von Python-Ressourcen für Nicht-Entwickler`_
+    werfen.
+
+    Solltest du bereits andere Programmiersprachen kennen und einfach nur
+    einen schnellen Einstieg in Python haben wollen, ist `Dive Into Python`_ 
+    (auch als `Buch`_ erhältlich) sehr zu empfehlen. Daneben gibt es noch
+    jede Menge anderer `Bücher über Python`_.
+    
+    .. _python: http://python.org/
+    .. _Liste von Python-Ressourcen für Nicht-Entwickler: http://wiki.python.org/moin/BeginnersGuide/NonProgrammers
+    .. _dive into python: http://diveintopython.org/
+    .. _Buch: http://www.amazon.com/exec/obidos/ASIN/1590593561/ref=nosim/jacobian20
+    .. _Bücher über Python: http://wiki.python.org/moin/PythonBooks
