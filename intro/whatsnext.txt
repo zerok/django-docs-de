@@ -1,0 +1,242 @@
+.. _intro-whatsnext:
+
+=======================
+Was kommt als Nächstes?
+=======================
+
+Also du hast die gesamte :ref:`Einführung <intro-index>` durch und hast dich
+dazu entschlossen, Django weiterhin einzusetzen? Dann bist du hier genau
+richtig, du hast bisher nämlich nur einen kleinen Teil der Dokumentation
+gesehen. (Selbst wenn du bis hier her jedes Wort gelesen hast, hast du
+vermutlich nur etwa 10% der gesamten Dokumentation gesehen.)
+
+Also was kommt als Nächstes?
+
+Nun ja, wir waren immer Anhänger des "Learning by Doing"-Ansatzes. Derzeit
+solltest du genug wissen, damit du ein eigenes Projekt starten und damit
+herumprobieren kannst. Wenn du von Zeit zu Zeit neue Tricks lernen möchtest,
+schaue einfach bei der Dokumentation vorbei.
+
+Wir haben jede Menge Arbeit in die Dokumentation gesteckt, damit sie
+hilfreich, einfach zu lesen und nicht zuletzt so vollständig wie möglich ist.
+Der verbleibende Teil dieses Dokumentes beschreibt die Dokumentation selbst
+ein bisschen genauer, damit du sie noch besser nutzen kannst.
+
+(Ja, das ist Dokumentation über Dokumentation, aber sei ganz beruhigt: Wir
+haben keine Pläne, zu dokumentieren, wie man die Dokumentation der
+Dokumentation liest.)
+
+Die richtige Dokumentation finden
+=================================
+
+Djangos Dokumentation ist *riesig* -- fast 200.000 Wörter. Folglich kann es
+manchmal etwas schwer sein, das zu finden, was man sucht. Ein guter
+Ausgangspunkt ist dann die :ref:`Suche <search>` und der :ref:`Index <index>`.
+
+Oder schau dich einfach um!
+
+Wie ist die Dokumentation aufgebaut?
+====================================
+
+Djangos Dokumentation ist in mehrere Teile aufgeteilt, um unterschiedliche
+Zielgruppen anzusprechen:
+
+    * Das :ref:`Einführungsmaterial <intro-index>` ist für Leute gedacht, die
+      einen Einstieg in Django -- oder Webentwicklung im Allgemeinen -- haben
+      möchten. Es behandelt nichts wirklich detailliert, gibt aber einen guten
+      Überblick darüber, wie man mit Django entwickelt.
+      
+    * Die :ref:`Tutorials` auf der anderen Seite gehen sehr detailliert auf
+      einzelne Teile von Django ein. Es gibt vollständige Anleitungen zu
+      Djangos :ref:`Modellsystem <topics-db-index>`, :ref:`Template-Engine
+      <topics-templates>`, :ref:`Formularframework <topics-forms-index>` und
+      vieles mehr.
+      
+      Das ist vermutlich auch jener Bereich, in dem du am meisten Zeit
+      verbringen dürftest; wenn du diesen Bereich durcharbeitest, solltest du
+      danach so ziemlich alles wissen, was es über Django zu wissen gibt.
+      
+    * Webentwicklung ist breit gefächert -- Probleme überspannen in der Regel
+      mehrere Domänen. Wir haben eine Reihe von :ref:`Anleitungen
+      <howto-index>` geschrieben, die häufig gestellte "Wie machen ich
+      ...?"-Fragen beantworten. Dort findest du Information wie man :ref:`PDFs
+      mit Django erzeugt <howto-outputting-pdf>`, :ref:`eigene Templatetags
+      baut <howto-custom-template-tags>` und vieles mehr.
+      
+      Antworten zu wirklich oft gestellten Fragen findest du auch in der
+      :ref:`FAQ <faq-index>`.
+      
+    * Die Anleitungen beschreiben nicht jede Klasse oder jede Funktion bzw.
+      Methode einzeln. Das wäre einfach zu detailliert, wenn du Django lernen
+      möchtest. Solche Detaillinformationen zu den einzelnen Klassen,
+      Funktionen, Methoden und Modulen befinden sich in der :ref:`Referenz
+      <ref-index>`.
+      
+    * Zu guter Letzt gibt es noch spezielle Dokumente, die in der Regel nur
+      für wenige Entwickler wirklich interessant sind. Diese beinhalten
+      :ref:`Release-Notes <releases-index>`, :ref:`Dokumentation
+      ausgemusterter Features <obsolute-index>`, :ref:`interne Dokumentation
+      <internals-index>` für diejenigen, die Django selbst erweitern möchten
+      und :ref:`ein paar andere Dokumente, die sonst einfach nirgends
+      dazupassen <misc-index>`.
+    
+Wie wird die Dokumentation aktuell gehalten?
+============================================
+
+Genauso wie auch der Code von Django täglich weiterentwickelt und verbessert
+wird, wird auch an unserer Dokumentation ständig gearbeitet. Wir verbessern
+die Dokumentation aus einer Reihe von Gründen:
+
+    * Um Fehler zu beheben, wie zum Beispiel Grammatik- oder Tippfehler.
+      
+    * Um zusätzliche Information oder Beispiele zu bereits existierenden
+      Bereichen hinzuzufügen, die das brauchen.
+    
+    * Um Features von Django zu dokumentieren, die bisher undokumentiert
+      waren. (Die Anzahl solcher Features wird immer kleiner, jedoch existiert
+      sie trotzdem noch.)
+    
+    * Um neue hinzugekommene Features zu dokumentieren oder um API- bzw.
+      Verhaltensänderungen zu dokumentieren.
+    
+Djangos Dokumentation wird mit demselben System verwaltet wie auch der
+Quellcode. Sie befindet sich im `django/trunk/docs`_-Verzeichnis unseres
+Subversion-Repositories.  Jedes Dokument existiert darin als eigene Datei.
+
+.. _django/trunk/docs: http://code.djangoproject.com/browser/django/trunk/docs
+
+Wie kommt man an die aktuelle Dokumentation?
+============================================
+
+Es gibt viele Wege, um an die Dokumentation zu kommen:
+
+Im Web
+------
+
+Die jeweils aktuelle Version der Django-Dokumentation findet man auf
+http://docs.djangoproject.com/en/dev/. Diese HTML-Seiten werden automatisch
+aus den Dateien im Code-Management erstellt. Das bedeutet, dass sie wirklich
+dem aktuellen Stand entspricht, also inklusive Fehlerkorrekturen und neuen Features, die möglicherweise auch wirklich nur in der Entwicklerversion vorhanden sind. (Wirf hierzu einen Blick in den Abschnitt "Unterschiede zwischen den Versionen" weiter unten.)
+
+Wenn du etwas findest, das verbessert werden sollte (zum Beispiel ein
+Tippfehler oder auch ein Bereich, der noch nicht wirklich vollständig
+dokumentiert ist), bitte sende uns Patches, Vorschläge etc. über das
+`Ticket-System`_. Die Entwickler hinter Django schauen ständig dort vorbei und
+nutzen dann deine Vorschläge und Patches, um die Dokumentation für alle besser
+zu machen.
+
+Bitte beachte aber, dass Tickets wirklich nur die Dokumentation selbst
+betreffen sollten. Das System ist nicht für Supportangelegenheiten da. Falls
+du Hilfe brauchst, wende dich bitte an die `django-users-Mailinglist`_ oder an
+den `#django-IRC-Channel`_.
+
+.. _Ticket-System: http://code.djangoproject.com/simpleticket?component=Documentation
+.. _django-users-Mailinglist: http://groups.google.com/group/django-users
+.. _#django-IRC-Channel: irc://irc.freenode.net/django
+
+Im Originalformat
+=================
+
+Für den Offlinegebrauch (oder einfach falls du das lieber hast) kannst du die
+Dokumentation auch im Klartext lesen.
+
+Wenn du eine offiziell veröffentlichte Version von Django verwendest, enthält
+die im ``docs/``-Ordner des Verzeichnisses, das du nach dem extrahieren des
+Paketes erhältst, die gesamte Dokumention dieser Version.
+
+Wenn du die Entwicklerversion von Django (das, was in Subversion als "trunk"
+bezeichnet wird) hast, enthält das ``docs/``-Verzeichnis wiederum die gesamte
+Dokumentation. Ebenso wie beim restlichen Quellcode, kannst du auch hier
+mittels ``svn update`` die jeweils aktuellsten Änderungen einspielen.
+
+Du kannst die aktuelle Version der Dokumention aus Subversion mit folgendem
+Kommandozeilenbefehl herunterladen:
+
+.. code-block:: bash
+
+    $ svn co http://code.djangoproject.com/svn/django/trunk/docs/ django_docs
+
+Damit hast du dann natürlich auch die Möglichkeit, die Dokumentation zum
+Beispiel mit dem Unix-Tool ``grep`` nach bestimmten Phrasen zu durchsuchen.
+Solltest du zum Beispiel nach allen Stellen suchen, an denen "max_length"
+erwähnt wird, geht das hiermit:
+
+.. code-block:: bash
+
+    $ grep -r max_length /path/to/django/docs/
+
+In HTML
+=======
+
+Du kannst die Dokumentation auch in HTML haben:
+
+    * Djangos Dokumentation nutzt ein System namens `Sphinx`__, um die
+      Quelldokumente in HTML umzuwandeln. Sphinx kannst du einerseits direkt
+      von der Sphinx-Webseite oder über Pythons ``easy_install`` installieren:
+      
+      .. code-block:: bash
+        
+            $ easy_install Sphinx
+      
+    * Danach führe das mitgelieferte Makefile aus, um die Dokumentation in
+      HTML umzuwandeln:
+      
+      .. code-block:: bash
+
+              $ cd path/to/django/docs
+              $ make html
+      
+      Hierfür musst du `GNU Make`__ installiert haben.
+      
+    * Die HTML-Dokumentation findest du dann im 
+      ``docs/_build/html``-Verzeichnis.
+    
+.. warning::
+    
+    Zum aktuellen Zeitpunkt verwendet Django eine Version von Sphinx, die noch
+    nicht veröffentlich wurde. Aus diesem Grund musst du Sphinx händisch aus
+    einem Quellpaket heraus installieren. Wir werden das in Kürze beheben.
+    
+__ http://sphinx.pocoo.org/
+__ http://www.gnu.org/software/make/
+
+Unterschiede zwischen den Versionen
+===================================
+
+Wie bereits erwähnt enthält die Text-Dokumentation in unserem
+Subversion-Repository den absolut letzten Stand der Dinge. Dieser enthält oft
+Dokumentation neuer Features, die in der Entwicklerversion von Django
+hinzugefügt wurden -- also in der Subversion ("trunk")-Version. Aus
+diesem Grund möchten wir kurz darauf hinweisen, wie wir die Dokumentation für
+verschiedene Versionen handhaben.
+
+Wir folgen hier folgender Verfahrensweise:
+
+    * Die primäre Dokumentation auf djangoproject.com ist die HTML-Version der
+      aktuellen Dokumente im Repository. Diese Dokumente entsprechen immer der
+      aktuell offiziellen Version von Django plus den Änderungen, die das
+      Framework seitdem erfahren hat.
+    
+    * Wenn wir Änderungen an Djangos Entwicklerversion vornehmen, versuchen
+      wir immer im selben Commit auch die Änderungen an der Dokumention
+      mitzuliefern.
+    
+    * Um neue Features bzw. Änderungen in der Dokumentation zu kennzeichnen,
+      verwenden wir die Phrase "Neu in Version X.Y", wobei X.Y der jeweils
+      nächsten Version (also derjenigen, an der gerade entwickelt wird)
+      entspricht.
+    
+    * Die Dokumentation für bestimmte Django-Versionen wird eingefroren,
+      sobald die Version offiziell veröffentlicht wurde. Ab diesem Zeitpunkt
+      wird die Dokumentation für diese Version nicht mehr verändert mit der
+      Ausnahme, dass ein Sicherheitsupdate oder andere zurückwirkende
+      Änderungen vorgenommen werden müssen. Sobald die Dokumentation
+      eingefroren wurde, wird bei jedem der hiervon betroffenen Dokumente die
+      Anmerkung "Dieses Dokument ist für Version XXX von Django eingefroren"
+      sowie ein Verweis auf die aktuelle Version des Dokumentes ganz oben im
+      Dokument angebracht.
+    
+    * Die `zentrale Dokumentationsseite`_ enthält Verweise auf die Dokumention
+      alles vorangegangener Versionen.
+    
+.. _zentrale Dokumentationsseite: http://docs.djangoproject.com/en/dev/
