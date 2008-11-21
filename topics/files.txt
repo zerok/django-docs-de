@@ -1,0 +1,149 @@
+.. _topics-files:
+
+=================
+Dateien verwalten
+=================
+
+.. versionadded:: 1.0
+
+Dieses Dokument beschreibt Djangos Dateizugriff-APIs.
+
+Django speichert Dateien standardmäßig lokal im unter :setting:`MEDIA_ROOT`
+angegebenen Pfad. Die folgenden Beispiele gehen davon aus, dass du diese
+Voreinstellung benutzt.
+
+Darüberhinaus bietet Django die Möglichkeit, eigene `Datei-Speicher`_ zu
+definieren, die Art und Ort des Speicherns bestimmen. Wie das funktioniert,
+erklärt die zweite Hälfte dieses Dokuments.
+
+Dateien in Models nutzen
+========================
+
+Wenn du ein :class:`~django.db.models.FileField` oder ein
+:class:`~django.db.models.ImageField` benutzt, kannst du die Django-API
+benutzen. Django bietet dir eine Reihe an APIs, die du benutzen kannst, um die
+Datei zu verwalten.
+
+Wir nehmen folgendes Modell an, in dem ein ``FileField`` benutzt wird um ein
+Foto abzuspeichern::
+
+    class Car(models.Model):
+        name = models.CharField(max_length=255)
+        price = models.DecimalField(max_digits=5, decimal_places=2)
+        photo = models.ImageField(upload_to='cars')
+
+Jedes ``Car``-Exemplar hat ein ``photo``-Attribut, über das Du das zugeordnete
+Photo ansprechen kannst:
+
+    >>> car = Car.objects.get(name="57 Chevy")
+    >>> car.photo
+    <ImageFieldFile: chevy.jpg>
+    >>> car.photo.name
+    u'cars/chevy.jpg'
+    >>> car.photo.path
+    u'/media/cars/chevy.jpg'
+    >>> car.photo.url
+    u'http://media.example.com/cars/chevy.jpg'
+
+Dieses Objekt -- hier ``car.photo`` -- ist ein ``File``-Objekt, das alle
+Methoden und Attribute besitzt, die im folgenden beschrieben werden:
+
+Das ``File``-Objekt
+===================
+
+Django benutzt intern ``django.core.files.File``, wenn es eine Datei abbilden will.
+Dies ist ein Adapter um Pythons `eingebautes file-Objekt`_ mit einigen Django-spezifischen Ergänzungen:
+
+.. _eingebautes file-Objekt: http://docs.python.org/lib/bltin-file-objects.html
+
+Meist wirst du das ``File``-Objekt das einfach benutzen (heißt, als Datei die
+wie oben zu einem Model gehört, oder beispielsweise eine hochgeladene Datei)
+
+Wenn du selbst ein ``File`` erstellen möchtest, der einfachste Weg führt über
+Pythons eingebautes ``file``-Objekt:
+
+    >>> from django.core.files import File
+    # Erstelle ein Python-file-Objekt durch open()
+    >>> f = open('/tmp/hello.world', 'w')
+    >>> myfile = File(f)
+
+Jetzt kannst du alle ``File``-Attribute und -Methoden benutzen
+:ref:`ref-files-file`.
+
+Datei-Speicher
+==============
+
+Im Hintergrund delegiert Django die eigentliche Arbeit (wie und wo Dateien
+gespeichert werden) an einen Datei-Speicher. Dieser kümmert sich um Details wie
+Dateisysteme, das Öffnen und Schreiben der Dateien, etc.
+
+Djangos Standard-Datei-Speicher ist durch die
+:setting:`DEFAULT_FILE_STORAGE`-Einstellung gegeben. Wenn du nicht explizit ein
+anderes angibst, wird dieses benutzt.
+
+Weiter unten findest du Details, wie du den eingebauten
+Standard-Datei-Speicher benutzen kannst, unter
+:ref:`howto-custom-file-storage` findest du Informationen darüber, wie du einen
+eigenen Datei-Speicher schreiben kannst.
+
+Storage-Objekte
+---------------
+
+Meist wirst du ein ``File``-Objekt benutzen (das im Hintergrund den zugehörigen
+Datei-Speicher für die jeweilige Datei anspricht), du kannst den
+Datei-Speicher aber auch direkt benutzen. Du kannst ein Exemplar eines
+eigenen Datei-Speichers erzeugen, oder -- meist praktischer -- einen
+globalen Datei-Speicher konfigurieren::
+
+    >>> from django.core.files.storage import default_storage
+    >>> from django.core.files.base import ContentFile
+
+    >>> path = default_storage.save('/path/to/file', ContentFile('new content'))
+    >>> path
+    u'/path/to/file'
+
+    >>> default_storage.filesize(path)
+    11
+    >>> default_storage.open(path).read()
+    'new content'
+
+    >>> default_storage.delete(path)
+    >>> default_storage.exists(path)
+    False
+
+Siehe :ref:`ref-files-storage` für die Datei-Zugriffs-API.
+
+Die eingebaute Dateisystem-Speicher-Klasse
+------------------------------------------
+
+Django kommt mit einer eingebauten ``FileSystemStorage``-Klasse (definiert in
+``django.core.files.storage``) die eine einfache lokale Dateisystem-Ablage
+implementiert.
+
+Dessen Konstruktur akzeptiert zwei Argumente:
+
+======================  ===================================================
+Attribut                Beschreibung
+======================  ===================================================
+``location``            Optional. Absoluter Pfad zu dem Order in dem die
+			Dateien abgespeichert werden. Wenn nicht angegeben,
+			wird dies auf die ``MEDIA_ROOT``-Einstellung gesetzt.
+``base_url``            Optional. URL von der aus die Dateien ausgeliefert
+			werden die hier gespeichert sind. Wenn nicht angegeben,
+                        wird die ``MEDIA_URL``-Einstellung verwendet.
+======================  ===================================================
+
+Beispielsweise speichert der folgende Code hochgeladene Dateien unter
+``/media/photos`` - egal wie du ``MEDIA_ROOT`` gesetzt hast::
+
+    from django.db import models
+    from django.core.files.storage import FileSystemStorage
+
+    fs = FileSystemStorage(location='/media/photos')
+
+    class Car(models.Model):
+        ...
+        photo = models.ImageField(storage=fs)
+
+:ref:`Eigene Datei-Speicher <howto-custom-file-storage>` funktionieren genau
+so: Du kannst sie als ``storage``-Argument einem``FileField`` übergeben.
