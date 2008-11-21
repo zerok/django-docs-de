@@ -1,0 +1,92 @@
+.. _howto-custom-file-storage:
+
+Ein eigenes Dateispeichersystem schreiben
+=========================================
+
+.. currentmodule:: django.core.files.storage
+
+Wenn du ein eigenes Dateispeichersystem benötigst -- zum Beispiel falls
+Dateien auf einen anderen Rechner ausgelagert werden sollen -- so kannst du
+das durch eine eigene Storage-Klasse erreichen. Hierfür musst du folgende
+Schritte durchführen:
+
+#. Deine Storage-Klasse muss eine Subklasse von
+   ``django.core.files.storage.Storage`` sein::
+    
+        from django.core.files.storage import Storage
+
+        class MyStorage(Storage):
+            ...
+
+#. Django muss in der Lage sein, dein Speicherungssystem ohne Argumente 
+   initialisieren zu können. Folglich sollten sämtliche Einstellung aus
+   ``django.conf.settings`` bezogen werden::
+        
+        from django.conf import settings
+        from django.core.files.storage import Storage
+
+        class MyStorage(Storage):
+            def __init__(self, option=None):
+                if not option:
+                    option = settings.CUSTOM_STORAGE_OPTIONS
+                ...
+
+#. Deine Storage-Klasse muss die Methoden ``_open()`` und ``_save()`` sowie 
+   alle anderen für sie relevanten Methoden implementieren. Im Anschluss 
+   findest du eine Liste dieser Methoden.
+   
+   Zusätzlich muss deine Klasse die ``path()``-Methode überschreiben, falls 
+   sie die Dateien lokal abspeichert.
+
+Dein Storage-System kann jede der in :ref:`ref-files-storage` behandelten
+Methode überschreiben. Sie muss jedoch immer die Folgenden implementieren:
+
+    * :meth:`Storage.delete`
+    * :meth:`Storage.exists`
+    * :meth:`Storage.listdir`
+    * :meth:`Storage.size`
+    * :meth:`Storage.url`
+
+Normalerweise solltest du auch die Hooks verwenden, die für Storage-Objekte
+existieren:
+
+``_open(name, mode='rb')``
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Verpflichtend**
+
+Wird von ``Storage.open()`` aufgerufen. Hierbei wird das eigentliche Öffnen
+einer Datei implementiert. Die Methode muss ein ``File`` zurückgeben, wobei du
+in den meisten Fällen eher eine Subklasse verwenden wirst, die noch
+entsprechende Applikationslogik für dein Speichersystem mitbringt.
+
+``_save(name, content)``
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Wird von ``Storage.save()`` aufgerufen. Der ``name`` wurde bereits durch
+``get_valid_name()`` und ``get_available_name()`` behandelt und ``content``
+ist das entsprechende ``File``-Objekt. Rückgabewert wird keiner erwartet.
+
+``get_valid_name(name)``
+------------------------
+
+Gibt einen Dateinamen zurück, der für das Speicherungssystem geeignet ist. 
+``name`` ist der Originalname, der an den Server gesendet wurde, nachdem 
+sämtliche Pfadinformationen entfernt wurden. Überschreibe diese Methode, 
+wenn du zum Beispiel bestimmte Zeichen konvertieren muss, um sichere
+Dateinamen zu erhalten.
+
+Die Implementierung in ``Storage`` entfernt sämtliche Zeichen, die weder
+alphanumerische Zeichen, noch Punkte, noch Unterstriche sind.
+
+``get_available_name(name)``
+----------------------------
+
+Gibt einen Dateinamen zurück der im Speichersystem verfügbar ist. Abhängig von
+der Implementierung wird hierbei auch der übergebene Dateiname berücksichtigt.
+Das ``name``-Argument, das hier übergeben wird, wurde bereits durch
+``get_valid_name()`` gefiltert.
+
+Die Implementierung in ``Storage`` fügt einfach so lange Unterstriche an den
+Dateinamen an, bis ein noch nicht verwendeter Name im Zielverzeichnis gefunden
+wird.
