@@ -1,0 +1,35 @@
+.. _howto-index:
+
+Anleitungen
+===========
+
+Hier findest du kurze Antworten auf gängige "Wie mache ich ...?"-Fragen. Diese
+Anleitungen behandeln ein Thema nicht erschöpfend, jedoch werden sie dir
+helfen, eine gängige Aufgabe schnell zu lösen. Detaillierte Beschreibungen
+findest du im :ref:`Themenindex <topic-index>` und im :ref:`Referenzindex
+<ref-index>`.
+
+.. toctree::
+   :maxdepth: 1
+   
+   apache-auth
+   custom-management-commands
+   custom-model-fields
+   custom-template-tags
+   custom-file-storage
+   deployment/index
+   error-reporting
+   initial-data
+   jython
+   legacy-databases
+   outputting-csv
+   outputting-pdf
+   static-files
+
+.. seealso::
+
+    Den `Django-Community-Aggregator`_, wo wir Beiträge der weltweiten
+    Django-Community sammeln. Eine ganze Reihe von Autoren in diesem
+    Aggregator schreiben die Art von Anleitungen.
+    
+    .. _django-community-aggregator: http://www.djangoproject.com/community/
