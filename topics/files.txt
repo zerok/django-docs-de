@@ -56,7 +56,7 @@ Dies ist ein Adapter um Pythons `eingebautes file-Objekt`_ mit einigen Django-sp
 
 .. _eingebautes file-Objekt: http://docs.python.org/lib/bltin-file-objects.html
 
-Meist wirst du das ``File``-Objekt das einfach benutzen (heißt, als Datei die
+Meist wirst du das ``File``-Objekt einfach benutzen (heißt, als Datei die
 wie oben zu einem Model gehört, oder beispielsweise eine hochgeladene Datei)
 
 Wenn du selbst ein ``File`` erstellen möchtest, der einfachste Weg führt über
