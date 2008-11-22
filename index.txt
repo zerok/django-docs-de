@@ -14,14 +14,15 @@ Hast du Probleme? Wir würden dir gerne helfen!
 * Versuche es in der :ref:`FAQ <faq-index>` -- sie enthält Antworten zu
   viele häufig gestellten Fragen.
 
-* Suchst du etwas Spezielles? Versuche den :ref:`genindex`, :ref:`modindex` oder
-  das :ref:`detailierte Inhaltsverzeichnis <contents>`.
+* Suchst du etwas Spezielles? Versuche den :ref:`genindex`, :ref:`modindex`
+  oder das :ref:`detaillierte Inhaltsverzeichnis <contents>`.
 
-* Durchsuche das `Archiv der django-users-Mailinglist`_, oder `stelle dort eine
-  Frage`_.
+* Durchsuche das `Archiv der django-users-Mailinglist`_, oder `stelle dort
+  eine Frage`_.
 
-* Stelle eine Frage im `#django-IRC-Channel`_, oder durchsuche die `IRC-Protokolle`_, um
-  zu sehen, ob deine Frage vielleicht früher schon einmal beantwortet wurde.
+* Stelle eine Frage im `#django-IRC-Channel`_, oder durchsuche die
+  `IRC-Protokolle`_, um zu sehen, ob deine Frage vielleicht früher schon
+  einmal beantwortet wurde.
 
 * Melde Bugs in Django im `Ticket-Tracker`_.
 
@@ -34,7 +35,7 @@ Hast du Probleme? Wir würden dir gerne helfen!
 Erste Schritte
 ==============
 
-:ref:`Overview <intro-overview>`
+:ref:`Übersicht <intro-overview>`
     See what writing a database-driven application with Django looks like.
 
 :ref:`Installation <intro-install>`
@@ -73,8 +74,8 @@ Django nutzen
 Und mehr:
 ---------
 
-    * :ref:`Authentikation <topics-auth>`
-    * :ref:`Caching <topics-cache>`
+    * :ref:`Authentifikation <topics-auth>`
+    * :ref:`Zwischenspeichern <topics-cache>`
     * :ref:`E-mail <topics-email>`
     * :ref:`Datei-Upload <topics-files>`
     * :ref:`topics-i18n`
@@ -121,41 +122,42 @@ Bestimmte Probleme lösen
     Lass dein Projekt auf die Welt los.
 
 :ref:`Importiere Daten aus einer Legacy-Datenbank <howto-legacy-databases>`
-    Use Django with an existing database or alongside other web development
-    toolkits.
+    Benutze Django mit einer bereits bestehenden Datenbank oder parallel zu
+    anderen Webentwicklunstoolkits.
 
 :ref:`Erstelle deine eigenen Templatetags <howto-custom-template-tags>`
-    Add your own extensions to Django's template language.
+    Schreibe deinee eigenen Erweiterungen zu Djangos Template-Sprache.
 
 :ref:`Erzeuge CSV <howto-outputting-csv>` & :ref:`PDF <howto-outputting-pdf>`
-    Produce non-HTML content with Django.
+    Erzeuge Inhalte, die nicht HTML sind, mit Django.
 
 Und mehr:
 ---------
 
-    * :ref:`Authenticating in Apache <howto-apache-auth>`
+    * :ref:`Authentisieren mit Apache <howto-apache-auth>`
     * :ref:`howto-custom-file-storage`
     * :ref:`howto-custom-management-commands`
     * :ref:`howto-custom-model-fields`
-    * :ref:`Tracking code errors by e-mail <howto-error-reporting>`
+    * :ref:`E-Mail-Benachrichtigungen bei Fehlern <howto-error-reporting>`
     * :ref:`howto-initial-data`
     * :ref:`howto-jython`
-    * :ref:`Serving static files <howto-static-files>`
+    * :ref:`Statische Dateien ausliefern <howto-static-files>`
 
 Referenz
 ========
 
-:ref:`Settings <ref-settings>`
-    See all of Django's settings and what they do.
+:ref:`Einstellungen <ref-settings>`
+    Hier findest du alle Einstellungen von Django und was sie bewirken.
 
 :ref:`Request & response objects <ref-request-response>`
-    Understand the classes Django uses to represent HTTP requests and responses.
+    Lerne die Django-Klassen kennen, die für HTTP-Anfragen und -Antworten
+    zuständig sind.
 
-:ref:`Model API reference <ref-models-index>`
-    Revel in the gory details of Django's model system.
+:ref:`Modell-API-Referenz <ref-models-index>`
+    Hier findest du mehr über Djangos Modell-System ... viel mehr.
 
-:ref:`Form API reference <ref-forms-index>`
-    Learn the details of forms, fields and widgets.
+:ref:`Formular-API-Referenz <ref-forms-index>`
+    Erfahre mehr über Formulare, Felder und Widgets.
 
 Und mehr:
 ---------
@@ -171,13 +173,14 @@ Und mehr:
 Alles Andere
 ============
 
-:ref:`Internals <internals-index>`
-    Learn how Django works under the hood and how you can contribute to the
-    project.
+:ref:`Internes <internals-index>`
+    Lerne, was innerhalb von Django so vorgeht und wie du etwas zum Projekt
+    beitragen kannst.
 
-:ref:`Release notes <releases-index>`
-    See what is and was new in each release of Django.
+:ref:`Versionshinweise <releases-index>`
+    Was ist bzw. war neu in jeder Django-Version.
 
-:ref:`Miscellany <misc-index>`
-    Stuff we can't find a more organized place for. Like that drawer in your
-    kitchen with the scissors, batteries and duct tape.
+:ref:`Verschiedenes <misc-index>`
+    Dokumente, die sonst irgendwie nirgends dazu passen. So wie die
+    Schachtel in deiner Küche mit den Batterien und der Schere.
+    
