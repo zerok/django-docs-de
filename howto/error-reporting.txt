@@ -1,0 +1,78 @@
+.. _howto-error-reporting:
+
+Fehlerbenachrichtigung via E-Mail
+=================================
+
+Wenn du eine öffentliche Seite betreibst, solltest du immer die
+:setting:`DEBUG`-Einstellung deaktiviert lassen. Das macht deinen Server
+schneller und verhindert ausserdem, dass böswillige Benutzer die Details
+deiner Applikation sehen, die durch die Fehlerseite im Debug-Modus angezeigt
+werden.
+
+Auf der anderen Seite siehst auch du keine detaillierten Fehlermeldungen
+deiner Seite, wenn :setting:`DEBUG` auf ``False`` gesetzt ist, sondern
+lediglich eine einfache Fehlerseite wie alle übrigen Benutzer. Trotzdem sollte
+du immer über auftretende Fehler informiert werden, die auf einer deiner
+Seiten auftreten. Genau dafür bietet Django die Möglichkeit, dir detaillierte
+Fehlermeldungen auch per E-Mail zukommen zu lassen.
+
+Server-Fehler
+-------------
+
+Wenn :setting:`DEBUG` auf ``False`` gesetzt ist und ein nicht-abgefangener
+Fehler auftritt, der in einen internen Serverfehler resultiert
+(HTTP-Status-Code 500), sendet Django an alle E-Mail-Adressen, die in
+:settings:`ADMINS` eingetragen sind, eine E-Mail. Dadurch werden sämtliche
+Administratoren über einen auftretenden Fehler sofort informiert. Die
+:setting:`ADMINS` erhalten dann eine Beschreibung des Fehlers, einen
+vollständigen Python-Traceback und Details zum HTTP-Request, der den Fehler
+verursacht hat.
+
+Um diese Funktion zu deaktivieren, entferne einfach sämtliche Einträge aus
+:setting:`ADMINS`.
+
+404-Fehler
+----------
+
+Django kann auch dahingehend konfiguriert werden, dass es E-Mails bei
+fehlerhaften Verweisen (404-"page not found"-Fehlern) ausschickt. Django
+versendet diese Mails wenn
+    
+    * :settings:`DEBUG` ``False`` ist,
+      
+    * :settings:`SEND_BROKEN_LINK_EMAILS` ``True`` ist
+    
+    * und wenn du die ``CommonsMiddleware`` bei deinen
+      :settings:`MIDDLEWARE_CLASSES` eingetragen hast (was standardmässig der
+      Fall ist).
+      
+Wenn diese Dinge zutreffen, sendet Django an jede E-Mail-Adresse, die in
+:settings:`MANAGERS` eintragen ist, eine Benachrichtigung, sobald ein
+404-Fehler auftritt und die Anfrage einen Referer hat. (Django ignoriert
+404-Fehler bei Anfragen ohne Referer, da diese in der Regel von Leuten erzeugt
+werden, die einfach nur eine falschen URL eingetippt haben oder von
+fehlerhaften Web-Bots stammen.)
+
+Du kannst Django auch so konfigurieren, dass bestimmte 404-Fehler nicht mehr
+an die Manager weitergeleitet werden. Hierfür gibt es
+:setting:`IGNORABLE_404_ENDS` und :setting:`IGNORABLE_404_STARTS`, die beide
+einen Tuple bestehend aus Strings enthalten sollten. Zum Beispiel::
+    
+    IGNORABLE_404_ENDS = ('.php', '.cgi')
+    IGNORABLE_404_STARTS = ('/phpmyadmin/',)
+    
+Mit dieser Konfiguration wird kein 404-Fehler einer URL, die auf ``.php`` oder
+``.cgi`` endet, mehr an die Manager weitergeleitet. Das Selbe gilt für URLs,
+die mit ``/phpmyadmin/`` anfangen.
+
+Um diese Funktion wieder zu deaktiviert, setzt man
+:setting:`SEND_BROKEN_LINK_EMAILS` auf ``False``.
+
+.. seealso::
+    
+    Du kannst auch dein eigenes System zur Fehlerbenachrichtung schreiben, 
+    indem du eine eigene :ref:`Exception-Middleware <exception-middleware>`
+    schreibst. In diesem Fall ist es empfehlenswert, dass du versuchst, 
+    das Verhalten von Djangos eigener Fehlerbenachrichtung nachzuahmen und
+    Benachrichtungen nur dann aussendest, wenn :setting:`DEBUG` auf ``False``
+    gesetzt ist.
