@@ -41,146 +41,52 @@ Erste Schritte
 :ref:`Installation <intro-install>`
     Get Django installed on your computer.
 
-Einführung: Schreibe deine erste Django-Anwendung
-=================================================
+Die Modell-Schicht
+==================
 
-:ref:`Teil 1 <intro-tutorial01>`
-    Beginne ein Projekt, baue Modelle und spiele mit der Datenbank-API.
+    * **Modelle:** :ref:`Modellsyntax <topics-db-models>` |
+      :ref:`Feldtypen <ref-models-fields>` |
+      :ref:`Meta-Optionen <ref-models-options>`
+    * **QuerySets:** :ref:`Queries durchführen <topics-db-queries` |
+      :ref:`QuerySet-Methodenreferenz <ref-models-querysets>`
+    * **Modellinstanzen:** :ref:`Instanzmethoden <ref-models-instances>`|
+      :ref:`Relationen <ref-models-relations>`
+    * **Für Fortgeschrittene:** :ref:`Manager <topics-db-managers>` |
+      :ref:`SQL-Statements <topics-db-sql>` |
+      :ref:`Transaktionen <topics-db-transactions>` |
+      :ref:`Eigene Felder <howot-custom-model-fields>`
+    * **Andere Themen:** :ref:`Unterstützte Datenbanken <ref-databases>` |
+      :ref:`Altdatenbanken <howto-legacy-databases>` |
+      :ref:`Initiale Datensätze anbieten <howot-initial-data>`
 
-:ref:`Teil 2 <intro-tutorial02>`
-    Lerne den automatisch erzeugten Administrationsbereich kennen.
 
-:ref:`Teil 3 <intro-tutorial03>`
-    Schreibe Views für den öffentlichen Bereich.
+Die Template-Schicht
+====================
 
-:ref:`Teil 4 <intro-tutorial04>`
-    Lerne, Formulare zu verarbeiten.
 
-Django nutzen
-=============
+Die View-Schicht
+================
 
-:ref:`Modelle <topics-db-index>`
-    Entwirf eine Schnittstelle zu deinen Daten.
 
-:ref:`Mit Web-Requests umgehen <topics-http-index>`
-    Verarbeite Anfragen, binde sie an Views und gib Seiten zurück.
+Formulare
+=========
 
-:ref:`Formulare <topics-forms-index>`
-    Erzeuge und verarbeite HTML-Formulare.
 
-:ref:`Templates <topics-templates>`
-    Entwirf das Aussehen deiner Seite.
+Der Entwicklungsprozess
+=======================
 
-Und mehr:
----------
 
-    * :ref:`Authentifikation <topics-auth>`
-    * :ref:`Zwischenspeichern <topics-cache>`
-    * :ref:`E-mail <topics-email>`
-    * :ref:`Datei-Upload <topics-files>`
-    * :ref:`topics-i18n`
-    * :ref:`topics-pagination`
-    * :ref:`Serialisierung <topics-serialization>`
-    * :ref:`Sessions <topics-http-sessions>`
-    * :ref:`Einstellungen/Konfiguration <topics-settings>`
-    * :ref:`topics-signals`
-    * :ref:`Testen <topics-testing>`
+Andere bereits enthaltene Komponenten
+=====================================
 
-Add-on ("contrib")-Anwendungen
+
+Das Open Source-Projekt Django
 ==============================
-
-:ref:`Djangos Administrationsbereich <ref-contrib-admin>`
-    Ein einfaches Webinterface für deine Daten.
-
-:ref:`Formularwerkzeuge <ref-contrib-formtools-index>`
-    Gehe einfach mit komplexen Fomular-Workflows um.
-
-:ref:`Feeds <ref-contrib-syndication>`
-    Erzeuge RSS- und Atom-Feeds für deine Daten.
-
-:ref:`"Local flavor" <ref-contrib-localflavor>`
-    Bereite deine Seiten für regionale Communities vor.
-
-Und mehr:
----------
-
-    * :ref:`Kommentare <ref-contrib-comments-index>`
-    * :ref:`Content-Typen <ref-contrib-contenttypes>`
-    * :ref:`Cross Site Request Forgery-Schutz <ref-contrib-csrf>`
-    * :ref:`Databrowse <ref-contrib-databrowse>`
-    * :ref:`Flatpages <ref-contrib-flatpages>`
-    * :ref:`Humanize <ref-contrib-humanize>`
-    * :ref:`Redirects <ref-contrib-redirects>`
-    * :ref:`Sitemaps <ref-contrib-sitemaps>`
-    * :ref:`Sites <ref-contrib-sites>`
-    * :ref:`Webdesign-Helferfunktionen <ref-contrib-webdesign>`
-
-Bestimmte Probleme lösen
-========================
-
-:ref:`Auslieferung <howto-deployment-index>`
-    Lass dein Projekt auf die Welt los.
-
-:ref:`Importiere Daten aus einer Legacy-Datenbank <howto-legacy-databases>`
-    Benutze Django mit einer bereits bestehenden Datenbank oder parallel zu
-    anderen Webentwicklunstoolkits.
-
-:ref:`Erstelle deine eigenen Templatetags <howto-custom-template-tags>`
-    Schreibe deinee eigenen Erweiterungen zu Djangos Template-Sprache.
-
-:ref:`Erzeuge CSV <howto-outputting-csv>` & :ref:`PDF <howto-outputting-pdf>`
-    Erzeuge Inhalte, die nicht HTML sind, mit Django.
-
-Und mehr:
----------
-
-    * :ref:`Authentisieren mit Apache <howto-apache-auth>`
-    * :ref:`howto-custom-file-storage`
-    * :ref:`howto-custom-management-commands`
-    * :ref:`howto-custom-model-fields`
-    * :ref:`E-Mail-Benachrichtigungen bei Fehlern <howto-error-reporting>`
-    * :ref:`howto-initial-data`
-    * :ref:`howto-jython`
-    * :ref:`Statische Dateien ausliefern <howto-static-files>`
-
-Referenz
-========
-
-:ref:`Einstellungen <ref-settings>`
-    Hier findest du alle Einstellungen von Django und was sie bewirken.
-
-:ref:`Request & response objects <ref-request-response>`
-    Lerne die Django-Klassen kennen, die für HTTP-Anfragen und -Antworten
-    zuständig sind.
-
-:ref:`Modell-API-Referenz <ref-models-index>`
-    Hier findest du mehr über Djangos Modell-System ... viel mehr.
-
-:ref:`Formular-API-Referenz <ref-forms-index>`
-    Erfahre mehr über Formulare, Felder und Widgets.
-
-Und mehr:
----------
-
-    * :ref:`ref-databases`
-    * :ref:`ref-django-admin`
-    * :ref:`ref-files-index`
-    * :ref:`ref-generic-views`
-    * :ref:`ref-middleware`
-    * :ref:`ref-templates-index`
-    * :ref:`ref-unicode`
-
-Alles Andere
-============
-
-:ref:`Internes <internals-index>`
-    Lerne, was innerhalb von Django so vorgeht und wie du etwas zum Projekt
-    beitragen kannst.
-
-:ref:`Versionshinweise <releases-index>`
-    Was ist bzw. war neu in jeder Django-Version.
-
-:ref:`Verschiedenes <misc-index>`
-    Dokumente, die sonst irgendwie nirgends dazu passen. So wie die
-    Schachtel in deiner Küche mit den Batterien und der Schere.
     
+    * **Community:** :ref:`Wie kann man mithelfen <internals-contributing>` | :ref:`The release process <internals-release-process>` | :ref:`Team von Beitragenden <internals-committers>`
+    * **Design-Philosophien:** :ref:`Überblick <misc-design-philosophies>`
+    * **Dokumentation:** :ref:`Über diese Dokumentation <internals-documentation>`
+    * **Distributionen von Fremdherstellern:** :ref:`Überblick <misc-distributions>`
+    * **Django als sich entwickelndes System:** :ref:`API-Stabilität <misc-api-stability>` | :ref:`Archiv von Versionshinweisen <releases-index>` | `Abwärtskompatible Änderungen`_
+    
+.. _abwärtskompatible änderungen: http://code.djangoproject.com/wiki/BackwardsIncompatibleChanges
