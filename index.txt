@@ -36,10 +36,10 @@ Erste Schritte
 ==============
 
 :ref:`Übersicht <intro-overview>`
-    See what writing a database-driven application with Django looks like.
+    Lerne, wie man eine Datenbank-betriebene Anwendung mit Django schreibt.
 
 :ref:`Installation <intro-install>`
-    Get Django installed on your computer.
+    Installiere Django auf deinem Computer.
 
 Die Modell-Schicht
 ==================
@@ -51,7 +51,7 @@ Die Modell-Schicht
       :ref:`QuerySet-Methodenreferenz <ref-models-querysets>`
     * **Modellinstanzen:** :ref:`Instanzmethoden <ref-models-instances>`|
       :ref:`Relationen <ref-models-relations>`
-    * **Für Fortgeschrittene:** :ref:`Manager <topics-db-managers>` |
+    * **Fortgeschrittene Themen:** :ref:`Manager <topics-db-managers>` |
       :ref:`SQL-Statements <topics-db-sql>` |
       :ref:`Transaktionen <topics-db-transactions>` |
       :ref:`Eigene Felder <howot-custom-model-fields>`
@@ -59,26 +59,62 @@ Die Modell-Schicht
       :ref:`Altdatenbanken <howto-legacy-databases>` |
       :ref:`Initiale Datensätze anbieten <howot-initial-data>`
 
-
 Die Template-Schicht
 ====================
 
+    * **Für Designer:** :ref:`Syntaxübersicht <topics-templates>` | :ref:`Eingebaute Tags und Filter <ref-templates-builtins>`
+    * **Für Programmierer:** :ref:`Template-API <ref-templates-api>` | :ref:`Eigene Tags und Filter <howto-custom-template-tags>`
 
 Die View-Schicht
 ================
 
+    * **Die Grundlagen:** :ref:`URLconfs <topics-http-urls>` | :ref:`View-Funktionen <topics-http-views>` | :ref:`Abkürzungen <topics-http-shortcuts>`
+    * **Referenz:** :ref:`Anfrage-/Antwortobjekte <ref-request-response>`
+    * **Hochladen von Dateien:** :ref:`Übersicht <topics-http-file-uploads>` | :ref:`File-Objekte <ref-files-file>` | :ref:`Dateispeicher-API <ref-files-storage>` | :ref:`Dateien verwalten <topics-files>` | :ref:`Eigenes Speichersystem <howto-custom-file-storage>`
+    * **Fortgeschrittene Themen:** :ref:`Generic views <ref-generic-views>` | :ref:`CSV generieren <howto-outputting-csv>` | :ref:`PDFs generieren <howto-outputting-pdf>`
+    * **Middleware:** :ref:`Übersicht <topics-http-middleware>` | :ref:`Eingebaute Middleware-Klassen <ref-middleware>`
 
 Formulare
 =========
 
+    * **Die Grundlagen:** :ref:`Übersicht <topics-forms-index>` | :ref:`Formular-API <ref-forms-api>` | :ref:`Eingebaute Felder <ref-forms-fields>` | :ref:`Eingebaute Widgets <ref-forms-widgets>`
+    * **Fortgeschrittene Themen:** :ref:`Formulare für Modelle <topics-forms-modelforms>` | :ref:`Integrating media <topics-forms-media>` | :ref:`Formsets <topics-forms-formsets>` | :ref:`Eigene Validierung <ref-forms-validation>`
+    * **Extras:** :ref:`Formularvorschau <ref-contrib-formtools-form-preview>` | :ref:`Wizards <ref-contrib-formtools-form-wizard>`
 
 Der Entwicklungsprozess
 =======================
 
+    * **Einstellungen:** :ref:`Übersicht <topics-settings>` | :ref:`Alle Einstellungen <ref-settings>`
+    * **django-admin.py und manage.py:** :ref:`Übersicht <ref-django-admin>` | :ref:`Eigene Befehle bauen <howto-custom-management-commands>`
+    * **Testen:** :ref:`Übersicht <topics-testing>`
+    * **Einsatz:** :ref:`Übersicht <howto-deployment-index>` | :ref:`Apache/mod_python <howto-deployment-modpython>` | :ref:`FastCGI/SCGI/AJP <howto-deployment-fastcgi>` | :ref:`Apache-Authentifizierung <howto-apache-auth>` | :ref:`Statische Dateien ausliefern <howto-static-files>` | :ref:`Über Fehler per E-Mail benachrichtigt werden <howto-error-reporting>`
 
 Andere bereits enthaltene Komponenten
 =====================================
 
+    * :ref:`Administrationsseite <ref-contrib-admin>`
+    * :ref:`Authentifizierung <topics-auth>`
+    * :ref:`Cache-System <topics-cache>`
+    * :ref:`Kommentare <ref-contrib-comments-index>`
+    * :ref:`Content-Types <ref-contrib-contenttypes>`
+    * :ref:`"Cross Site Request Forgery"-Schutz <ref-contrib-csrf>`
+    * :ref:`Databrowse <ref-contrib-databrowse>`
+    * :ref:`E-mail (versenden) <topics-email>`
+    * :ref:`Flatpages <ref-contrib-flatpages>`
+    * :ref:`Humanize <ref-contrib-humanize>`
+    * :ref:`Internationalisierung <topics-i18n>`
+    * :ref:`Jython-Unterstützung <howto-jython>`
+    * :ref:`"Local flavor" <ref-contrib-localflavor>`
+    * :ref:`Seitennummerierung <topics-pagination>`
+    * :ref:`Weiterleitungen <ref-contrib-redirects>`
+    * :ref:`Serialisierung <topics-serialization>`
+    * :ref:`Sessions <topics-http-sessions>`
+    * :ref:`Signale <topics-signals>`
+    * :ref:`Sitemaps <ref-contrib-sitemaps>`
+    * :ref:`Sites <ref-contrib-sites>`
+    * :ref:`RSS/Atom <ref-contrib-syndication>`
+    * :ref:`Unicode in Django <ref-unicode>`
+    * :ref:`Hilfsfunktionen für Webdesigner <ref-contrib-webdesign>`
 
 Das Open Source-Projekt Django
 ==============================
