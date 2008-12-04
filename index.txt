@@ -56,7 +56,7 @@ Die Modell-Schicht
       :ref:`Transaktionen <topics-db-transactions>` |
       :ref:`Eigene Felder <howot-custom-model-fields>`
     * **Andere Themen:** :ref:`Unterstützte Datenbanken <ref-databases>` |
-      :ref:`Altdatenbanken <howto-legacy-databases>` |
+      :ref:`Bestehende Datenbanken <howto-legacy-databases>` |
       :ref:`Initiale Datensätze anbieten <howot-initial-data>`
 
 Die Template-Schicht
