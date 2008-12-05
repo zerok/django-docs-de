@@ -1,0 +1,37 @@
+.. _howto-custom-management-commands:
+
+Schreibe eigene Befehle für django-admin
+========================================
+
+.. versionadded:: 1.0
+
+Applikationen können eigene Aktionen für das ``manage.py``- bzw.
+`django-admin.py`-Script definieren, um zusätzliche Funktionalität auf der
+Kommandozeile anzubieten, die speziell sie betrifft.
+
+Hierfür erzeuge ein ``management/commands``-Verzeichnis innerhalb deines
+Applikationspackages. Jedes Python-Modul in diesem Verzeichnis wird
+automatisch erkannt und als neuer Befehl für ``manage.py`` bzw.
+``django-admin.py`` registriert::
+
+    blog/
+        __init__.py
+        models.py
+        management/
+            __init__.py
+            commands/
+                __init__.py
+                explode.py
+        views.py
+
+In dem oberen Beispiel wird der Befehl ``explode`` durch die
+``blog``-Applikation allen Projekten bereitgestellt, die diese in ihrer
+``settings.INSTALLED_APPS``-Einstellung eingetragen haben.
+
+Das ``explode.py``-Modul muss hierfür lediglich eine Bedingung erfüllen: Es
+muss eine Klasse mit dem Namen ``Command`` definieren, die
+``django.core.management.base.BaseCommand`` erweitert.
+
+Für mehr Details zu diesem Thema, schau dir einmal den Code von bereits
+existierenden ``manage.py``-/``django-admin.py``-Befehlen in
+``/django/core/management/commands`` an.
