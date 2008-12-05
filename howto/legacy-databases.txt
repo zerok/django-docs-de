@@ -1,0 +1,72 @@
+.. _howto-legacy-databases:
+
+==============================================
+Django mit bestehenden Datenbanken integrieren
+==============================================
+
+Obwohl Django natürlich primär für die Entwicklung neuer Applikationen
+ausgelegt ist, ist es auch durchaus in der Lage, bestehende Datenbanken zu
+verwenden. Es bietet hierfür eine Reihe von Werkzeugen, um diesen Prozess so
+gut als möglich zu automatisieren.
+
+Dieses Dokument setzt Wissen über die Grundlagen von Django voraus, welche 
+im :ref:`Tutorial <intro-tutorial01>` behandelt werden.
+
+Sobald du Django aufgesetzt hast, folge dem nachfolgenden Prozess um Django
+in eine bestehende Datenbank zu integrieren.
+
+Gib Django deine Datenbank-Parameter
+====================================
+
+Du musst Django mitteilen, wie es mit der Datenbank kommunizieren kann.
+Hierfür musst du folgende Einstellungen in deiner :ref:`settings-Datei
+<topic-settings>` vornehmen:
+
+    * :setting:`DATABASE_NAME`
+    * :setting:`DATABASE_ENGINE`
+    * :setting:`DATABASE_USER`
+    * :setting:`DATABASE_PASSWORD`
+    * :setting:`DATABASE_HOST`
+    * :setting:`DATABASE_PORT`
+
+Erzeuge die Modelle
+===================
+
+.. highlight:: bash
+
+Um nun zu deinen Tabellen auch die entsprechenden Modelle zu erhalten, gibt es
+in Django den :djadmin:`inspectdb`-Befehl, der die Tabellen analysiert und
+daraus den entsprechenden Python-Code generiert::
+
+    python manage.py inspectdb
+
+Du kannst die Ausgabe auch als Datei speichern, indem du die Ausgabe umleitest
+(zum Beispiel mit einem Redirector, wie er auf Unix-Systemen üblich ist)::
+
+    python manage.py inspectdb > models.py
+
+Diese Funktion ist lediglich als eine schnelle Lösung gedacht, stellt jedoch
+nicht die ultimative Lösung dar. Mehr Information findest du in der
+:djadmin:`Dokumentation über inspectdb <inspectdb>`.
+
+Sobald du deine Modelle aufgeräumt hast, benenne die Datei in ``models.py`` um
+und speichere sie in jenem Python-Package, das deine Applikation beherbergt.
+Danach füge diese Applikation zu deinen :setting:`INSTALLED_APPS` hinzu.
+
+Djangos Basistabellen anlegen
+=============================
+
+Als nächstes führe den :djadmin:`syncdb`-Befehl aus, um alle sonstigen
+Tabellen und Einträge in der Datenbank anzulegen, die du benötigst (zum
+Beispiel die Administrationsberechtigungen oder Content-Types)::
+
+    python manage.py syncdb
+
+Testen und erweitern
+====================
+
+Damit hast du einmal die Grundlagen für dein System geschaffen, auf denen du
+jetzt aufbauen kannst, um die Modelle ganz deinen Wünschen anzupassen.
+Versuche einmal, auf deine Daten über die Django-Datenbank-API zuzugreifen und
+die einzelnen Objekte über die Administrationsanwendung zu bearbeiten bzw.
+editiere die Modell-Dateien entsprechend deinen Vorstellungen.
