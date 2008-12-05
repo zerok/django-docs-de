@@ -1,0 +1,92 @@
+.. _howto-jython:
+
+===========================
+Django mit Jython verwenden
+===========================
+
+.. index:: Jython, Java, JVM
+
+Jython_ ist eine Python-Implementierung für die Java-Plattform (JVM). Django
+funktioniert einwandfrei auf Jython 2.5 oder neuer. Folglich kannst du Django
+auf jeder von Java unterstützten Plattform betreiben.
+
+Dieses Dokument soll dir nun dabei helfen, Django mit Jython zu betreiben.
+
+.. _jython: http://jython.org/
+
+Jython installieren
+===================
+
+Django funktioniert mit Jython 2.5 und neuer. 
+
+.. warning::
+
+    Als dieses Dokument verfasst wurde, existiert noch keine offizielle 
+    Version von Jython die django unterstützt. Die in Kürze erscheinende
+    Version 2.5a2+ wird die erste Version sein, mit der Django ohne 
+    Änderungen funktionieren wird.
+    
+    In der Zwischenzeit musst du die aktuelle Entwicklerversion von Jython
+    verwenden, die du über Jythons SVN-Repository beziehen kannst.
+
+Lade Jython von http://jython.org/ herunter.
+
+Installiere einen Servlet-Container
+===================================
+
+Wenn du Django nur kurz ausprobieren möchtest, überspringe diesen Abschnitt;
+Django bietet einen eigenen kleinen Webserver, den du fürs Testen verwenden
+kannst. Damit brauchst du sonst nichts anderes zu installieren bis du 
+schlussendlich bereit bist, Django produktiv einzusetzen.
+
+Wenn du Django in einem Produktivsystem einsetzen möchtest, benötigst du einen
+Servlet-Container wie zum Beispiel `Apache Tomcat`_. Vollständige
+JavaEE-Applikationsserver wie `GlassFish`_ oder `JBoss`_ gehen natürlich auch,
+wenn du die ganzen Extra-Funktionen benötigst.
+
+.. _`Apache Tomcat`: http://tomcat.apache.org/
+.. _GlassFish: https://glassfish.dev.java.net/
+.. _JBoss: http://www.jboss.org/
+
+Installiere Django
+==================
+
+Als nächstes musst du Django selbst installieren. Der Ablauf hier ist genau
+gleich wie die Installation von Django in der Standard-Python-Umgebung, die in
+:ref:`removing-old-versions-of-django` und :ref:`install-django-code`
+beschrieben wird.
+
+Hilfsbibliotheken für Jython installieren
+=========================================
+
+Das `django-jython`_-Projekt umfasst Datenbankanbindungen und zusätzliche
+Verwaltungskommandos für die Entwicklung von Django mit Jython. Bitte beachte,
+dass die Datenbankanbindungen, die standardmässig mit Django mitgeliefert
+werden, mit Jython nicht funktionieren.
+
+.. _`django-jython`: http://code.google.com/p/django-jython/
+
+Die Projektwebseite enthält eine genaue `Installationsanleitung`_
+hierfür.Zusätzliche existiert auch noch Dokumentation für die
+Datenbankschnittstellen.
+
+.. _installationsanleitung: http://code.google.com/p/django-jython/wiki/Install
+.. _datenbankschnittstellen: http://code.google.com/p/django-jython/wiki/DatabaseBackends
+
+Was ist anders mit Jython?
+==========================
+
+.. index:: JYTHONPATH
+
+Ab diesem Zeitpunkt sollte sich Django in Kombination mit Jython gleich
+verhalten wie eine Django-Installation auf CPython. Es gibt jedoch trotzdem
+ein paar Unterschiede:
+
+    * Benutze den ``jython``-Befehl anstelle von ``python``. In der
+      Dokumentation wird durchgehend ``python`` verwendet, um konsistent zu
+      bleiben. Wenn du jedoch Jython einsetzt, denk dir einfach für jedes
+      ``python`` ein ``jython``.
+     
+    * Das Gleiche gilt für die Verwendung der
+      ``PYTHONPATH``-Umgebungsvariable. Bei Jython benötigst du
+      ``JYTHONPATH``.
