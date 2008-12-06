@@ -1,0 +1,75 @@
+.. _glossary:
+
+=======
+Glossar
+=======
+
+.. glossary::
+
+    Feld
+        Ein Attribut eines :term:`Modell`\s, das direkt einer einzelnen Spalte
+        in der Datenbank entspricht.
+        
+        Siehe :ref:`topics-db-models`.
+
+    Generischer View
+        Eine sehr abstrahierte :term:`view`-Funktion, die gängige Patterns
+        hinsichtlich der Entwicklung von Views implementiert.
+        
+        Siehe :ref:`ref-generic-views`.
+
+    Modell
+        Modelle speichern die Daten deiner Applikation.
+        
+        Siehe :ref:`topics-db-models`.
+
+    MTV
+        Siehe :ref:`mtv`.
+
+    MVC
+        `Model-View-Controller`__; ein Software-Pattern. Django
+        :ref:`implementiert MVC bis zu einem gewissen Grad <mtv>`
+
+        __ http://en.wikipedia.org/wiki/Model-view-controller
+
+    Projekt
+        Ein Python-Package -- in der Regel ein Verzeichnis, das Code enthält
+        --, das alle Einstellungen für eine Django-Instanz enthält. Das 
+        umfasst Datenbankeinstellungen, Django- und applikationsspezifische
+        Optionen und Einstellungen.
+
+    Property
+        Auch bekannt als "managed attributes" und `seit Version 2.2 in Python
+        verfügbar`__. Mit ihnen ist es einfach möglich, den Zugriff auf
+        Attribute durch Funktionen zu steuern. 
+        
+        Vor der Einführung von Properties war dies nur durch Überschreiben
+        von ``__getattr__`` und ``__setattr__`` möglich.
+
+        __ http://www.python.org/download/releases/2.2/descrintro/#property
+
+    Queryset
+        Ein Objekt, das eine Sammlung von Zeilen darstellt, die aus der
+        Datenbank abgefragt wurden.
+        
+        Siehe :ref:`topics-db-queries`.
+
+    Slug
+        Ein kurzer Name, der lediglich aus Buchstaben, Zahlen, Unter- und
+        Bindestrichten besteht. Solche Namen werden in der Regel in URLs 
+        verwendet, wie zum Beispiel in der URL eines Blog-Eintrages::
+        
+        .. parsed-literal::
+            
+            http://www.djangoproject.com/weblog/2008/apr/12/**spring**/
+            
+        Der letzte Teil (``spring``) ist ein Slug.
+
+    Template
+        Eine Vorlage für die Präsentation von Daten. Dient als Hilfsmittel zur
+        Abstraktion der Daten von ihrer Darstellung.
+        
+        Siehe :ref:`topics-templates`.
+        
+    View
+        Eine Funktion, die für die Darstellung einer Seite zuständig ist.
