@@ -1,0 +1,130 @@
+.. _howto-apache-auth:
+
+===================================================================
+Djangos Benutzerdaten für die Authentifikation mit Apache verwenden
+===================================================================
+
+Mehrere Benutzerdatenbanken für die Authentifikation synchron zu halten, ist
+immer ein Problem, wenn man mit Apache arbeitet. Um dies zu umgehen, kann man
+Apache dahingehend konfigurieren, dass die Authentifikation direkt gegen das
+:ref:`Authentifikationssystem <topics-auth>` von Django durchgeführt wird.
+Somit könntest du zum Beispiel
+    
+    * statische Dateien durch Apache nur an authentifizierte Benutzer
+      ausliefern
+      
+    * einen gesicherten Zugriff auf ein Subversion_-Repository für
+      Django-Benutzer mit entsprechenden Berechtigungen implementieren
+      
+    * oder nur gewissen Benutzers Zugriff zu einem WebDAV-Share, das mit
+      mod_dav_ angelegt wurde, geben.
+
+.. _Subversion: http://subversion.tigris.org/
+.. _mod_dav: http://httpd.apache.org/docs/2.0/mod/mod_dav.html
+
+Apache Konfigurieren
+====================
+
+Um nun Djangos Datenbank für die Authentifikation innerhalb von Apache zu
+verwenden, musst du mod_pythons ``PythonAuthenHandler``-Direktive in
+Kombination mit den üblichen ``Auth*``- und ``Require``-Direktiven 
+verwenden:
+
+.. code-block:: apache
+    
+    <Location /example/>
+        AuthType Basic
+        AuthName "example.com"
+        Require valid-user
+
+        SetEnv DJANGO_SETTINGS_MODULE mysite.settings
+        PythonAuthenHandler django.contrib.auth.handlers.modpython
+    </Location>
+
+.. admonition:: Authentifikationshandler mit Apache 2.2 verwenden
+    
+    Wenn du Apache 2.2 verwendest, ist das leider noch nicht alles.
+    
+    Zusätzlich musst du sicherstellen, dass ``mod_auth_basic`` und 
+    ``mod_authz_user`` geladen sind. Diese können entweder statisch in
+    Apache kompiliert sein, oder du musst ``LoadModule`` verweden, um diese
+    Module dynamisch zu laden (weiter unten kommt hierzu noch ein Beispiel).
+
+    Ausserdem musst du zusätzliche Einstellungen vornehmen, damit Apache nicht
+    versucht, andere Authentifkationsmodule zu verwenden. Des Weiteren musst
+    du ``AuthUserFile`` auf ``/dev/null`` setzen. Abhängig davon, welche 
+    Authentifikationsmodule geladen sind, musst eine oder mehrere der 
+    folgenden Direktiven angeben::
+    
+    .. code-block:: apache
+        
+        AuthBasicAuthoritative Off
+        AuthDefaultAuthoritative Off
+        AuthzLDAPAuthoritative Off
+        AuthzDBMAuthoritative Off
+        AuthzDefaultAuthoritative Off
+        AuthzGroupFileAuthoritative Off
+        AuthzOwnerAuthoritative Off
+        AuthzUserAuthoritative Off
+
+    Eine vollständige Konfiguration (mit den Unterschieden zwischen Apache 2.0
+    und 2.2 fett hervorgehoben) könnte zum Beispiel so aussehen:
+
+    .. parsed-literal::
+
+        **LoadModule auth_basic_module modules/mod_auth_basic.so**
+        **LoadModule authz_user_module modules/mod_authz_user.so**
+
+        ...
+
+        <Location /example/>
+            AuthType Basic
+            AuthName "example.com"
+            **AuthUserFile /dev/null**
+            **AuthBasicAuthoritative Off**
+            Require valid-user
+
+            SetEnv DJANGO_SETTINGS_MODULE mysite.settings
+            PythonAuthenHandler django.contrib.auth.handlers.modpython
+        </Location>
+
+In diesem Beispiel wird Zugriff auf ``/example/`` nur auf Benutzer beschränkt,
+die als Mitarbeiter markiert wurden. Es steht eine Reihe von
+``PythonOption``-Direktiven zur Verfügung, um dieses Verhalten zu
+modifizieren:
+
+    ================================  ========================================
+    ``PythonOption``                  Beschreibung
+    ================================  ========================================
+    ``DjangoRequireStaffStatus``      Wenn auf ``on`` gesetzt, dann werden
+                                      lediglich Mitarbeiter (also jene 
+                                      Benutzer, deren ``is_staff``-Feld 
+                                      gesetzt ist) zugelassen.
+
+                                      Standardwert: ``on``.
+
+    ``DjangoRequireSuperuserStatus``  Wenn auf ``on`` gesetzt, dann werden
+                                      lediglich Superuser (also jene Benutzer,
+                                      deren ``is_superuser``-Feld gesetzt
+                                      ist) zugelassen.
+
+                                      Standardwert: ``off``.
+
+    ``DjangoPermissionName``          Der Name der Berechtigung, die für den
+                                      Zugriff benötigt wird. Siehe
+                                      :ref:`Eigene Berechtigungen 
+                                      <custom-permissions>` für mehr 
+                                      Information.
+                                      
+                                      Standardmässig ist keine bestimmte
+                                      Berechtigung gesetzt.
+    ================================  ========================================
+
+Bitte bedenke aber, dass ``SetEnv`` aus unbekannten Gründen manchmal Probleme
+in dieser mod_python-Konfiguration machen kann. Wenn du Probleme hast,
+mod_python dein ``DJANGO_SETTINGS_MODULE`` mitzuteilen, kannst du dies auch
+mittels ``PythonOption`` tun und somit hier ``SetEnv`` umgehen. Hier sind
+diese beiden Direktiven gleichwertig::
+
+    SetEnv DJANGO_SETTINGS_MODULE mysite.settings
+    PythonOption DJANGO_SETTINGS_MODULE mysite.settings
