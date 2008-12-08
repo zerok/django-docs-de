@@ -1,0 +1,150 @@
+.. _howto-initial-data:
+
+====================================
+Basisdaten für Modelle bereitstellen
+====================================
+
+Wenn man eine Applikation installiert, ist es manchmal nützlich, wenn sie
+gleich die Datenbank mit ein paar fest vorgegebenen Datensätzen befüllt.
+Hierfür gibt es primär 2 Möglichkeiten in Django: Du kannst die Datenbank
+automatisch mit `Fixtures`_ oder mit Daten aus `SQL-Statements`_ befüllen.
+
+In der Regel sind hierbei Fixtures die saubere Lösung, da sie nicht von einer
+bestimmten Datenbank abhängen. Daten aus SQL-Statements sind auf der anderen
+Seite aber flexibler.
+
+.. _`SQL-Statements`: `basisdaten als sql bereitstellen`_
+.. _Fixtures: `basisdaten durch fixtures bereitstellen`_
+
+Basisdaten durch Fixtures bereitstellen
+=======================================
+
+Eine Fixture ist eine Sammlung von Daten, die Django in die Datenbank
+importieren kann. Wenn du bereits Daten in deiner Datenbank hast, kannst du so
+eine Fixture bestehend aus deinem aktuellen Datenbestand sehr einfach mit dem
+:djadmin:`manage.py dumpdata`-Befehl erstellen. Du kannst sie aber auch
+einfach händisch schreiben; in Form von XML-, YAML- oder JSON-Dokumenten. Die
+:ref:`Serialisierungsdokumention <topics-serialization>` bietet hierfür mehr
+Information über alle :ref:`unterstützten Formate <serialization-formats>`.
+
+Trotzdem noch schnell eines kleines Beispiel für eine Fixture für Daten eines
+einfachen ``Person``-Modells in JSON:
+
+.. code-block:: js
+
+    [
+      {
+        "model": "myapp.person",
+        "pk": 1,
+        "fields": {
+          "first_name": "John",
+          "last_name": "Lennon"
+        }
+      },
+      {
+        "model": "myapp.person",
+        "pk": 2,
+        "fields": {
+          "first_name": "Paul",
+          "last_name": "McCartney"
+        }
+      },
+    ]
+
+Und hier dieselbe Fixture in YAML:
+
+.. code-block:: none
+
+    - model: myapp.person
+      pk: 1
+      fields:
+        first_name: John
+        last_name: Lennon
+    - model: myapp.person
+      pk: 2
+      fields:
+        first_name: Paul
+        last_name: McCartney
+
+Diese Datei speicherst du nun in einem ``fixtures``-Ordner innerhalb deiner
+Applikation.
+
+Daten in die Datenbank zu laden ist einfach: Führe einfach :djadmin:`manage.py
+loaddata fixturename <loaddata>` aus, wobei *fixturename* der Name deiner
+Fixtures-Datei ist. Jedes Mal wenn du :djadmin:`loaddata` aufrufst, werden
+die Daten aus deinen Fixtures gelesen und neu in die Datenbank geladen. Das
+heißt, solltest du eine der Zeilen, die durch ein Fixture erstellt wurden,
+ändern und :djadmin:`loaddata` erneut ausführen, werden deine Änderungen
+entfernt.
+
+Lade Basisdaten-Fixtures automatisch
+------------------------------------
+
+Wenn du eine Fixture mit dem Namen ``initial_data.[xml/yaml/json]`` erstellst,
+dann wird sie automatisch geladen, wenn du :djadmin:`syncdb` ausführst. Das
+ist zwar sehr nützlich, beachte aber bitte, dass diese Daten jedes Mal neu
+geladen werden, wenn du :djadmin:`syncdb` verwendest. Folglich solltest du
+``initial_data`` nicht für Daten verwenden, die du vorhast, zu ändern.
+
+.. seealso::
+
+    Fixtures werden auch vom :ref:`Testing-Framework
+    <topics-testing-fixtures>` verwenden, um eine konsistente Testumgebung
+    zu schaffen.
+
+.. _initial-sql:
+
+Basisdaten als SQL bereitstellen
+================================
+
+Django bietet auch einen Einstiegspunkt, um beliebige SQL-Statements gleich
+nach den CREATE TABLE-Statements bei :djadmin:`syncdb` auszuführen. Damit 
+kannst du einerseits Basisdaten laden, oder auch SQL-Funktionen, Views, 
+Trigger etc. erstellen.
+
+Alles, was du tun musst, ist eine ``sql/<modelname>.sql`` in dem Verzeichnis
+deiner Applikation zu erstellen, wobei ``<modelname>`` der Name eines deiner
+Modelle kleingeschrieben darstellt.
+
+Also wenn du ein ``Person``-Modell in einer Applikation ``myapp`` hast, 
+solltest du deine Statements in eine Datei mit dem Namen``sql/person.sql`` 
+innerhalb deines ``myapp``-Verzeichnisses speichern. Hier ein kleines
+Beispiel für eine solche Datei:
+
+.. code-block:: sql
+
+    INSERT INTO myapp_person (first_name, last_name) VALUES ('John', 'Lennon');
+    INSERT INTO myapp_person (first_name, last_name) VALUES ('Paul', 'McCartney');
+
+Jede solche SQL-Datei muss gültige SQL-Statements enthalten, welche die
+gewünschten Daten anlegen (zum Beispiel korrekt formatierte
+``INSERT``-Statements voneinander durch Semikolons getrennt).
+
+Die SQL-Dateien werden von den Befehlen :djadmin:`sqlcustom`,
+:djadmin:`sqlreset`, :djadmin:`sqlall` und :djadmin:`reset` in
+:ref:`manage.py <ref-django-admin>` gelesen. Mehr Information über 
+``manage.py`` findest du in  :ref:`der entsprechenden Dokumentation 
+<ref-django-admin>`.
+
+Bitte beachte, dass, solltest du mehrere SQL-Dateien haben, die Ordnung
+ihrer Abarbeitung nicht immer gleich sein muss. Du kannst lediglich davon 
+ausgehen, dass die Tabellen für die entsprechenden Modelle bereits existieren,
+wenn deine SQL-Dateien geladen werden.
+
+Datenbankspezifische SQL-Statements
+-----------------------------------
+
+Wenn du SQL-Statements für bestimmten Datenbank-Backends wie PostgreSQL und 
+MySQL verwenden möchtest, bietet dir Django auch hierfür eine Möglichkeit. So
+sucht Django speziell nach Dateien nach dem Muster 
+``<appname>/sql/<modelname>.<backend>.sql``, wobei ``<appname>`` das
+Verzeichnis der jeweiligen Applikation, ``<modelname>`` der
+kleingeschriebene Name eines Modelles und ``<backend>`` der Wert der 
+:setting:`DATABASE_ENGINE`-Einstellung (z.B. ``postgresql``, ``mysql``) in 
+deiner Settings-Datei  ist.
+
+Backendspezifische SQL-Dateien werden vor den anderen SQL-Dateien geladen. 
+Wenn deine Applikation zum Beispiel sowohl eine ``sql/person.sql``- als auch
+eine ``sql/person.postgresql.sql``-Datei hat und du die Applikation in
+PostgreSQL installierst, wird zunächst ``sql/person.postgresql.sql`` geladen
+und erst danach ``sql/person.postgresql.sql``.
