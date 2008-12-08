@@ -7,35 +7,36 @@ Wie fange ich an?
 ---------------------
 
     #. `Lade dir den Code herunter`_.
-    #. Installiere Django (lies dazu auch die :ref:`Installationsanleitung <intro-install>`).
+    #. Installiere Django (lies dazu auch die :ref:`Installationsanleitung
+       <intro-install>`).
     #. Absolviere das :ref:`Tutorial <intro-tutorial01>`.
-    #. Schaue durch den Rest der :ref:`Dokumentation <index>` und `stell Fragen`_ 
-       falls du in Schwierigkeiten kommst.
+    #. Schaue durch den Rest der :ref:`Dokumentation <index>` und `stelle
+       Fragen`_, falls du in Schwierigkeiten kommst.
 
 .. _`Lade dir den Code herunter`: http://www.djangoproject.com/download/
-.. _stell Fragen: http://www.djangoproject.com/community/
+.. _stelle Fragen: http://www.djangoproject.com/community/
 
 Wie behebe ich die Fehlermeldung "install a later version of setuptools"?
----------------------------------------------------------------
+-------------------------------------------------------------------------
 
-Führe einfach das ``ez_setup.py`` Skript im Django-Verzeichnis aus.
+Führe einfach das ``ez_setup.py``-Skript im Django-Verzeichnis aus.
 
 Was sind Djangos Abhängigkeiten?
 --------------------------------
 
-Django benötigt Python_ 2.3 oder neuer. Andere Python Bibliotheken werden nicht 
-benötigt um Django grundlegend benutzen zu können.
+Django benötigt Python_ 2.3 oder neuer. Andere Python Bibliotheken werden
+nicht benötigt, um Django grundlegend benutzen zu können.
 
-Du brauchst auch keinen separaten Webserver installieren, falls du Django 
+Du brauchst auch keinen separaten Webserver zu installieren, falls du Django 
 nur ausprobieren willst und eine Entwicklungsumgebung brauchst, da ein eigener 
 kleiner Entwicklungsserver integriert ist. 
 Für eine Produktionsumgebung empfehlen wir `Apache 2`_ und mod_python_, 
-auch wenn Django der WSGI_ Spezifikation folgt, was heißt, dass es auf einer 
+auch wenn Django der WSGI_-Spezifikation folgt, was heißt, dass es auf einer 
 Vielzahl von Serverplattformen läuft.
 
 Falls du Django mit einer Datenbank nutzen willst, empfehlen wir als 
 PostgreSQL-Fans natürlich PostgreSQL. Jedoch werden auch MySQL_, `SQLite 3`_ 
-und Oracle_ untertützt.
+und Oracle_ unterstützt.
 
 .. _Python: http://www.python.org/
 .. _Apache 2: http://httpd.apache.org/
@@ -51,7 +52,7 @@ Habe ich einen Nachteil, wenn ich anstatt Python 2.3 eine neuere Python Version 
 
 Nein. Django läuft garantiert mit allen Python Versionen ab 2.3.
 
-Wenn du eine neuere Python Version als 2.3 verwenden willst, kannst du 
+Wenn du eine neuere Python-Version als 2.3 verwenden willst, kannst du 
 nicht nur die neuen Features in Python nutzen, sondern profitierst auch von 
 Geschwindigkeitsverbesserungen und diversen anderen Optimierungen die an 
 Python vorgenommen wurden. 
@@ -65,7 +66,7 @@ verwenden. Dank der Tatsache, dass Django einen Standard namens WSGI_
 nutzt, kann jeder WSGI-fähige Server angesprochen werden. Andere
 nicht-mod_python Umgebungen sind FastCGI, SCGI oder AJP. Siehe
 `Wie man Django mit FastCGI, SCGI oder AJP nutzt`_, oder die 
-`Wikiseite zu Server-Konfigurationen`_für weitere Informationen.
+`Wikiseite zu Server-Konfigurationen`_ für weitere Informationen.
 
 Falls du einfach nur ein paar Dinge auf deinem lokalen Computer ausprobieren 
 willst, solltest du Djangos integrierten Webserver nutzen.
@@ -82,7 +83,7 @@ Wie installiere ich mod_python auf Windows?
     * Für Python 2.4, schaue dir das `Django on Windows howto`_ an.
     * Für Python 2.3, lade dir mod_python von http://www.modpython.org/ und
       lese `Running mod_python on Apache on Windows2000`_.
-    * Probiere außerdem diesen, nicht Windows-spezifischen, 
+    * Probiere außerdem diesen nicht Windows-spezifischen
       `Guide um mod_python ans Laufen zu bekommen`_.
 
 .. _`win32 build of mod_python for Python 2.4`: http://www.lehuen.com/nicolas/index.php/2005/02/21/39-win32-build-of-mod_python-314-for-python-24
@@ -93,7 +94,7 @@ Wie installiere ich mod_python auf Windows?
 Läuft Django bei Shared Hosting-Anbietern (wie z.B. TextDrive oder Dreamhost)?
 ------------------------------------------------------------------------------
 
-Siehe dazu die `Django-freundliche Webhoster`_ Wiki-Seite.
+Siehe dazu die `Django-freundliche Webhoster`_-Wiki-Seite.
 
 .. _`Django-freundliche Webhoster`: http://code.djangoproject.com/wiki/DjangoFriendlyWebHosts
 
