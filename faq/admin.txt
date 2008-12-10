@@ -1,0 +1,107 @@
+.. _faq-admin:
+
+FAQ: Die Administrationsoberfläche
+==================================
+
+Ich kann mich nicht einloggen. Wenn ich gültige Benutzerdaten eingebe erscheint die Login-Seite, ohne Fehlermeldungen, erneut.
+------------------------------------------------------------------------------------------------------------------------------
+
+Der Login-Cookie wird nicht richtig gesetzt, da die Domain die von Django aus 
+geht nicht der Domain im Browser entspricht. Probiere folgende zwei 
+Lösungsmöglichkeiten:
+
+      
+    * Setze die ``SESSION_COOKIE_DOMAIN``-Einstellung in deiner 
+      Einstellungsdatei entsprechend deiner Domain.
+      Falls du beispielsweise "http://www.example.com/admin/" mit deinem 
+      Browser aufrufst, sollte ``SESSION_COOKIE_DOMAIN = 'www.example.com'`` 
+      in "myproject.settings" stehen.
+
+    * Einige Browser (Firefox?) akzeptieren keine Cookies von Domains die 
+      keine Punkte haben. Versuche "localhost.localdomain" oder "127.0.0.1" 
+      aufzurufen, falls du die Administrationsoberfläche auf "localhost" oder 
+      einer anderen Domain, die keine Punkte hat, laufen lässt. 
+      Vergiss anschließend nicht, ``SESSION_COOKIE_DOMAIN`` entsprechend zu 
+      setzen.
+
+Ich kann mich nicht einloggen. Wenn ich gültige Benutzerdaten eingebe erscheint die Login-Seite, mit der Fehlermeldung "Please enter a correct username and password", erneut.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Falls du dir sicher bist, dass dein Benutzername und dein Passwort richtig 
+sind, überpruefe ob bei deinem Benutzer-Account ``is_active`` und ``is_staff`` 
+auf ``True`` gesetzt sind. Die Administrationsoberfläche ermöglicht den 
+Zugriff nur, wenn beide Werte auf ``True`` gesetzt sind.
+
+Wie kann ich die Cache-Middleware daran hindern, die Administrationsoberfläche im Cache zu speichern?
+-----------------------------------------------------------------------------------------------------
+
+Setze die :setting:`CACHE_MIDDLEWARE_ANONYMOUS_ONLY`-Einstellung auf ``True``.
+Für weitere Informationen, kannst du dir die :ref:`Cache Dokumentation <topics-cache>`
+ansehen.
+
+Wie kann ich in der Administrationsoberfläche den Wert eines Feldes auf den Benutzer setzen, der das dazugehörige Objekt zuletzt bearbeitet hat?
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Für diesen Fall, gibt es keine offizielle Lösung in Django. Da es allerdings 
+ein sehr oft nachgefragtes Feature ist, diskutieren wir bereits darüber ob und 
+wie wir es implementieren können. Das Problem besteht darin den aktuellen 
+Benutzer zu ermitteln. Dazu müssten wir die Datenmodelle mit der 
+Administrationsoberfläche und dem Request verbinden, welches wir aber 
+vermeiden wollen. Es ist ein recht verzwicktes Problem.
+
+Jemand hat mal eine `Lösung gefunden, ohne Django zu patchen`_. Beachte jedoch, 
+dass es sich hierbei um eine inoffizielle Lösung handelt und es keine Garantie 
+gibt, dass dies immer funktionieren wird.
+
+.. _Lösung gefunden, ohne Django zu patchen: http://lukeplant.me.uk/blog.php?id=1107301634
+
+Wie schränke ich die Zugriffsrechte der Administrationsoberfläche so ein, dass Objekte nur von den Benutzern bearbeitet werden können die sie auch erstellt haben? 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Siehe die Antwort auf die vorherige Frage.
+
+Meine CSS-Stylesheets und Bilder werden zwar mit dem Entwicklungsserver angezeigt, jedoch nicht wenn ich mod_python verwende.
+-----------------------------------------------------------------------------------------------------------------------------
+
+Siehe :ref:`Admin Dateien bereitstellen <howto-deployment-modpython-serving-the-admin-files`
+in der Dokumentation zu mod_python.
+
+Mein "list_filter" enthält ein ManyToManyField, jedoch wird der Filter nicht angezeigt.
+---------------------------------------------------------------------------------------
+
+Django zeigt den Filter für ein ``ManyToManyField`` nicht an, wenn es 
+weniger als zwei zugehörige Objekte gibt.
+
+Wenn dein ``list_filter`` beispielsweise ``sites`` beinhaltet, es aber nur 
+eine Seite in deiner Datenbank gibt, so wird kein "Site"-Filter dargestellt, 
+da es einfach keinen Sinn machen würde.
+
+Wie kann ich die Funktionalität der Administrationsoberfläche verändern?
+-----------------------------------------------------------------------
+
+Du hast verschiedene Möglichkeiten. Wenn du ein, automatisch generiertes, 
+Hinzufügen-/Ändern-Formular manipulieren willst, kannst du beliebige 
+Javascript-Module an die Seite anhängen indem du in der ``class Admin`` 
+des Datenmodells den ``js``-Parameter setzt. Dieser Parameter ist eine
+Liste von URLs (als Strings), die auf Javascript-Module zeigen und hinterher 
+mit dem ``<script>``-Tag in die Administrationsoberfläche eingebunden werden.
+
+Falls dir das verändern der automatisch generierten Formulare zu wenig
+Flexibilität bietet, kannst du gerne auch eigene Views für die 
+Administrationsoberfläche schreiben. Da die Administrationsoberfläche auf 
+Django basiert, kannst du eigene Views, die auf das Authentifizierungssystem 
+zugreifen, Zugriffsrechte überprüfen und auch sonst alles machen was du 
+willst, schreiben.
+
+Wenn du das Aussehen der Administrationsoberfläche verändern willst, 
+lies die nächste Frage.
+
+Die dynamisch generierte Administrationsoberfläche ist hässlich. Wie kann ich sie verändern?
+--------------------------------------------------------------------------------------------
+
+Wir finden das die Administrationsoberfläche gut aussieht. Wenn du dies 
+nicht so siehst, kannst du sie auch gerne anpassen indem du die CSS stylesheets 
+und/oder die dazugehoerigen Bilder veränderst. Die Seiten bestehen aus 
+semantischem HTML und sind so geschreiben, dass möglichst jede 
+Veränderung per CSS stylesheet vorgenommen werden kann. Für weitere 
+Informationen gibt es auch eine :ref:`Anleitung zum CSS auf der Administrationsoberfläche <obsolete-admin-css>`.
