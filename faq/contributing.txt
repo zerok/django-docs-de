@@ -1,0 +1,33 @@
+.. _faq-contributing:
+
+FAQ: Mitarbeit am Code
+======================
+
+Wie kann ich an Django mitarbeiten?
+-----------------------------------
+
+Danke, dass du fragst. Wir haben dieser Frage, mit 
+:ref:`An Django mitarbeiten <internals-contributing>`, ein komplettes 
+Dokument gewidmet.
+
+I habe vor einigen Wochen einen Bugfix in das Ticketsystem eingetragen. Warum ignoriert ihr meinen Patch?
+---------------------------------------------------------------------------------------------------------
+
+Keine Sorge, wir ignorieren dich nicht.
+
+Es ist wichtig zu verstehen, dass es einen Unterschied zwischen "ein Ticket 
+wird ignoriert" und "um ein Ticket wurde sich noch nicht gekümmert" gibt. 
+Djangos Ticketsystem beinhaltet hunderte von offenen Tickets, mit verschiedenen
+Auswirkungen auf die Funktionalität für den Endbenutzer. Jedes dieser Tickets
+muss erst von Djangos Entwicklern geprüft und priorisiert werden.
+
+Darüber hinaus arbeiten alle beteiligten Personen freiwillig mit an Django, 
+was sich natürlich auch in der Zeit widerspiegelt, die man für die 
+Entwicklung des Frameworks aufwenden kann. Da die vorhandene Freizeit von Woche
+zu Woche unterschiedlich ist, können wir uns eventuell nicht so oft mit Django 
+beschäftigen wie wir es geplant haben.
+
+Auch wenn deine Anfrage für eine neue Funktion keine Chance auf Integration in
+Django hat, werden wir sie nicht ignorieren, sondern einfach das Ticket 
+schliessen. Wenn dein Ticket also noch offen ist, heisst das nicht das wir dich 
+ignorieren, sondern einfach noch keine Zeit hatten es uns anzusehen.
