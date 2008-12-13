@@ -1,0 +1,74 @@
+.. _faq-usage:
+
+FAQ: Django benutzen
+====================
+
+Warum erscheint ein Fehler wenn ich DJANGO_SETTINGS_MODULE importiere?
+----------------------------------------------------------------------
+
+Du solltest sicherstellen, dass:
+      
+    * Die Umgebungsvariable DJANGO_SETTINGS_MODULE auf ein richtiges Python 
+      Modul gesetzt ist (z.B. "mysite.settings").
+      
+    * Das Modul sich im ``sys.path`` befindet (``import mysite.settings`` 
+      sollte funktionieren).
+
+    * Das Modul, natürlich, keine Syntaxfehler enthält.
+
+    * Falls du mod_python verwendest, aber *nicht* Djangos Request Handler, 
+      musst du einen Bug in mod_python umgehen, der die Nutzung von ``SetEnv`` 
+      betrifft. Bevor du irgendetwas von Django importierst, solltest du 
+      folgendes ausführen::
+
+            os.environ.update(req.subprocess_env)
+
+      (wobei ``req`` das mod_python Request-Objekt ist.)
+
+Ich kann euere Template-Sprache nicht ausstehen. Muss ich sie verwenden?
+------------------------------------------------------------------------
+
+Wir glauben, dass unsere Template Engine das Beste seit der Erfindung der
+Schokolade ist, sehen aber auch ein, dass das Wählen einer
+Template Sprache einer Religion nahe kommt. Es gibt nichts in Django, dass dich
+dazu zwingt, die Template Engine zu benutzen. Wenn du also ein Anhänger von 
+ZPT, Cheetah oder was auch immer bist, kannst du es auch gerne verwenden.
+
+Muss ich euere Datenmodel-/Datenbank-abstraktionsschicht verwenden?
+-------------------------------------------------------------------
+
+Nein. Wie auch das Template-System, ist die 
+Datenmodel-/Datenbank-abstraktionsschicht vom restlichen Framework unabhängig.
+
+Es gibt allerdings eine Ausnahme: Falls du eine andere Datenbank Bibliothek 
+verwendest, kannst du nicht Djangos automatisch-generierte 
+Administrationsoberfläche nutzen, da sie mit der Datenbankschicht 
+verbunden ist.
+
+Wie verwende ich Bild- und Dateifelder?
+---------------------------------------
+
+Das verwenden eines :class:`~django.db.models.FileField` oder 
+:class:`~django.db.models.ImageField` bedarf einiger Schritte:
+       
+    #. Setze :setting:`MEDIA_ROOT` in deiner Einstellungsdatei auf einen
+       vollständigen Pfad, in dem die hochgeladenen Dateien von Django 
+       gespeichert werden sollen (Aus Performancegründen werden diese 
+       Dateien nicht in der Datenbank gespeichert). Setze :setting:`MEDIA_URL` 
+       auf den Basispfad der öffentlichen URL dieses Verzeichnisses und 
+       stelle sicher, dass das Verzeichnis für den Benutzer unter dem der 
+       Webserver läuft, beschreibbar ist.
+       
+    #. Füge das :class:`~django.db.models.FileField` oder das 
+       :class:`~django.db.models.ImageField` zu deinem Datenmodell hinzu
+       und versichere dich, dass du die 
+       :attr:`~django.db.models.FileField.upload_to`-Option gesetzt hast, damit 
+       Django weiß, in welches Unterverzeichnis von :setting:`MEDIA_ROOT` 
+       die Dateien hochgeladen werden sollen.
+       
+    #. Das einzige, was in deiner Datenbank gespeichert wird, ist der Pfad zur
+       Datei (relativ von :setting:`MEDIA_ROOT`). Wir empfehlen dir, 
+       Djangos komfortable :attr:`~django.core.files.File.url`-Funktion 
+       zu nutzen. Wenn dein :class:`~django.db.models.ImageField` z.B. 
+       ``mug_shot`` heißt, kannst du in deinem Template, die absolute URL zu 
+       dem Bild mit ``{{ object.mug_shot.url }}`` ausgeben.
