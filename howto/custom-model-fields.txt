@@ -1,0 +1,671 @@
+.. _howto-custom-model-fields:
+
+=============================
+Eigene Modellfelder schreiben
+=============================
+
+.. versionadded:: 1.0
+
+Einführung
+==========
+
+Die :ref:`Modellreferenz <topics-db-models>` beschreibt, wie man Djangos
+Standard-Feldklassen -- :class:`~django.db.models.CharField`,
+:class:`~django.db.models.DateField`, etc -- verwendet. In vielen Situationen
+sind Stellen diese Klassen alles bereit, was du brauchst. Manchmal jedoch kann
+es passieren, dass die von Django bereitgestellten Klassen nicht ganz deinen
+Vorgaben entsprechen oder du ein Feld verwenden möchtest, das komplett anders
+ist als jene, die Django mitliefert.
+
+Djangos eingebaute Feldtypen decken nicht alle möglichen Spaltentypen in
+Datenbanken ab, sondern beschränken sich auf die üblichsten -- wie zum
+Beispiel ``VARCHAR`` und ``INTEGER``. Für weniger gebräuchliche Typen -- wie
+zum Beispiel geographische Polygone oder benutzerdefinierte Spaltentypen, `wie
+sie zum Beispiel PostgreSQL anbietet`_ -- kannst du deine eigentlichen
+Unterklassen zu Djangos ``Field``-Klasse definieren.
+
+.. _wie sie zum beispiel postgresql anbietet: http://www.postgresql.org/docs/8.2/interactive/sql-createtype.html
+
+Alternativ kannst du versuchen, ein komplexes Python-Objekt so zu
+serialisieren, dass es in eine Standardspalte passt. Auch in diesem Fall ist
+eine ``Field``-Sublasse nützlich, um es besser in das Modell zu integrieren.
+
+Unser Beispielobjekt
+--------------------
+
+Um die gesamte Beschreibung ein bisschen einfacher verständlich zu machen, 
+werden wir ein durchgängiges Beispiel verwenden: Ein Python-Objekt, das ein
+Bridge_-Blatt darstellt. Falls du die Regeln des Spiels nicht kennst, ist
+das auch kein Problem. Alles, was du wissen musst, ist, dass 52 Karten 
+gleichmässig an 4 Spieler ausgeteilt werden, die entsprechend den 
+Himmelsrichtungen als *north*, *east*, *south* und *west* bezeichnet werden.
+Unsere Klasse sieht somit so aus::
+
+    class Hand(object):
+        def __init__(self, north, east, south, west):
+            # Input parameters are lists of cards ('Ah', '9s', etc)
+            self.north = north
+            self.east = east
+            self.south = south
+            self.west = west
+        
+        # ... (andere moeglicherweise nuetzliche Methoden wurden
+        #  hier weggelassen) ...
+
+.. _Bridge: http://en.wikipedia.org/wiki/Contract_bridge
+
+Das ist eine ganz normale Python-Klasse, die so noch nichts mit Django zu tun
+hat. In Zukunft möchten wir aber zum Beispiel folgende Dinge mit einem
+entsprechenden Modell tun (wir gehen einmal davon aus, dass das
+``hand``-Attribut des Modells ein Instanz der Klasse ``Hand`` beherbergt::
+
+    example = MyModel.objects.get(pk=1)
+    print example.hand.north
+
+    new_hand = Hand(north, east, south, west)
+    example.hand = new_hand
+    example.save()
+
+Wir können hier auf das ``hand``-Attribut zugreifen wie bei jedem anderen
+Python-Objekt. Der Trick ist nun, Django mitzuteilen, wie das Speichern in
+die und das Laden aus der Datenbank ablaufen soll.
+
+Um nun die ``Hand``-Klasse in unserem Modell zu verwenden, müssen wir 
+**nichts** daran ändern. Das ist insofern praktisch, als dass du somit 
+existierende Klassen, deren Code du nicht ändern kannst, in einem Modell
+verwenden kannst.
+
+.. TODO: Der Absatz macht keinen Sinn und sollte zunächst in upstream 
+..       bereinigt werden.
+.. .. note::
+..     You might only be wanting to take advantage of custom database column
+..     types and deal with the data as standard Python types in your models;
+..     strings, or floats, for example. This case is similar to our ``Hand``
+..     example and we'll note any differences as we go along.
+
+Theoretischer Hintergrund
+=========================
+
+Datenbankspeicher
+-----------------
+
+Einfach gesagt, ein Feld eines Modells bietet einen Weg, um normale 
+Python-Objekte -- String, Boolean, ``datetime`` oder auch etwas Komplexeres
+wie unsere ``Hand``-Klasse -- in ein Format zu bringen, das innerhalb einer
+Datenbank verwendet werden kann (und auch umgekehrt bzw. allgemein dessen
+Serialisierung; mehr dazu jedoch später).
+
+Modellfelder müssen irgendwie konvertiert werden, um einem existierenden
+Spaltentyp einer Datenbank zu entsprechen. Unterschiedliche Datenbanksysteme
+bieten oft unterschiedliche Typen von Spalten, jedoch eine grundlegende
+Regel bleibt immer gleich: Du hast nur diese Spaltentypen. Alles, das du in
+der Datenbank abspeichern willst, muss irgendwie in einen davon passen.
+
+Normalerweise schreibst du entweder ein Django-Feld, um einem bestimmten
+Spaltentyp deiner Datenbank zu entsprechen, oder es gibt einen 
+verhältnismässig einfachen Weg, um deine Daten in zum Beispiel einen String
+umzuwandeln.
+
+Für unser ``Hand``-Beispiel könnten wir die Daten über die Karten u.A. in
+einen String mit 104 Buchstaben umwandeln, indem wir alle Karten in einer
+vorbestimmten Art und Weise aneinander reihen -- zum Beispiel alle
+*north*-Karten zuerst, danach *east*, *south* und *west*. Somit können
+``Hand``-Objekte in Text-Spalten der Datenbank gespeichert werden.
+
+Was machen Field-Klassen?
+-------------------------
+
+Alle Felder in Django (und wir meinen in diesem Dokument immer Felder in
+Modellen und nicht :ref:`Formularfelder <ref-forms-fields>`) sind Unterklassen
+von :class:`django.db.models.Field`. Die meiste Information, die Django 
+über Feld führt, sind bei allen Feldern gleich -- Name, Hilfstext, 
+Unique-Constraints usw. Die Speicherung dieser Information übernimmt
+``Field``. Wie kommen später noch darauf zurück, was ``Field`` nun genau
+alles machen kann; fürs Erste sollte einmal genügen, dass alle Felder von
+``Field`` erben und dann nur einzelne Details anpassen.
+
+Es ist ausserdem wichtig zu wissen, dass die Felder eigentlich nicht wirklich
+das sind, was du in deinem Modell speicherst. Die Modellattribute enthalten
+nur ganz normale Python-Objekte. Die von dir definierten Feldklassen werden
+tatsächlich in der ``Meta``-Klasse gespeichert, wenn die Modellklasse angelegt
+wird (wie das genau geschieht, ist hier nicht weiter von Bedeutung). Das
+geschieht deshalb, weil die Feldklassen nicht wirklich benötigt werden, wenn
+du einfach nur Attribute anlegen oder ändern willst. Vielmehr bieten sie jene
+Funktionalität, die die Umwandlung zwischen Attributwert und dem Wert, der 
+dann schlussendlich in der Datenbank gespeichert wird bzw. an einen
+:ref:`Serializer <topics-serialization>` übergeben wird, steuert.
+
+Bitte bedenke das, wenn du eigene Felder erstellst. Deine ``Field``-Subklasse
+muss nun einen solchen Umwandlungsmechanismus in ein paar unterschiedlichen
+Arten anbieten (so gibt es zum Beispiel einen Unterschied zwischen der Methode
+zum Speichern des Wertes und derjenigen zum Auffinden). Wenn das jetzt ein
+bisschen kompliziert klingt, keine Sorge -- das nächste Beispiel sollte es
+veranschaulichen. Denke einfach daran, dass du oft 2 Klassen erstellen musst,
+wenn du ein eigenes Feld haben möchtest:
+
+    * Die erste Klasse ist das Python-Objekt, das deine Benutzer verwenden
+      werden. Sie werden es an ein Attribut eines Modells binden, es 
+      auslesen etc.. In unserem Beispiel von oben ist das die ``Hand``-Klasse.
+
+    * Die zweite Klasse ist die Subklasse von ``Field``, also jene Klasse, die
+      weiß, wie unsere erste Klasse zwischen ihrer Python-Form und der 
+      Datenbank konvertiert werden muss.
+
+Eine Field-Unterklasse schreiben
+================================
+
+Wenn du deine :class:`~django.db.models.Field`-Unterklasse entwirfst, überlege
+dir zunächst, welche bereits existierende 
+:class:`~django.db.models.Field`-Klasse deinem neuen Feld am ehesten 
+entspricht. Vielleicht kannst du ja hiervon deine Klasse ableiten und dir
+somit ein bisschen Arbeit ersparen. Wenn nicht, dann erstelle dein Feld als 
+direkte Unterklasse von :class:`~django.db.models.Field`.
+
+Im Zuge der Initialisierung deines Feldes solltest du alle Argumente, die
+speziell für deine Implementierung wichtig sind, von generischen Argumenten
+trennen und letztere der :meth:`~django.db.models.Field.__init__`-Methode von
+:class:`~django.db.models.Field` oder deiner jeweiligen Superklasse übergeben.
+
+In unserem Beispiel nennen wir das Feld ``HandField``. (Damit du Subklassen 
+von :class:`~django.db.models.Field` einfach erkennst, bietet es sich an, sie 
+nach dem Muster ``<Irgendetwas>Field`` zu benennen.) Es verhält sich nicht wie 
+irgendein anderes bereits existierendes Feld, also erstellen wir es als 
+direkte Subklasse von :class:`~django.db.models.Field`::
+
+    from django.db import models
+
+    class HandField(models.Field):
+        def __init__(self, *args, **kwargs):
+            kwargs['max_length'] = 104
+            super(HandField, self).__init__(*args, **kwargs)
+
+Unser ``HandField`` verwendet die meisten der üblichen Feld-Optionen (siehe 
+die Liste weiter unten), jedoch benötigen wir eine fixe Länge, da es lediglich 
+52 Kartenwerte sowie deren Farbe speichern muss (also 104 Zeichen insgesamt).
+
+.. note::
+    Viele Modellfelder in Django akzeptieren Optionen, die sie jedoch nicht
+    verwenden. So kannst du zum Beispiel einem 
+    :class:`django.db.models.DateField` sowohl 
+    :attr:`~django.db.models.Field.editable` als auch
+    :attr:`~django.db.models.Field.auto_now` übergeben und es wird einfach den
+    :attr:`~django.db.models.Field.editable`-Parameter ignorieren. (Wenn 
+    (:attr:`~django.db.models.Field.auto_now` gesetzt ist, impliziert das
+    ``editable=False``). In diesem Fall wird kein Fehler geworfen.
+
+    Dadurch werden die Feld-Klassen einfacher, da sie keine redundanten 
+    Optionen überprüfen. Sie übergeben lediglich alle Optionen an die 
+    jeweilige Superklasse und verwenden sie nicht weiter. Es ist ganz dir 
+    überlassen, ob dein Feld nun streng die Optionen kontrollieren soll oder 
+    sich mehr am Verhalten der existierenden Klassen orientiert.
+
+Die :meth:`~django.db.models.Field.__init__`-Methode akzeptiert folgende 
+Parameter:
+
+    * :attr:`~django.db.models.Field.verbose_name`
+    * :attr:`~django.db.models.Field.name`
+    * :attr:`~django.db.models.Field.primary_key`
+    * :attr:`~django.db.models.Field.max_length`
+    * :attr:`~django.db.models.Field.unique`
+    * :attr:`~django.db.models.Field.blank`
+    * :attr:`~django.db.models.Field.null`
+    * :attr:`~django.db.models.Field.db_index`
+    * :attr:`~django.db.models.Field.core`
+    * :attr:`~django.db.models.Field.rel`: für Relationen (wie
+      :class:`ForeignKey`). Für fortgeschrittene Benutzer geeignet.
+    * :attr:`~django.db.models.Field.default`
+    * :attr:`~django.db.models.Field.editable`
+    * :attr:`~django.db.models.Field.serialize`: Wenn auf ``False`` gesetzt,
+      dann wird dieses Feld nicht serialisiert werden, wenn das Modell an
+      Djangos :ref:`Serializer <topics-serialization>` übergeben wird.
+      Standardwert: ``True``.
+    * :attr:`~django.db.models.Field.prepopulate_from`
+    * :attr:`~django.db.models.Field.unique_for_date`
+    * :attr:`~django.db.models.Field.unique_for_month`
+    * :attr:`~django.db.models.Field.unique_for_year`
+    * :attr:`~django.db.models.Field.choices`
+    * :attr:`~django.db.models.Field.help_text`
+    * :attr:`~django.db.models.Field.db_column`
+    * :attr:`~django.db.models.Field.db_tablespace`: Wird zum aktuellen
+      Zeitpunkt lediglich vom Oracle-Backend verwendet und auch da nur bei der 
+      Erzeugung der Indizes. Du kannst diese Option normalerweise ignorieren.
+
+Diejenigen Optionen in der Liste oben, die keine Beschreibung haben, haben 
+dieselbe Bedeutung, die sie auch bei normalen Django-Feldern haben. Mehr dazu 
+findest du in der :ref:`Felder-Documentation <ref-models-fields>` .
+
+Die ``SubfieldBase``-Metaklasse
+-------------------------------
+
+Wie wir bereits in der Einführung_ angedeutet haben, werden
+``Field``-Unterklassen oft aus zwei Gründen benötigt: Entweder um einen
+besonderen Spaltentyp zu verwenden, oder um komplex Python-Typen zu nutzen.
+Natürlich können auch beide Gründe gleichzeitig zutreffen. Wenn du nur an
+eigenen Spaltentypen interessiert bist und dein Feld auf der Python-Seite ein
+normaler Standard-Typ ist, betrifft dich dieser Abschnitt nicht.
+
+Wenn du mit eigenen Python-Typen arbeitest, wie das mit unsere ``Hand``-Klasse
+der Fall ist, müssen wir sicherstellen, dass sobald Django eine Instanz
+unseres Modelles initialisiert und einen Wert aus der Datenbank unserem
+Feld-Attribut zuweist, wir diese Werte in das entsprechende Python-Objekt
+umwandeln. Wie das intern genau geschieht, ist etwas kompliziert, jedoch der
+Code, den du in deine ``Field``-Klasse schreiben musst, ist einfach: Stelle
+sicher, dass deine ``Field``-Unterklasse eine bestimmte Metaklasse verwendet:
+
+.. class:: django.db.models.SubfieldBase
+
+Zum Beispiel::
+
+    class HandField(models.Field):
+        __metaclass__ = models.SubfieldBase
+
+        def __init__(self, *args, **kwargs):
+            # ...
+
+Das stellt sicher, dass die :meth:`to_python`-Methode (Details hierzu weiter
+unten) jedes Mal aufgerufen wird, wenn das Attribut initialisiert wird.
+
+Nützliche Methoden
+------------------
+
+Sobald du deine :class:`~django.db.models.Field`-Unterklasse erstellt und die
+``__metaclass__`` angegeben hast, wirst du vielleicht -- abhängig von der
+Aufgabe deines Feldes -- ein paar der Standard-Methoden überschreiben wollen.
+Die folgende Auflistung ist weitestgehend absteigend nach Wichtigkeit
+sortiert. Also fang von oben an.
+
+Eigener Datenbank-Typ
+~~~~~~~~~~~~~~~~~~~~~
+
+.. method:: db_type(self)
+
+Gibt den Spaltentyp für das :class:`~django.db.models.Field` zurück --
+abhängig von der derzeit gewählten :setting:`DATABASE_ENGINE`.
+
+Gehen wir einmal davon aus, dass du in PostgreSQL einen Typ mit dem Name
+``mytype`` erstellt hast. Du kannst diesen Typ nun in deiner
+``Field``-Unterklasse verwenden, indem du :meth:`db_type` wie folgt
+implementierst::
+
+    from django.db import models
+
+    class MytypeField(models.Field):
+        def db_type(self):
+            return 'mytype'
+
+Sobald du nun dein ``MytypeField`` hast, kannst du es in einem Modell nun wie
+jedes andere Feld verwenden::
+
+    class Person(models.Model):
+        name = models.CharField(max_length=80)
+        gender = models.CharField(max_length=1)
+        something_else = MytypeField()
+
+Wenn deine Applikation nicht nur auf ein Datenbanksystem beschränkt sein soll,
+musst du unterschiedliche Spaltentypen in Betracht ziehen. So ist zum Beispiel
+der Spaltentype für Datums- und Zeitangaben in PostgreSQL ``timestamp``,
+während der Typ in MySQL ``datetime`` heißt. Innerhalb von ``db_type()`` kann
+der Typ dann entsprechend der in der Settings-Datei gesetzten
+:setting:`DATABASE_ENGINE` festgesetzt werden. Das könnte dann zum Beispiel so
+aussehen::
+
+    class MyDateField(models.Field):
+        def db_type(self):
+            from django.conf import settings
+            if settings.DATABASE_ENGINE == 'mysql':
+                return 'datetime'
+            else:
+                return 'timestamp'
+
+:meth:`db_type` wird nur dann Aufgerufen, wenn Django die ``CREATE
+TABLE``-Statements für deine Applikation zusammenstellt , also wenn du zum
+ersten Mal die Tabellen erstellst. Da es nur zu diesem Zeitpunkt ausgeführt,
+kann es auch durchaus komplexeren Code, wie zum Beispiel die Unterscheidung
+nach :setting:`DATABASE_ENGINE` wie im oberen Beispiel enthalten.
+
+Einige Spalten Typen erlauben auch Parameter, wie zum Beispiel ``CHAR(25)``,
+wobei ``25`` die maximale Spaltenbreite festlegt. In einer solchen Situation
+ist es deutlich flexibler, wenn der Parameter durch das Modell festgelegt
+wird, anstelle eines fixen Wertes in der ``db_type()``-Methode. So würde ein
+``CharMaxlength25Field`` nur wenig Sinn machen::
+
+    # This is a silly example of hard-coded parameters.
+    class CharMaxlength25Field(models.Field):
+        def db_type(self):
+            return 'char(25)'
+
+    # In the model:
+    class MyModel(models.Model):
+        # ...
+        my_field = CharMaxlength25Field()
+
+Eine bessere Lösung wäre hier, wenn der Wert zur Laufzeit festgelegt werden
+könnte -- also wenn die Klasse instanziiert wird. Um das zu erreichen,
+implementiere :meth:`django.db.models.Field.__init__` wie folgt::
+
+    # Das ist eine deutlich flexiblere Loesung:
+    class BetterCharField(models.Field):
+        def __init__(self, max_length, *args, **kwargs):
+            self.max_length = max_length
+            super(BetterCharField, self).__init__(*args, **kwargs)
+
+        def db_type(self):
+            return 'char(%s)' % self.max_length
+
+    # Im Modell:
+    class MyModel(models.Model):
+        # ...
+        my_field = BetterCharField(25)
+
+Wenn deine Spalte ein sehr komplexes SQL-Setup benötigt, schreibe
+:meth:`db_type` so, dass es ``None`` zurückgibt. Damit überspringt Django
+diese Spalte während der Erstellung der Tabelle. Du musst dann irgendwie
+anders diese Spalte anlegen, jedoch erreicht du so, dass Django dir nicht in
+die Quere kommt.
+
+Datenbankwerte in Python-Objekte umwandeln
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. method:: to_python(self, value)
+
+Wandelt einen Wert aus der Datenbank (oder dem Serializer) in ein
+Python-Objekt um.
+
+In der Regel gibt bereits das Datenbank-Backend den Wert im korrekten Format
+zurück, folglich gibt die Standardimplementierung einfach ``value`` zurück.
+
+Wenn deine :class:`~django.db.models.Field`-Klasse mit Datenstrukturen
+arbeitet, die komplexer als Strings, Daten und Zahlen sind, dann musst du
+diese Methode überschreiben. Die Methode sollte hierbei mit folgenden Werten
+umgehen können:
+
+    * Eine Instanz des korrekten Typs (zum Beispiel ``Hand`` in unserem 
+      Beispiel)
+
+    * Ein String (zum Beispiel aus dem Deserializer)
+
+    * Was auch immer die Datenbank für Spaltentyp zurückgibt, den du
+      verwendest
+
+In unserer ``HandField``-Klasse speichern wir die Daten in einem VARCHAR-Feld
+in der Datenbank. Folglich muss die :meth:`to_python`-Methode sowohl Strings
+als auch mit ``Hand``-Instanzen verarbeiten können::
+
+    import re
+
+    class HandField(models.Field):
+        # ...
+
+        def to_python(self, value):
+            if isinstance(value, Hand):
+                return value
+
+            # The string case.
+            p1 = re.compile('.{26}')
+            p2 = re.compile('..')
+            args = [p2.findall(x) for x in p1.findall(value)]
+            return Hand(*args)
+
+Bitte beachte, dass wir immer hier immer eine ``Hand``-Instanz zurückgeben.
+Das ist der Python-Objekttyp, den wir in unserem Modellattribut speichern
+möchten.
+
+**Nicht vergessen:** Wenn dein Feld davon abhängt, dass :meth:`to_python`
+aufgerufen wird, wenn es erstellt wird, dann solltest du die
+`Die SubfieldBase-Metaklasse`_ verwenden, die weiter oben beschrieben wurde.
+Ansonsten wird :meth:`to_python` nicht automatisch aufgerufen.
+
+Python-Objekte in Datenbankwerte umwandeln
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. method:: get_db_prep_value(self, value)
+
+Die Methode hat genau die gegenteilige Aufgabe von :meth:`to_python`, wenn man
+mit Datenbank-Backends anstelle von reiner Serialisierung arbeitet. Der
+``value``-Parameter ist der aktuelle Wert des Attributs im Modell (ein Feld
+hat keinerlei Verbindung zum Modell, das es enthält, weshalb es den Wert nicht
+selbst vom Modell beziehen kann) und die Methode soll die Daten nun in einem
+Format zurückgeben, das für die Verwendung in Queries an das Datenbank-Backend
+geeignet ist.
+
+Zum Beispiel::
+
+    class HandField(models.Field):
+        # ...
+
+        def get_db_prep_value(self, value):
+            return ''.join([''.join(l) for l in (value.north,
+                    value.east, value.south, value.west)])
+
+.. method:: get_db_prep_save(self, value)
+
+\.\.\. erfüllt die gleiche Aufgabe, wird jedoch dann aufgerufen, wenn der
+Feldwert in die Datenbank *gespeichert* werden soll. Da die
+Standardimplementierung lediglich ``get_db_pre_value`` aufruft, solltest du in
+der Regel diese Methode nicht implementieren müssen, ausser wenn dein Feld in
+einer besonderen Art und Weise konvertiert werden muss, bevor es abgespeichert
+werden kann und dann nicht mehr dem Wert entspricht, der als normaler
+Query-Parameter verwendet werden kann (was der Implementierung von
+``get_db_prep_value`` entspricht).
+
+Werte vor dem Speichern bearbeiten
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. method:: pre_save(self, model_instance, add)
+
+Diese Methode wird kurz vor :meth:`get_db_prep_save` aufgerufen und sollte den
+des entsprechenden Attributs von ``model_instance`` für dieses Feld
+zurückgeben. Der Name des Attributes ist (dank
+:class:`~django.db.models.Field`) in ``self.attname`` gespeichert. Wenn das
+Modell zum ersten Mal in die Datenbank abgespeichert wird, ist der
+``add``-Parameter ``True``, ansonsten ``False``.
+
+Du musst diese Methode nur dann überschreiben, wenn du den Wert irgendwie
+modifizieren willst, bevor er gespeichert wird. So verwendet zum Beispiel
+Djangos :class:`~django.db.models.DateTimeField` diese Methode, um den Wert
+des Attributs entsprechend anzupassen, wenn die Parameter
+:attr:`~django.db.models.Field.auto_now` oder
+:attr:`~django.db.models.Field.auto_now_add` gesetzt sind.
+
+Wenn du nun diese Methode überschreibst, musst du den Wert des Attributes
+zurückgeben. Du solltest ausserdem das Attribut im Modell aktualisieren, wenn
+du den Wert änderst, damit Referenzen auf dieses Modell immer den korrekten
+Wert sehen.
+
+Werte für Datenbankabfragen vorbereiten
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. method:: get_db_prep_lookup(self, lookup_type, value)
+
+Bereitet den ``value`` für seine Rolle als Abfrage-Parameter auf die Datenbank
+vor (eine ``WHERE``-Klausel in SQL). Der ``lookup_type`` ist einer der
+folgenden Abfrage-Filter in Django: ``exact``, ``iexact``, ``contains``,
+``icontains``, ``gt``, ``gte``, ``lt``, ``lte``, ``in``, ``startswith``,
+``istartswith``, ``endswith``, ``iendswith``, ``range``, ``year``, ``month``,
+``day``, ``isnull``, ``search``, ``regex``, und ``iregex``.
+
+Deine Methode muss mit all diesen ``lookup_type``-Werten umgehen können und
+sollte entweder einen ``ValueError`` werfen, wenn der ``value`` zum Beispiel
+eine Liste ist, wenn du ein normales Objekt erwartet hast, oder einen
+``TypeError``, wenn dein Feld einen bestimmten Abfragetyp nicht unterstützt.
+Meistens kannst du auch einfach nur die Methode für eine kleine Anzahl an
+Abfragetypen implementieren, die irgendwie eine besondere Behandlung
+benötigen, und alle anderen von :meth:`get_db_prep_lookup` der Elternklasse
+verarbeiten lassen.
+
+Wenn du ``get_db_prep_save()`` hast implementieren müssen, dann brauchst du
+wahrscheinlich auch ``get_db_prep_lookup()``. Wenn du diese Methode nicht
+implementierst, wird ``get_db_prep_value`` von der Standardimplementierung
+aufgerufen, um ``exact``-, ``gt``-, ``gte``-, ``lt``-, ``lte``-, ``in``- und
+``range``-Abfragen zu verarbeiten.
+
+Du kannst mit dieser Methode auch die Anzahl der verschiedenen Abfragetypen
+einschränken, die mit deinem Feldtyp verwendet werden können.
+
+Bei ``range`` und ``in``-Anfragen erhält ``get_db_prep_lookup`` eine Liste von Objekten (wahrscheinlich mit dem korrekten Typ) und muss diese Liste dann in eine Liste von Werten mit dem richtigen Typ umwandeln, um sie dann der Datenbank zu übergeben. Meistens kannst du hier ``get_db_prep_value()`` wiederverwenden, ganz oder in Teilen.
+
+Im folgenden Beispiel wird ``get_db_prep_lookup`` implementiert, um nur ``exact`` und ``in`` zuzulassen::
+
+    class HandField(models.Field):
+        # ...
+
+        def get_db_prep_lookup(self, lookup_type, value):
+            # We only handle 'exact' and 'in'. All others are errors.
+            if lookup_type == 'exact':
+                return [self.get_db_prep_value(value)]
+            elif lookup_type == 'in':
+                return [self.get_db_prep_value(v) for v in value]
+            else:
+                raise TypeError('Lookup type %r not supported.' % lookup_type)
+
+Formularfeld und Modellfeld verbinden
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. method:: formfield(self, form_class=forms.CharField, **kwargs)
+
+Gibt das Formularfeld zurück, das standardmässig für dieses Modellfeld
+verwendet werden soll, wenn es angezeigt wird. Diese Methode wird von
+:class:`~django.forms.ModelForm` aufgerufen.
+
+Das gesamte ``kwargs``-Dictionary wird direkt an die :meth:`~django.forms.Field__init__`-Methode des Formularfelds übergeben. Somit musst du normalerweise einfach einen guten Standardwert für das ``form_class`` setzen  und dann alles weitere der Elternklasse überlassen. Das heißt aber auch, dass du vielleicht dein eigenes Formularfeld schreiben wirst müssen (und auch vermutlich ein Formular-Widget). Mehr Information darüber findest du in der :ref:`Formular-Dokumentation <topics-forms-index>`. Für Widget-Beispiele wirf auch einen Blick auf den Code von :mod:`django.contrib.localflavor`.
+
+In unserem Beispiel können wir die :meth:`formfield`-Methode so schreiben::
+
+    class HandField(models.Field):
+        # ...
+
+        def formfield(self, **kwargs):
+            # This is a fairly standard way to set up some defaults
+            # while letting the caller override them.
+            defaults = {'form_class': MyFormField}
+            defaults.update(kwargs)
+            return super(HandField, self).formfield(**defaults)
+
+Das setzt voraus, dass wir eine ``MyFormField``-Feldklasse importiert haben,
+welche ihr eigenes Standard-Widget hat. Dieses Dokument behandelt nicht das
+Schreiben eigener Formularfelder
+
+.. _helper functions: ../forms/#generating-forms-for-models
+.. _forms documentation: ../forms/
+
+Eingebaute Feldtypen nachahmen
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. method:: get_internal_type(self)
+
+Gibt den Namen derjenigen :class:`~django.db.models.Field`-Subklasse zurück,
+die wir auf der Datenbankschicht nachahmen wollen. Das wird genutzt, um
+einfach den Spaltentyp in einfachen Fällen zu ermitteln.
+
+Wenn du bereits eine :meth:`db_type`-Methode geschrieben hast, brauchst du
+dich nicht weiter um :meth:`get_internal_type` zu kümmern, da es nicht weiter
+verwendet wird. Wenn dein Feld aber auf der Datenbank-Ebene einem anderen
+bereits existierenden Feld sehr ähnlich ist, kannst du somit einfach die
+Funktionalität dieses Anderen Feldes für die Erstellung des richtigen
+Spaltentyps verwenden.
+
+Zum Beispiel::
+
+    class HandField(models.Field):
+        # ...
+
+        def get_internal_type(self):
+            return 'CharField'
+
+Ganz egal, welches Datenbank-Backend wir nun benutzen, bedeutet das, das
+``syncdb`` und andere SQL-Befehle den richtigen Spaltentyp für einen String
+erstellen werden.
+
+Wenn :meth:`get_internal_type` nun einen String zurückgibt, der Django für das
+gerade verwendete Datenbank-Backend unbekannt ist -- als der String nicht in
+``django.db.backends.<db_name>.creation.DATA_TYPES`` aufscheint --, wird der
+String trotzdem für den Serializer verwendet werden, jedoch gibt
+:meth:`db_type` ``None`` zurück. Warum das nützlich ist, wird in der
+Dokumentation zu :meth:`db_type` erklärt. Es ist hier normalerweise ratsam,
+einen sprechenden String als Typ des Feldes für den Serializer anzugeben;
+speziell wenn du die Ausgabe des Serializers auch ausserhalb von Django
+verwendest.
+
+Felddaten für die Serialisierung konvertieren
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. method:: value_to_string(self, obj)
+
+Diese Methode wird von den Serializern verwendet, um das Feld in einen String
+umzuwandeln, der dann ausgegeben werden kann.
+:meth:`Field._get_val_from_obj(obj)` aufzurufen ist hierbei der Beste Weg, um
+den Wert für die Serialisierung zu bekommen. Da unser ``HandField`` zum
+Beispiel ohnehin bereits Strings als Datenspeicher verwendet, können wird ein
+bisschen Wiederverwertung betreiben::
+
+    class HandField(models.Field):
+        # ...
+
+        def value_to_string(self, obj):
+            value = self._get_val_from_obj(obj)
+            return self.get_db_prep_value(value)
+
+Allgemeine Empfehlungen
+-----------------------
+
+Es kann sehr heikel sein, ein eigenes Feld zu schreiben; besonders, wenn du
+komplizierte Konvertierungsoperationen zwischen Python-Typen und Datenbank
+bzw. Serialisierungsformaten benötigst. Hier nun ein paar Tipps, die den
+ganzen Prozess ein bisschen erleichtern sollten:
+
+    1. Schau dir die bereits existierenden Django-Felder (in 
+       :file:`django/db/models/fields/__init__.py`) an. Versuche ein Feld zu 
+       finden, das mehr oder weniger dem entspricht, was du erreichen 
+       möchtest, und erweitere es. Das ist einfacher, als ein Feld komplett 
+       von Grund auf neu zu schreiben.
+
+    2. Die Klasse, die du mit deinem Feld umhüllen willst, sollte eine 
+       :meth:`__str__`- oder :meth:`__unicode__`-Methode haben. An vielen 
+       Stellen wird standardmässig die 
+       :func:`~django.utils.encoding.force_unicode` mit dem Wert aufgerufen. 
+       (In unserem Beispiel wäre ``value`` eine Instanz von ``Hand`` und nicht 
+       von ``HandField``.) Wenn deine :meth:`__unicode__`-Methode dir nun 
+       schon eine brauchbare String-Version deines Python-Objektes zurückgibt, 
+       kannst du dir sehr viel Arbeit sparen.
+
+
+Eine ``FileField``-Subklasse schreiben
+======================================
+
+Felder die auf Dateien operieren, haben neben den oben behandelten Methoden
+noch ein paar besondere Voraussetzungen, die in Betracht gezogen werden
+müssen. Der Großteil der Funktionalität von ``FileField``, wie der
+Datenbankzugriff, kann unverändert übernommen werden, wodurch Subklassen sich
+ganz auf die Herausforderungen der Unterstützung von bestimmten Dateitypen
+konzentrieren können.
+
+Django bietet bietet hierbei eine ``File``-Klasse, die als Proxy für
+Dateioperationen und dessen eigentlichen Inhalt fungiert. Zu dieser Klasse
+kann nun eine Subklasse erstellt werden, die anpasst, wie man auf die Datei
+zugreift und welche weiteren Methoden verfügbar sind. Diese Klasse befindet
+sich ``django.db.models.fields.files``-Package und ihr Verhalten wird in der
+:ref:`Datei-Dokumentation <ref-files-file>` behandelt.
+
+Sobald du eine ``File``-Subklasse erstellt hast, musst du deinem ``FileField``
+dies noch mitteilen, damit sie auch verwendet wird. Dazu setze einfach das
+``attr_class``-Attribut deines ``FileField``\s auf die neue
+``File``-Subklasse.
+
+Ein paar Ratschläge
+-------------------
+
+Zusätzlich zu den Details von oben gibt es noch ein paar Richtlinien, die sowohl die Effizienz als auch die Lesbarkeit des Codes von Feldern verbessern.
+
+    1. Der Quelltext von Djangos ``ImageField`` (in
+       ``django/db/models/fields/files.py``) ist ein gutes Beispiel für ein 
+       Feld, das ``FileField`` erweitert, um eine bestimmte Dateiart zu 
+       unterstützen. Sämtliche Techniken, die dazu oben behandelt wurden, 
+       finden hier Verwendung.
+
+    2. Speichere Dateiattribut so oft wie nur irgendwie möglich zwischen. Da 
+       Dateien auch zum Beispiel auf entfernten Rechnern gespeichert sein 
+       können, kostet ein zusätzlicher Zugriff extra (sowohl in Zeit als auch 
+       u.U. in Geld), was nicht notwendig ist. Sobald eine Datei einmal 
+       abgeholt wurde, um Daten über den Inhalt abzufragen, speichere soviel 
+       wie möglich zwischen, um die Anzahl der Abfragen bei späteren Anfragen 
+       nach dieser Information zu minimieren.
