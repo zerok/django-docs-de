@@ -24,7 +24,7 @@ Führe einfach das ``ez_setup.py``-Skript im Django-Verzeichnis aus.
 Was sind Djangos Abhängigkeiten?
 --------------------------------
 
-Django benötigt Python_ 2.3 oder neuer. Andere Python Bibliotheken werden
+Django benötigt Python_ Version 2.3 bis 2.6. Andere Python Bibliotheken werden
 nicht benötigt, um Django grundlegend benutzen zu können.
 
 Du brauchst auch keinen separaten Webserver zu installieren, falls du Django 
@@ -50,13 +50,36 @@ und Oracle_ unterstützt.
 Habe ich einen Nachteil, wenn ich anstatt Python 2.3 eine neuere Python Version nutze, wie Python 2.5?
 ------------------------------------------------------------------------------------------------------
 
-Nein. Django läuft garantiert mit allen Python Versionen ab 2.3.
+Nicht im Kern des Frameworks. Derzeit unterstützt Django Python in der
+Versionen 2.3 bis 2.6. Add-On-Komponenten könnten aber eine neuere Version von
+Python voraussetzen; so benötigt dìe ``django.contrib.gis``-Komponente zum
+Beispiel Python 2.3 und Django-Applikationen Dritter steht es natürlich frei,
+eine andere Python-Version vorauszusetzen.
 
-Wenn du eine neuere Python-Version als 2.3 verwenden willst, kannst du 
-nicht nur die neuen Features in Python nutzen, sondern profitierst auch von 
-Geschwindigkeitsverbesserungen und diversen anderen Optimierungen die an 
-Python vorgenommen wurden. 
-Django sollte allerdings gleich gut mit Python 2.3, 2.4 oder 2.5 arbeiten.
+Bitte beachte aber, dass Django im Rahmen der nächsten ein bis zwei Jahre
+anfangen wird, Unterstützung alter Python-Version als Teil der Migration zu
+Python 3.0 zu beenden (mehr dazu im nächsten Abschnitt). Wenn du nun erst
+gerade mit Python angefangen hast, solltest du die neueste 2.x-Version
+verwenden (derzeit 2.6). Dadurch kannst du eine Vielzahl von Verbesserungen in
+der Python-Sprache verwenden, die sie seit 2.3 erfahren hat. Ausserdem hilfst
+du damit dabei, den Prozess hin zum Wegfall der Unterstützung alter
+Python-Version auf dem Weg zu Python 3.0 zu erleichtern.
+
+Kann ich Django mit Python 3.0 verwenden?
+-----------------------------------------
+
+Derzeit nicht. Python 3.0 hat eine Reihe von nicht mehr abwärtskompatiblen
+Änderungen in die Sprache eingeführt und obwohl diese Änderungen allgemein gut
+für Pythons Zukunft sind, wird es doch eine Weile dauern, bis der Großteil der
+Python-Applikationen mit Python 3.0 funktionieren. Für eine größere
+Python-basierte Software wie Django kann man für diesem Umstiegsprozess
+zumindest mit ein bis zwei Jahren rechnen (da es auch das schrittweise Ende
+der Unterstützung älterer Python-Versionen beinhaltet).
+
+In der Zwischenzeit werden Python 2.x-Versionen weiterhin unterstützt und auch
+mit Security-Updates und Bugfixes durch das Python-Entwicklerteam versorgt.
+Folglich sollte die Nutzung von Python 2.x während dieser Übergangsphase kein
+Risiko darstellen.
 
 Muss ich mod_python verwenden?
 ------------------------------

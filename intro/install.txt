@@ -12,9 +12,12 @@ Python installieren
 -------------------
 
 Da Django ein Python-Web-Framework ist, benötigt es Python. Es funktioniert
-mit Version 2.3 und neuer, wobei wir Python 2.5 oder neuer empfehlen. Dadurch
-ersparst du dir vorerst, eine Datenbank installieren zu müssen, da Python ab
-Version 2.5 ein einfaches Datenbanksystem namens SQLite_ mitbringt.
+mit Version 2.3 bis 2.6 (aufgrund der fehlenden Abwärtskompatibilität von
+Python 3.0 unterstützt Django derzeit Python 3.0 *nicht*; mehr dazu und den
+Umstieg auf Python 3.0 findest du in der :ref:`Django-FAQ <faq-install>`),
+wobei wir Python 2.5 oder neuer empfehlen. Dadurch ersparst du dir vorerst,
+eine Datenbank installieren zu müssen, da Python ab Version 2.5 ein einfaches
+Datenbanksystem namens SQLite_ mitbringt.
 
 .. _sqlite: http://sqlite.org/
 
