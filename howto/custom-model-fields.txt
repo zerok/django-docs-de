@@ -99,7 +99,7 @@ Modellfelder müssen irgendwie konvertiert werden, um einem existierenden
 Spaltentyp einer Datenbank zu entsprechen. Unterschiedliche Datenbanksysteme
 bieten oft unterschiedliche Typen von Spalten, jedoch eine grundlegende
 Regel bleibt immer gleich: Du hast nur diese Spaltentypen. Alles, das du in
-der Datenbank abspeichern willst, muss irgendwie in einen davon passen.
+der Datenbank speichern willst, muss irgendwie in einen davon passen.
 
 Normalerweise schreibst du entweder ein Django-Feld, um einem bestimmten
 Spaltentyp deiner Datenbank zu entsprechen, oder es gibt einen 
@@ -246,7 +246,7 @@ normaler Standard-Typ ist, betrifft dich dieser Abschnitt nicht.
 
 Wenn du mit eigenen Python-Typen arbeitest, wie das mit unsere ``Hand``-Klasse
 der Fall ist, müssen wir sicherstellen, dass sobald Django eine Instanz
-unseres Modelles initialisiert und einen Wert aus der Datenbank unserem
+unseres Modells initialisiert und einen Wert aus der Datenbank unserem
 Feld-Attribut zuweist, wir diese Werte in das entsprechende Python-Objekt
 umwandeln. Wie das intern genau geschieht, ist etwas kompliziert, jedoch der
 Code, den du in deine ``Field``-Klasse schreiben musst, ist einfach: Stelle
@@ -443,7 +443,7 @@ Zum Beispiel::
 Feldwert in die Datenbank *gespeichert* werden soll. Da die
 Standardimplementierung lediglich ``get_db_pre_value`` aufruft, solltest du in
 der Regel diese Methode nicht implementieren müssen, ausser wenn dein Feld in
-einer besonderen Art und Weise konvertiert werden muss, bevor es abgespeichert
+einer besonderen Art und Weise konvertiert werden muss, bevor es gespeichert
 werden kann und dann nicht mehr dem Wert entspricht, der als normaler
 Query-Parameter verwendet werden kann (was der Implementierung von
 ``get_db_prep_value`` entspricht).
@@ -457,7 +457,7 @@ Diese Methode wird kurz vor :meth:`get_db_prep_save` aufgerufen und sollte den
 des entsprechenden Attributs von ``model_instance`` für dieses Feld
 zurückgeben. Der Name des Attributes ist (dank
 :class:`~django.db.models.Field`) in ``self.attname`` gespeichert. Wenn das
-Modell zum ersten Mal in die Datenbank abgespeichert wird, ist der
+Modell zum ersten Mal in die Datenbank gespeichert wird, ist der
 ``add``-Parameter ``True``, ansonsten ``False``.
 
 Du musst diese Methode nur dann überschreiben, wenn du den Wert irgendwie
@@ -502,7 +502,7 @@ aufgerufen, um ``exact``-, ``gt``-, ``gte``-, ``lt``-, ``lte``-, ``in``- und
 Du kannst mit dieser Methode auch die Anzahl der verschiedenen Abfragetypen
 einschränken, die mit deinem Feldtyp verwendet werden können.
 
-Bei ``range`` und ``in``-Anfragen erhält ``get_db_prep_lookup`` eine Liste von Objekten (wahrscheinlich mit dem korrekten Typ) und muss diese Liste dann in eine Liste von Werten mit dem richtigen Typ umwandeln, um sie dann der Datenbank zu übergeben. Meistens kannst du hier ``get_db_prep_value()`` wiederverwenden, ganz oder in Teilen.
+Bei ``range`` und ``in``-Anfragen erhält ``get_db_prep_lookup`` eine Liste von Objekten (wahrscheinlich mit dem korrekten Typ) und muss diese Liste dann in eine Liste von Werten mit dem richtigen Typ umwandeln, um sie dann der Datenbank zu übergeben. Meistens kannst du hier ``get_db_prep_value()`` wieder verwenden, ganz oder in Teilen.
 
 Im folgenden Beispiel wird ``get_db_prep_lookup`` implementiert, um nur ``exact`` und ``in`` zuzulassen::
 
@@ -609,7 +609,7 @@ Allgemeine Empfehlungen
 -----------------------
 
 Es kann sehr heikel sein, ein eigenes Feld zu schreiben; besonders, wenn du
-komplizierte Konvertierungsoperationen zwischen Python-Typen und Datenbank
+komplizierte Konvertierungsoperationen zwischen Python-Typen und der Datenbank
 bzw. Serialisierungsformaten benötigst. Hier nun ein paar Tipps, die den
 ganzen Prozess ein bisschen erleichtern sollten:
 

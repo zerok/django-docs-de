@@ -36,7 +36,7 @@ Schritte durchführen:
    findest du eine Liste dieser Methoden.
    
    Zusätzlich muss deine Klasse die ``path()``-Methode überschreiben, falls 
-   sie die Dateien lokal abspeichert.
+   sie die Dateien lokal speichert.
 
 Dein Storage-System kann jede der in :ref:`ref-files-storage` behandelten
 Methode überschreiben. Sie muss jedoch immer die Folgenden implementieren:
