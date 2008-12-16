@@ -4,23 +4,23 @@
 Django-Dokumentation
 ====================
 
-.. rubric:: Alles, was du über Django wissen solltest (und mehr).
+.. rubric:: Alles was du über Django wissen solltest (und mehr).
 
 Hilfe
 ============
 
 Hast du Probleme? Wir würden dir gerne helfen!
 
-* Versuche es in der :ref:`FAQ <faq-index>` -- sie enthält Antworten zu
-  viele häufig gestellten Fragen.
+* Versuche es in der :ref:`FAQ <faq-index>` -- sie enthält Antworten auf
+  viele häufig gestellte Fragen.
 
 * Suchst du etwas Spezielles? Versuche den :ref:`genindex`, :ref:`modindex`
   oder das :ref:`detaillierte Inhaltsverzeichnis <contents>`.
 
-* Durchsuche das `Archiv der django-users-Mailinglist`_, oder `stelle dort
+* Durchsuche das `Archiv der django-users-Mailinglist`_ oder `stelle dort
   eine Frage`_.
 
-* Stelle eine Frage im `#django-IRC-Channel`_, oder durchsuche die
+* Stelle eine Frage im `#django-IRC-Channel`_ oder durchsuche die
   `IRC-Protokolle`_, um zu sehen, ob deine Frage vielleicht früher schon
   einmal beantwortet wurde.
 
@@ -36,10 +36,10 @@ Erste Schritte
 ==============
 
 :ref:`Übersicht <intro-overview>`
-    See what writing a database-driven application with Django looks like.
+    Schau wie eine Datenbank-betriebene Applikation mit Django aussehen kann.
 
 :ref:`Installation <intro-install>`
-    Get Django installed on your computer.
+    Django auf deinem Computer installieren.
 
 Einführung: Schreibe deine erste Django-Anwendung
 =================================================
@@ -54,7 +54,7 @@ Einführung: Schreibe deine erste Django-Anwendung
     Schreibe Views für den öffentlichen Bereich.
 
 :ref:`Teil 4 <intro-tutorial04>`
-    Lerne, Formulare zu verarbeiten.
+    Lerne Formulare zu verarbeiten.
 
 Django nutzen
 =============
@@ -129,7 +129,7 @@ Bestimmte Probleme lösen
     Schreibe deinee eigenen Erweiterungen zu Djangos Template-Sprache.
 
 :ref:`Erzeuge CSV <howto-outputting-csv>` & :ref:`PDF <howto-outputting-pdf>`
-    Erzeuge Inhalte, die nicht HTML sind, mit Django.
+    Erzeuge mit Django Inhalte, die nicht HTML sind.
 
 Und mehr:
 ---------
