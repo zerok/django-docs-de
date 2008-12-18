@@ -1,0 +1,758 @@
+.. _intro-tutorial01:
+
+===============================================
+Schreibe deine erste Django-Applikation, Teil 1
+===============================================
+
+Lass uns durch Beispiele lernen.
+
+Im Laufe dieses Tutorials werden wir dich durch die Erstellung einer
+grundlegenden Umfrage-Applikation führen.
+
+Es wird aus zwei Teilen bestehen:
+
+    * Einer öffentlichen Seite, die es Menschen ermöglicht Umfragen anzusehen
+      und in ihnen abzustimmen.
+    * Einer Administrationsseite, die dir ermöglicht, Umfragen hinzuzufügen, zu
+      ändern und zu löschen.
+
+Wir gehen davon aus, dass du :ref:`Django bereits installiert <intro-install>` 
+installiert hast. Du kannst feststellen, ob Django installiert ist, indem du
+den den interaktiven Interpreter von Python startest und ``import django``
+eingibst. Wenn dieser Befehl erfolgreich und ohne Fehler ausgeführt wird, ist
+Django installiert.
+
+.. admonition:: Wo man Hilfe bekommt:
+
+    Wenn du im Laufe dieses Tutorials Probleme bekommen solltest, schreibe bitte
+    eine Nachricht in `django-users`__ oder schau bei 
+    `#django on irc.freenode.net`__ vorbei, um mit anderen Django-Benutzern zu
+    chatten, die dir vielleicht helfen können.
+
+__ http://groups.google.com/group/django-users
+__ irc://irc.freenode.net/django
+
+Ein Projekt erstellen
+=====================
+
+Wenn dies dein erstes Mal ist, dass du Django benutzt, wirst du dich um einige
+grundlegende Einstellungen kümmern müssen. Du wirst nämlich einigen Code
+autogenerieren müssen, der ein Django-:term:`Projekt` erstellt – eine Sammlung
+von Einstellungen für eine Instanz von Django, einschließlich
+Datenbank-Konfiguration, djangospezifischen Optionen und
+Applikationsspezifischen Einstellungen.
+
+Auf der Kommandozeile bewege dich mit ``cd`` in ein Verzeichnis, wo du deinen
+Code ablegen möchtest. Dann führe den Befehl
+``django-admin.py startproject mysite`` aus. Dieses erstellt ein
+``mysite``-Verzeichnis in deinem aktuellen Verzeichnis.
+
+.. admonition:: Mac OS X Zugriffsrechte
+   
+   
+   Wenn du Mac OS X benutzt, könntest du die Mitteilung "permission denied"
+   sehen, wenn du versuchst ``django-admin.py startproject`` auszuführen. Das
+   liegt daran, das auf unix-basierenden Systemen wie OS X eine Datei immer als
+   "ausführbar" markiert werden muss, bevor sie als Programm ausgeführt werden
+   kann. Um dies zu erledigen, öffne Terminal.app und bewege dich (benutze den
+   ``cd``-Befehl) in das Verzeichnis, wo 
+   :ref:`django-admin.py <ref-django-admin>` installiert ist. Dann führe den
+   Befehl ``chmod +x django-admin.py`` aus.
+   
+.. note::
+
+    Du musst es vermeiden deine Projekte nach eingebauten Python- oder
+    Django-Komponenten zu benennen. Insbesondere bedeutet dies, dass du es
+    vermeiden solltest Namen wie ``django`` (das in einen Konflikt mit Django
+    selbst gerät) oder ``test`` (das mit einem eingebauten Python-Paket in 
+    Konflikt gerät) zu verwenden.
+
+:ref:`django-admin.py <ref-django-admin>` sollte sich auf deinem Systempfad
+befinden, wenn du Django über ``python setup.py`` installiert hast. Wenn es sich
+nicht auf deinem Pfad befindet, kannst du es in ``site-packages/django/bin``
+finden, wobei ``site-packages`` ein Verzeichnis innerhalb deiner
+Python-Installation ist. Du solltest in Erwägung ziehen, einen symbolischen Link
+auf :ref:`django-admin.py <ref-django-admin>` von irgendeinem Ort auf deinem
+Pfad, wie z. B. :file:`/usr/local/bin` zu erstellen.
+
+.. admonition:: Wo sollte dieser Code abgelegt werden?
+
+    Wenn dein Hintergrund PHP ist, bist du es vermutlich gewöhnt deinen Code in
+    das Wurzelverzeichnis des Webservers (an einem Ort wie ``/var/www``)
+    abzulegen. Bei Django macht man das nicht. Es ist keine gute Idee,
+    irgendetwas von diesem Python-Code innerhalb des Wurzelverzeichnises deines
+    Webservers abzulegen, weil dann das Risiko besteht, dass Menschen deinen
+    Code über das Web ansehen könnten. Und das ist aus Sicherheitsgründen 
+    nicht gut.
+
+    Platziere deinen Code daher **außerhalb** deines Wurzelverzeichnises, wie
+    z. B. in :file:`/home/mycode`.
+
+Lass uns einen Blick auf das werfen, was :djadmin:`startproject` erstellt hat::
+
+    mysite/
+        __init__.py
+        manage.py
+        settings.py
+        urls.py
+
+Diese Dateien sind:
+
+    * :file:`__init__.py`: Eine leere Datei, die Python mitteilt, dass dieses
+      Verzeichnis als Python-Paket betrachtet werden soll (Lies 
+      `mehr über Pakete`_ in der offiziellen Python-Dokumentation, wenn du ein
+      Anfänger bist).
+
+    * :file:`manage.py`: Ein Kommandozeilen-Hilfsprogramm, dass dich mit dem
+      Django-Projekt auf verschiedene Weise interagieren lässt. Du kannst alle
+      Details über :file:`manage.py` in :ref:`ref-django-admin` nachlesen.
+      
+    * :file:`settings.py`: Die Einstellungs-/Konfigurationsdatei für dieses
+      Django-Projekt. :ref:`topics-settings` wird dir alles darüber erzählen,
+      wie Einstellungen funktionieren.
+      
+    * :file:`urls.py`: Die URL-Deklarationen für dieses Django-Projekt. Eine
+      "Tabelle mit Inhalten" deiner Django-betriebenen Seite. Du kannst mehr
+      über URLs in :ref:`topics-http-urls` nachlesen.
+      
+.. _mehr über Pakete: http://docs.python.org/tut/node8.html#packages
+
+Der Entwicklungsserver
+----------------------
+
+Lass uns überprüfen, ob dies funktioniert hat. Wechsel dazu in das
+:file:`mysite`-Verzeichnis, wenn du es nicht schon gemacht hast, und führe den
+Befehl ``python manage.py runserver`` aus. Du wirst die folgende Ausgabe auf der
+Kommandozeile sehen::
+
+    Validating models...
+    0 errors found.
+
+    Django version 1.0, using settings 'mysite.settings'
+    Development server is running at http://127.0.0.1:8000/
+    Quit the server with CONTROL-C.
+
+Du hast damit den Django-Entwicklungsserver gestartet, einen leichtgewichtigen
+Webserver, der vollständig in Python geschrieben wurde. Wir haben diesen Django
+beigefügt, damit du schnell Dinge entwickeln kannst, ohne dich mit der
+Konfiguration eines Produktionsservers – wie z. B. Apache – beschäftigen zu
+müssen, bis du für die Produktion fertig bist.
+
+Nun ist eine gute Zeit für einen Hinweis: Benutze diesen Server NICHT in einer
+Umgebung, die auch nur irgendwie einer Produktionsumgebung ähnlich ist. Er ist
+nur für die Entwicklung gedacht (unser Geschäft ist die Erstellung von
+Web-Frameworks, nicht von Webservern).
+
+Jetzt, da der Server läuft, rufe http://127.0.0.1:8000/ mit deinem Webbrowser 
+auf. Du wirst eine "Welcome to Django"-Seite, in angenehmen, hellblauen 
+Pasteltönen sehen. Es hat funktioniert!
+
+.. admonition:: Den Port verändern
+
+    Standardmäßig startet der :djadmin:`runserver`-Befehl den Entwicklungsserver
+    auf Port 8000. Wenn du diesen Serverport ändern möchtest, übergibt ihn als
+    Kommandozeilenargument. Dieser Befehl startet den Server z. B. auf Port
+    8080:
+
+    .. code-block:: bash
+
+        python manage.py runserver 8080
+
+    Die vollständige Dokumentation für den Entwicklungsserver kann in der
+    :djadmin:`runserver`-Referenz gefunden werden.
+    
+
+Datenbank-Setup
+---------------
+
+Jetzt bearbeite die Datei :file:`settings.py`. Diese ist ein normales 
+Python-Modul mit Modul-Level Variablen, die die Django-Einstellungen 
+repräsentieren:
+
+    * :setting:`DATABASE_ENGINE` – Entweder 'postgresql_psycopg2', 'mysql' oder
+      'sqlite3'. Andere Backends sind 
+      :setting:`auch verfügbar <DATABASE_ENGINE>`
+    
+    * :setting:`DATABASE_NAME` – Der Name deiner Datenbank. Wenn du SQLite
+      benutzt, wird die Datenbank eine Datei auf deinem Computer sein. In diesem
+      Fall sollte ``DATABASE_NAME`` ein voller, absoluter Pfad sein, den
+      Dateinamen der Datei eingeschlossen. Wenn die Datei nicht existiert, wird
+      sie automatisch erstellt, wenn du die Datenbanken zum ersten Mal
+      synchronisierst (siehe unten).
+
+      Wenn du den Pfad angibst, benutze immer einen vorwärtsgerichteten 
+      Schrägstrich, auch unter Windows 
+      (z. B. ``C:/homes/user/mysite/sqlite3.db``).
+
+    * :setting:`DATABASE_USER` – Der Benutzername deiner Datenbank (nicht in
+      Gebrauch bei SQLite).
+      
+    * :setting:`DATABASE_PASSWORD` – Dein Datenbankpasswort (nicht in Gebrauch
+      bei SQLite).
+    
+    * :setting:`DATABASE_HOST` – Der Host, auf dem deine Datenbank läuft. Lass
+      dies bei einem leeren String, wenn dein Datenbankserver auf der selben
+      physikalischen Maschine ist (nicht in Gebrauch bei SQLite).
+    
+
+Wenn du noch Neuling mit Datenbanken bist, empfehlen wir dir einfach SQLite
+(indem du :setting:`DATABASE_ENGINE` auf ``'sqlite3'`` setzt) zu benutzen.
+SQLite ist als Teil von Python 2.5 und neuer bereits enthalten, so dass du
+nichts installieren musst.
+
+.. note::
+
+    Wenn du PostgreSQL oder MySQL benutzt, stell bitte sicher, dass du die
+    Datebanken zu diesem Zeitpunkt bereits angelegt hast. Dies kannst du mit
+    "``CREATE DATABASE database_name;``" in der Eingabezeile deiner Datenbank
+    erledigen.
+
+    Wenn du SQLite benutzt, brauchst du nichts vorher anlegen – die
+    Datenbankdatei wird automatisch erstellt, wenn sie benötigt wird.
+
+
+Während du die :file:`settings.py` bearbeitest, beachte die Einstellung
+:setting:`INSTALLED_APPS` am Ende der Datei. Diese Variable enthält die Namen
+von allen Django-Applikationen, die in dieser Django-Instanz aktiviert sind.
+Applikationen können in mehreren Projekten verwendet werden, und du kannst
+sie zusammenpacken und veröffentlichen, damit andere diese in ihren Projekten
+verwenden können.
+
+Standardmäßig enthält :setting:`INSTALLED_APPS` die folgenden Applikationen, die
+alle mit Django geliefert werden:
+
+    * :mod:`django.contrib.auth` – Ein Authenzifizierungssystem.
+
+    * :mod:`django.contrib.contenttypes` – Ein Framework für Inhaltstypen.
+
+    * :mod:`django.contrib.sessions` – Ein Session-Framework.
+
+    * :mod:`django.contrib.sites` – Ein Framework, um mehrere Websites mit einer
+      Installation zu verwalten.
+    
+Diese Applikationen sind bereits standardmäßig zur Bequemlichkeit für den
+üblichen Fall enthalten.
+
+Jede von diesen Applikationen benutzt mindestens eine Datenbanktabelle, daher
+müssen diese Tabellen in der Datenbank erstellt werden, bevor wir sie nutzen
+können. Um das zu tun, führe den folgenden Befehl aus:
+
+.. code-block:: bash
+
+    python manage.py syncdb
+
+Der Befehl :djadmin:`syncdb` schaut in den Einstellungen von 
+:setting:`INSTALLED_APPS` nach und erstellt die notwendigen Datenbanktabellen
+entsprechend der Datei :file:`settings.py`. Du wirst eine Meldung für jede
+Datenbanktabelle sehen, die erstellt wird. Außerdem wirst du gefragt, ob du einen
+Superuser-Account für das Authenzifizierungssystem anlegen möchtest. Mach das.
+
+Wenn du interessiert bist, kannst du den Kommandozeilen-Klienten für deine
+Datenbank starten und ``\dt`` (PostgreSQL), ``SHOW TABLES;`` (MySQL) oder 
+``.schema`` (SQLite) eingeben, um die Tabellen anzeigen zu lassen, die Django
+erstellt hat.
+
+.. admonition:: Für die Minimalisten
+
+    Wie wir bereits oben gesagt haben, sind die standardmäßigen Applikationen
+    für den üblichen Fall bereits enthalten, aber nicht jeder braucht sie. Wenn
+    du einige oder alle davon nicht benötigst, kannst du gerne die Zeilen aus der
+    :setting:`INSTALLED_APPS` auskommentieren oder löschen, bevor du 
+    :djadmin:`syncdb` ausführst. Der Befehl :djadmin:`syncdb` erstellt nur die
+    Tabellen für Applikationen in :setting:`INSTALLED_APPS`.
+
+.. _creating-models:
+
+Datenbankmodelle erstellen
+==========================
+
+Jetzt ist deine Umgebung – ein "Projekt" – eingerichtet, und du kannst mit der
+Arbeit beginnen.
+
+Jede Applikation, die du in Django schreibst, besteht aus einem Python-Paket,
+irgendwo auf deinem `Python-Pfad`_, der einer bestimmten Konvention folgt.
+Django wird mit einem Dienstprogramm geliefert, das automatisch eine 
+grundlegende Struktur für eine Applikation erstellt, so dass du dich auf das
+Schreiben von Code konzentrieren kannst und nicht darauf Verzeichnisse zu
+erstellen.
+
+.. admonition:: Projekte vs. Applikationen
+
+    Was ist der Unterschied zwischen einem Projekt und einer Applikation?
+    Eine Applikation ist eine Webapplikation, die etwas tut – z. B. ein
+    Weblog-System, eine Datenbank mit öffentlichen Einträgen oder eine einfache
+    Umfrage-Applikation. Ein Projekt ist eine Sammlung von Konfigurationen und
+    Applikationen für eine bestimmte Website. Ein Projekt kann mehrere
+    Applikationen enthalten. Eine Applikation kann in mehreren Projekten
+    enthalten sein.
+
+In diesem Tutorial werden wir der Einfachheit halber unsere 
+Umfrageapplikation im :file:`mysite`-Verzeichnis erstellen. In der
+Konsequenz wird die Applikation an das Projekt gekoppelt – das bedeutet
+Python-Code innerhalb der Umfrageapplikation verweist auf ``mysite.polls``.
+Später in diesem Tutorial, werden wir die Entkopplung deiner Applikationen für
+die Verbreitung diskutieren.
+
+Um deine Applikation zu erstellen, stelle sicher, dass du dich im Verzeichnis
+:file:`mysite` befindest wenn du und diesen Befehl tippst:
+
+.. code-block:: bash
+
+    python manage.py startapp polls
+
+Dies erstellt ein Verzeichnis :file:`polls`, das so aussieht::
+
+    polls/
+        __init__.py
+        models.py
+        views.py
+
+Diese Verzeichnisstruktur wird die Umfrageapplikation enthalten.
+
+Der erste Schritt beim Schreiben einer Datenbank-Webapplikation in Django ist es,
+deine Datenmodelle – hauptsächlich dein Datenbanklayout mit zusätzlichen
+Metadaten – zu definieren.
+
+.. admonition:: Philosophie
+
+   Ein Datenmodell ist eine einzelnen, definitive Datenquelle über deine Daten.
+   Es enthält die essentiellen Felder und Handlungsweisen der Daten, die du
+   ablegst. Django folgt dem Prinzip :ref:`DRY <dry>`. Das Ziel ist es, dein 
+   Datenmodell an einem Platz zu definieren und automatisch Dinge davon
+   abzuzweigen.
+
+In unserer einfachen Umfrageapplikation erzeugen wir zwei Datenmodelle:
+Umfragen (polls) und Auswahlmöglichkeiten (choices). Eine Umfrage hat 
+eine Frage und ein Veröffentlichungsdatum. Eine Auswahlmöglichkeit hat zwei
+Felder: einen Text der Auswahlmöglichkeit und einen Stimmenzähler. Jede
+Auswahlmöglichkeit ist mit einer Umfrage verknüpft.
+
+Diese Konzepte werden durch einfache Python-Klassen repräsentiert. Bearbeite die
+Datei :file:`polls/models.py`, so dass sie so aussieht::
+
+    from django.db import models
+
+    class Poll(models.Model):
+        question = models.CharField(max_length=200)
+        pub_date = models.DateTimeField('date published')
+
+    class Choice(models.Model):
+        poll = models.ForeignKey(Poll)
+        choice = models.CharField(max_length=200)
+        votes = models.IntegerField()
+
+.. admonition:: Fehler zu :attr:`~django.db.models.Field.max_length`
+
+   Wenn Django dir eine Fehlermeldung ausgibt, das
+   :attr:`~django.db.models.Field.max_length` kein valides Argument ist, dann
+   benutzt du höchstwahrscheinlich eine alte Version von Django (Diese Version
+   des Tutorials wurde für die neuste Entwicklerversion von Django geschrieben).
+   Wenn du einen Subversion-Checkout von Djangos Entwicklerversion benutzt 
+   (siehe :ref:`die Installationsdokumentation <topics-install>`), solltest du
+   keine Probleme haben.
+
+   Wenn du bei einer älteren Version von Django bleiben willst, möchtest du
+   vielleicht zum `Django 0.96-Tutorial`_ wechseln, weil dieses Tutorial
+   einige Besonderheiten enthält, die nur in der Entwicklerversion von Django
+   enthalten sind.
+
+.. _Django 0.96-Tutorial: http://www.djangoproject.com/documentation/0.96/tutorial01/
+
+Der Code ist einfach. Jedes Datenmodell wird von einer Klasse repräsentiert, die
+:class:`django.db.models.Model` subklassifiziert. Jedes Datenmodell hat eine
+Nummer von Klassenvariablen, die jeweils ein Datenbankfeld im Datenmodell
+repräsentieren.
+
+Jedes Feld wird von einer Instanz der Klasse :class:`~django.db.models.Field` 
+repräsentiert – z. B. :class:`~django.db.models.CharField` für Zeichenfelder und
+:class:`~django.db.models.DateTimeField` für Datum- und Zeitfelder. Dies teilt
+Django mit, welchen Typ von Daten jedes Feld enthält.
+
+Der Name von jeder :class:`~django.db.models.Field`-Instanz (z. B. ``question``
+oder ``pub_date``) ist der Name des Feldes in maschinenlesbares Format. Du
+benutzt diesen Wert in deinem Python-Code und deine Datenbank wird ihn als 
+Spaltennamen benutzen.
+
+Du kannst ein optionales, an erster Stelle positioniertes Argument bei einem
+:class:`~django.db.models.Field` benutzen, um einen visuell lesbaren Namen zu
+bestimmen. Das wird bei einer Reihe von introspektiven Teilen von Django
+benutzt, und dient als zusätzliche Dokumentation. Wenn dieses Feld nicht
+festgelegt ist, benutzt Django den maschinenlesbaren Namen. In diesem Beispiel
+haben wir nur den visuell lesbaren Namen für ``Poll.pub_date`` definiert. Für
+alle anderen Felder in diesem Datenmodell dient der maschinenlesbare Name als
+visuell lesbarer Name.
+
+Einige :class:`~django.db.model.Field`-Klassen haben erfoderliche Elemente.
+:class:`~django.db.models.Field` benötigt z. B. die Angabe eines
+:attr:`~django.db.models.Field.max_length`. Dieses wird nicht nur im 
+Datenbankschema verwendet, sondern auch für die Validierung, wie wir bald sehen
+werden.
+
+Schließlich wurde noch ein Verknüpfungsfeld definiert, unter Verwendung von
+:class:`~django.db.models.ForeignKey`. Dieses teilt Django mit, dass jede
+Auswahl mit einer einzigen Umfrage verknüpft ist. Django unterstützt
+alle üblichen Datenbankverknüpfungen: 1:n, n:m und 1:1.
+
+.. _`Python-Pfad`: http://docs.python.org/tut/node8.html#SECTION008110000000000000000
+
+Datenmodelle aktivieren
+=======================
+
+Dieses kleines bisschen Datenmodellcode liefert Django eine Menge Informationen.
+Damit ist Django in der Lage:
+
+    * ein Datenbankschema (``CREATE TABLE``-Anweisung) für diese Applikation 
+      zu erstellen.
+    * eine Python-Datenbankzugriff-API für den Zugriff auf Poll- und
+      Choice-Objekte zu erstellen.
+
+Aber zuerst müssen wir unserem Projekt noch mitteilen, dass die Applikation
+``polls`` installiert ist.
+
+.. admonition:: Philosophie
+
+    Django-Applikationen sind "pluggable" (steckbar): Du kannst eine Applikation
+    in mehreren Projekten benutzen und du kannst deine Applikationen verteilen,
+    weil sie nicht an eine bestimmte Django-Installation gebunden sein müssen.
+
+Bearbeite die Datei :file:`settings.py` noch einmal und ändere die Einstellung
+:setting:`INSTALLED_APPS`, dass sie ``'mysite.polls'`` enthält. Dann sieht sie so
+aus::
+
+    INSTALLED_APPS = (
+        'django.contrib.auth',
+        'django.contrib.contenttypes',
+        'django.contrib.sessions',
+        'django.contrib.sites',
+        'mysite.polls'
+    )
+
+Jetzt weiß Django das ``mysite`` die Applikation ``polls`` enthält. Lass uns
+einen weiteren Befehl ausführen:
+
+.. code-block:: bash
+
+    python manage.py sql polls
+
+Du solltest etwas ähnliches (die ``CREATE TABLE`` SQL-Befehle für die 
+Umfrageapplikation) wie dieses sehen:
+
+.. code-block:: sql
+
+    BEGIN;
+    CREATE TABLE "polls_poll" (
+        "id" serial NOT NULL PRIMARY KEY,
+        "question" varchar(200) NOT NULL,
+        "pub_date" timestamp with time zone NOT NULL
+    );
+    CREATE TABLE "polls_choice" (
+        "id" serial NOT NULL PRIMARY KEY,
+        "poll_id" integer NOT NULL REFERENCES "polls_poll" ("id"),
+        "choice" varchar(200) NOT NULL,
+        "votes" integer NOT NULL
+    );
+    COMMIT;
+
+Beachte das folgende:
+
+    * Die exakte Ausgabe wird in Abhängigkeit der von dir benutzten Datenbank
+      variieren.
+
+    * Die Tabellennamen werden automatisch generiert, indem der Name der 
+      Applikation (``polls``) und der kleingeschriebene Name des Datenmodells –
+      ``poll`` und ``choice`` kombiniert werden (dieses Verhalten kann
+      verändert werden).
+
+    * Primärschlüssel (IDs) werden automatisch hinzugefügt (du kannst auch dies
+      verändern).
+
+    * Durch Konvention hängt Django ``"_id"`` an den Fremdschlüsselfeldnamen an.
+      Und ja, auch dies kann verändert werden.
+
+    * Die Fremdschlüsselverknüpfung wird explizit mit einem 
+      ``REFERENCES``-Befehl gemacht.
+
+    * Es ist maßgeschneidert auf die Datenbank, die du benutzt, weshalb
+      datenbankspezifische Feldertypen, wie ``auto_increment`` (MySQL), 
+      ``serial`` (PostgreSQL) oder ``integer primary key`` (SQLite) automatisch
+      verarbeitet werden. Das gleiche gilt für die Notierung von Feldnamen – 
+      z. B. die Benutzung von doppelten oder einfachen Anführungszeichen. Der
+      Autor dieses Tutorials benutzt PostgreSQL, deshalb sind die
+      Beispielausgaben in der PostgreSQL-Syntax.
+
+    * Der Befehl :djadmin:`sql` führt das SQL nicht in der Datenbank aus, 
+      sondern druckt es nur auf den Bildschirm, damit du sehen kannst, welches
+      SQL Django für erforderlich hält. Wenn du willst, könntest du diese 
+      Ausgabe kopieren und in deine Datenbankeingabe einfügen. Aber, wie wir in
+      Kürze sehen werden, bietet Django einen leichteren Weg SQL in die
+      Datenbank zu übergeben.
+
+Wenn du interesiert bist, kannst du auch die folgenden Befehle ausführen:
+
+    * :djadmin:`python manage.py validate <validate>` – Prüft auf irgendwelche
+      Fehler in der Struktur der Datenmodelle.
+      
+    * :djadmin:`python manage.py sqlcustom polls <sqlcustom>` – Gibt alle
+      :ref:`benutzerdefinierten SQL-Statements <initial-sql>` (wie 
+      Tabellenmodifikationen oder Beschränkungen) aus, die für die Applikation
+      definiert sind.
+
+    * :djadmin:`python manage.py sqlclear polls <sqlclear>` – Gibt die 
+      notwendigen ``DROP TABLE``-Befehle für diese Applikation aus, entsprechend
+      der Tabellen, die bereits in der Datenbank existieren (wenn welche
+      existieren).
+      
+    * :djadmin:`python manage.py sqlindexes polls <sqlindexes>` – Gibt die 
+      ``CREATE INDEX``-Befehle für diese Applikation aus.
+
+    * :djadmin:`python manage.py sqlall polls <sqlall>` – Eine Kombination von
+      allem SQL aus den Befehlen :djadmin:`sql`, :djadmin:`sqlcustom` und
+      :djadmin:`sqlindexes`.
+
+Wenn du auf die Ausgabe von diesen Befehlen schaust, kann es dir helfen zu
+verstehen, was wirklich unter der Haube vor sich geht.
+
+Jetzt führe noch einmal :djadmin:`syncdb` für diese Tabellen der Datenmodelle
+in deiner Datenbank aus:
+
+.. code-block:: bash
+
+    python manage.py syncdb
+
+Der Befehl :djadmin:`syncdb` führt das SQL von 'sqlall' für alle Applikationen,
+in :setting:`INSTALLED_APPS`, die nicht bereits in der Datenbank existieren auf
+deiner Datenbank aus. Dies erstellt alle Tabellen, anfängliche Daten und Indizes
+für alle Applikationen, die du zu deinem Projekt seit dem letzten Mal, dass du
+syncdb ausgeführt hast, hinzugefügt hast. :djadmin:`syncdb` kann so oft
+aufgerufen werden, wie es dir gefällt, und es wird nur Tabellen anlegen, die
+nicht existieren.
+
+Lies die :ref:`django-admin.py-Dokumentation <ref-django-admin>` für 
+vollständige Informationen darüber, was das Dienstprogramm ``manage.py`` kann.
+
+Mit der API spielen
+===================
+
+Als nächstes wagen wir einen Sprung in die interaktive Python-Shell und spielen
+mit der gratis API herum, die Django dir bietet. Um die Python-Shell zu
+aktivieren, benutzte diesen Befehl:
+
+.. code-block:: bash
+
+    python manage.py shell
+
+Wir benutzen dies, anstatt einfach "python" zu tippen, weil ``manage.py`` die
+Projektumgebung für dich einrichtet. "Die Projektumgebung einrichten" beinhaltet
+zwei Dinge:
+
+    * ``mysite`` wird auf ``sys.path`` gesetzt. Für bessere Flexibilität
+      verweisen einige Teile von Django auf Projekte in der Python-Punktsyntax
+      (z. B. ``'mysite.polls.models'``). Damit dies funktioniert, muss das
+      Paket ``mysite`` sich auf ``sys.path`` befinden.
+
+      Wir haben bereits ein Beispiel hiervon gesehen: die Einstellung
+      :setting:`INSTALLED_APPS` ist eine Liste von Paketen in der 
+      Punktsyntax-Schreibung.
+
+    * die Umgebungsvariable ``DJANGO_SETTINGS_MODULE`` wird gesetzt, die Django
+      den Pfad zu deiner Datei ``settings.py`` gibt.
+    
+.. admonition:: Umgehen von manage.py
+
+    Wenn du lieber nicht ``manage.py`` benutzen möchtest, kein Problem. Stell
+    nur sicher, dass ``mysite`` im Wurzelverzeichnis des Python-Pfades ist 
+    (``import mysite`` muss z. B. funktionieren) und setze die Umgebungsvariable
+    ``DJANGO_SETTINGS_MODULE`` auf ``mysite.settings``.
+    
+    Für mehr Informationen zu diesen Themen, schaue in die 
+    :ref:`django-admin.py-Dokumentation <ref-django-admin>`.
+
+Wenn du dich erst auf der Shell befindest, erkunde die
+:ref:`Datenbank-API <topics-db-queries>`::
+
+    # Importiere die Modellklassen, die wir gerade geschrieben haben.
+    >>> from mysite.polls.models import Poll, Choice 
+    
+    # Noch keine Umfragen im System.
+    >>> Poll.objects.all()
+    []
+
+    # Erstelle eine neue Umfrage.
+    >>> import datetime
+    >>> p = Poll(question="What's up?", pub_date=datetime.datetime.now())
+
+    # Speichere das Objet in die Datenbank. Du musst save() explizit aufrufen.
+    >>> p.save()
+
+    # Jetzt hat es eine ID. Beachte, dass es auch "1L" anstelle von "1" heißen
+    # kann, abhängig von der Datenbank, die du benutzt. Das ist kein Problem, es
+    # bedeutet nur, dass dein Datenbank-Backend es vorzieht integer als Python
+    # long integer Objekte zurückzugeben.
+    >>> p.id
+    1
+
+    # Greife auf die Datenbankspalten über Python-Attribute zu.
+    >>> p.question
+    "What's up?"
+    >>> p.pub_date
+    datetime.datetime(2007, 7, 15, 12, 00, 53)
+
+    # Veränderte Werte, indem du die Attribute veränderst und dann 
+    # save() aufrufst.
+    >>> p.pub_date = datetime.datetime(2007, 4, 1, 0, 0)
+    >>> p.save()
+
+    # objects.all() zeigt alle Umfragen in der Datenbank.
+    >>> Poll.objects.all()
+    [<Poll: Poll object>]
+
+
+Aber warte einen Moment. ``<Poll: Poll object>`` ist eine völlig nutzlose
+Darstellung von diesem Objekt. Lass uns das beheben, indem wir das Datenmodell
+der Umfrage (in der Datei ``polls/models.py``) bearbeiten und eine Methode
+:meth:`~django.db.models.Model.__unicode__` zu ``Poll`` und ``Choice``
+hinzufügen::
+
+    class Poll(models.Model):
+        # ...
+        def __unicode__(self):
+            return self.question
+
+    class Choice(models.Model):
+        # ...
+        def __unicode__(self):
+            return self.choice
+
+.. admonition:: Wenn :meth:`~django.db.models.Model.__unicode__` anscheinend nicht funktioniert
+
+   Wenn du die Methode :meth:`~django.db.models.Model.__unicode__` zu deinen
+   Datenmodellen hinzugefügt hast, und keine Änderungen in der Darstellung siehst,
+   benutzt du höchstwahrscheinlich eine alte Version von Django (diese Version
+   des Tutorials wurde für die neuste Entwicklerversion von Django geschrieben).
+   Wenn du einen Subversion-Checkout der Django-Entwicklerversion benutzt (siehe
+   :ref:`die Installationsdokumentation <topics-install>` für mehr Informationen)
+   solltest du keine Probleme haben.
+
+   Wenn du bei einer älteren Version von Django bleiben willst, möchtest du
+   vielleicht zum `Django 0.96-Tutorial`_ wechseln, weil dieses Tutorial
+   einige Besonderheiten enthält, die nur in der Entwicklerversion von Django
+   enthalten sind.
+
+.. _Django 0.96-Tutorial: http://www.djangoproject.com/documentation/0.96/tutorial01/
+
+Es ist wichtig die :meth:`~django.db.models.Model.__unicode__`-Methoden zu
+deinen Datenmodellen hinzuzufügen, nicht nur für dich, wenn du mit der
+interaktiven Eingabezeile arbeitest, sondern auch weil die Repräsentationen der
+Objekte in Djangos automatisch-erzeugtem Admin-Interface benutzt werden.
+
+.. admonition:: Warum :meth:`~django.db.models.Model.__unicode__` und nicht 
+                :meth:`django.db.models.Model.__str__`?
+
+    Wenn du dich mit Python auskennst, hast du vielleicht die Gewohnheit die
+    Methode :meth:`django.db.models.Model.__str__` zu deinen Klassen 
+    hinzuzufügen und nicht die Methode 
+    :meth:`~django.db.models.Model.__unicode__`. Wir benutzen hier die Methode
+    :meth:`~django.db.models.Model.__unicode__`, weil Django-Datenmodelle
+    standardmäßig mit Unicode arbeiten. Alle Daten, die in deiner Datenbank
+    abgelegt sind, werden bei der Rückgabe in Unicode konvertiert.
+
+    Django-Datenmodelle haben eine standardmäßige Methode
+    :meth:`django.db.models.Model.__str__`, die
+    :meth:`~django.db.models.Model.__unicode__` aufruft und das Ergebnis in
+    einen UTF-8-Bytestring konvertiert. Das bedeutet, dass ``unicode(p)`` einen
+    Unicode-String zurückgibt und ``str(p)`` einen normalen String, mit Zeichen
+    als UTF-8 kodiert.
+
+    Wenn das alles für dich wie Kauderwelsch klingt, denke einfach daran die
+    Methoden :meth:`~django.db.models.Model.__unicode__` zu deinen Datenmodellen
+    hinzuzufügen. Mit etwas Glück, sollte die Dinge einfach für dich
+    funktionieren.
+
+Beachte, dass dies normale Python-Methoden sind. Lass uns eine benutzerdefinierte
+Methode hinzufügen, nur zur Demonstration::
+
+    import datetime
+    # ...
+    class Poll(models.Model):
+        # ...
+        def was_published_today(self):
+            return self.pub_date.date() == datetime.date.today()
+
+Beachte das Hinzufügen von ``import datetime``, um Pythons 
+Standard-``datetime``-Modul zu referenzieren.
+
+Springen wir jetzt zurück in die interaktive Python-Konsole, indem wir den
+Befehl ``python manage.py shell`` erneut ausführen::
+
+    >>> from mysite.polls.models import Poll, Choice
+
+    # Stelle sicher, dass unsere __unicode__()-Hinzufügung funktioniert.
+    >>> Poll.objects.all()
+    [<Poll: What's up?>]
+
+    # Django bietet eine umfassende Datenbankabfrage-API, die vollständig durch
+    # Schlüsselwortargumente betrieben wird.
+    >>> Poll.objects.filter(id=1)
+    [<Poll: What's up?>]
+    >>> Poll.objects.filter(question__startswith='What')
+    [<Poll: What's up?>]
+
+    # Hole dir die Umfrage, deren Jahr 2007 ist. Natürlich solltest du diese Zahl
+    # anpassen, wenn du das Tutorial in einem anderen Jahr durcharbeitest.
+    >>> Poll.objects.get(pub_date__year=2007)
+    <Poll: What's up?>
+
+    >>> Poll.objects.get(id=2)
+    Traceback (most recent call last):
+        ...
+    DoesNotExist: Poll matching query does not exist.
+
+    # Abfrage durch einen Primärschlüssel ist der üblichste Fall, daher bietet
+    # Django eine Abkürzung für Primärschlüsselabfragen.
+    # The following is identical to Poll.objects.get(id=1).
+    >>> Poll.objects.get(pk=1)
+    <Poll: What's up?>
+
+    # Stelle sicher, dass unsere benutzerdefinierte Methode funktioniert.
+    >>> p = Poll.objects.get(pk=1)
+    >>> p.was_published_today()
+    False
+
+    # Gib der Umfrage einige Auswahlmöglichkeiten. Der Aufruf von `create()` 
+    # erzeugt ein neues Auswahl-Objekt, führt den INSERT-Befehl aus, fügt die
+    # Auswahl zur Gruppe Auswahlmöglichkeiten hinzu und gibt das neue 
+    # Choice-Object zurück.
+    >>> p = Poll.objects.get(pk=1)
+    >>> p.choice_set.create(choice='Not much', votes=0)
+    <Choice: Not much>
+    >>> p.choice_set.create(choice='The sky', votes=0)
+    <Choice: The sky>
+    >>> c = p.choice_set.create(choice='Just hacking again', votes=0)
+
+    # Choice-Objekte haben API-Zugriff zu ihren verknüpften Poll-Objekten.
+    >>> c.poll
+    <Poll: What's up?>
+
+    # Und auch umgekehrt: Poll-Objekte haben Zugriff auf Choice-Objtekte.
+    >>> p.choice_set.all()
+    [<Choice: Not much>, <Choice: The sky>, <Choice: Just hacking again>]
+    >>> p.choice_set.count()
+    3
+
+    # Die API folgt automatisch Verknüpfungen, so weit wie du sie brauchst.
+    # Benutze doppelte Unterstriche um Verknüpfungen zu trennen.
+    # Dies funktioniert so viele Ebenen tief, wie du willst, es gibt kein Limit.
+    # Finde alle Choices for alle Umfragen, deren pub_date in 2007 liegt.
+    >>> Choice.objects.filter(poll__pub_date__year=2007)
+    [<Choice: Not much>, <Choice: The sky>, <Choice: Just hacking again>]
+
+    # Lass uns eine der Auswahlmöglichkeiten löschen. Benutze delete() dafür.
+    >>> c = p.choice_set.filter(choice__startswith='Just hacking')
+    >>> c.delete()
+
+Für vollständige Details der Datenbank-API, schaue in unsere 
+:ref:`Datenbank-API-Referenz <topics-db-queries>`.
+
+Wenn du dich etwas in den Umgang mit der API eingearbeitet hast, lies 
+:ref:`Teil 2 von diesem Tutorial <intro-tutorial02>` um Djangos automatisches
+Admin-Interface zum Laufen zu bringen.
