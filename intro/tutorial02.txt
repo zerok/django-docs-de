@@ -1,0 +1,481 @@
+.. _intro-tutorial02:
+
+===============================================
+Schreibe deine erste Django-Applikation, Teil 2
+===============================================
+
+Dieses Tutorial startet dort, wo :ref:`Tutorial 1 <intro-tutorial01>` aufgehört
+hat. Wir machen mit der Web-Umfrage-Applikation weiter und werden uns auf
+Djangos automatisch-generiertes Admin-Interface konzentrieren.
+
+.. admonition:: Philosophie
+
+    Administrationsseiten für dein Personal oder Kunden zu erstellen, mit denen
+    sie Inhalte hinzufügen, ändern oder löschen können, erfordert nicht viel
+    Kreativität. Aus diesem Grund automatisiert Django die Erstellung von
+    Administrationsseiten für Datenmodelle vollständig.
+
+    Django wurde in einer Umgebung von Nachrichtenredaktionen erstellt, mit
+    klarer Trennung zwischen "Herausgebern von Inhalt" und der "öffentlichen"
+    Website. Website-Manager benutzen das System, um Artikel, Ereignisse,
+    Sportergebnisse, usw. hinzuzufügen und dieser Inhalt wird auf der
+    öffentlichen Website angezeigt. Django löst dieses Problem durch die
+    Erstellung einer einheitlichen Oberfläche für Seiten-Administratoren, mit
+    der sie Inhalte bearbeiten können.
+
+    Das Admin-Interface ist nicht notwendigerweise für die Benutzung durch
+    Besucher der Website gedacht; es ist für Website-Manager.
+
+Das Admin-Interface aktivieren
+==============================
+
+Das Django-Admin-Interface ist nicht standardmäßig aktiviert – es ist eine
+optional auszuwählen. Um das Admin-Interface für deine Installation zu
+aktivieren, musst du diese drei Dinge erledigen:
+
+    * Füge ``"django.contrib.admin"`` zu seinen 
+      :setting:`INSTALLED_APPS`-Einstellungen hinzu.
+
+    * Führe ``python manage.py syncdb`` aus. Da du eine neue Applikation zu den
+      Einstellungen von :setting:`INSTALLED_APPS` hinzugefügt hast, müssen die
+      Datenbanktabellen aktualisiert werden.
+
+    * Bearbeite deine Datei ``mysite/urls.py`` und kommentiere die Zeilen unter
+      dem Kommentar "Uncomment the next two lines..." ein. Diese Datei ist eine
+      URLconf; damit arbeiten wir im nächsten Tutorial. Für jetzt ist alles, 
+      was du wissen musst, dass sie URL-Pfade auf Applikationen abbilden. Am
+      Ende solltest du eine Datei ``urls.py`` haben, die so aussieht:
+
+      .. parsed-literal::
+
+          from django.conf.urls.defaults import *
+
+          # Uncomment the next two lines to enable the admin:
+          **from django.contrib import admin**
+          **admin.autodiscover()**
+
+          urlpatterns = patterns('',
+              # Example:
+              # (r'^mysite/', include('mysite.foo.urls')),
+
+              # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
+              # to INSTALLED_APPS to enable admin documentation:
+              # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
+
+              # Uncomment the next line to enable the admin:
+              **(r'^admin/(.*)', admin.site.root),**
+          )
+
+      (Die fetten Zeilen, sie diejenigen, die einkommentiert werden müssen.)
+
+Starte den Entwicklungsserver
+=============================
+
+Lass uns den Entwicklungsserver starten und das Admin-Interface erkunden.
+
+Erinnere dich aus Tutorial 1, dass du den Entwicklungsserver so startest:
+
+.. code-block:: bash
+
+    python manage.py runserver
+
+Jetzt öffne einen Webbrowser und gehe zu "/admin/" auf deiner lokalen Domain –
+z. B. http://127.0.0.1:8000/admin/. Du solltest den Login-Screen des
+Admin-Interface sehen:
+
+.. image:: _images/admin01.png
+   :alt: Django-Admin-Interface Login-Screen
+
+Betritt das Admin-Interface
+===========================
+
+Versuche dich jetzt anzumelden (Du hast einen Superuser-Account im ersten Teil
+dieses Tutorials angelegt, erinnerst du dich?). Du solltest die Index-Seite des
+Django-Admin-Interface sehen:
+
+.. image:: _images/admin02t.png
+   :alt: Django-Admin-Interface Index-Seite
+
+Du solltest einige andere Arten von bearbeitbarem Inhalt sehen können, wie z. B.
+Gruppen, Benutzer und Websites. Dies sind Kernfunktionen, mit denen Django
+standardmäßig ausgestattet ist.
+
+Mache die Umfrage-Applikation bearbeitbar im Admin-Interface
+============================================================
+
+Aber wo ist unsere Umfrage-Applikation? Sie wird nicht auf der Index-Seite des
+Admin-Interface angezeigt.
+
+Du musst nur eine Sache erledigen: Wir müssen der Admin-Applikation mitteilen,
+dass ``Poll``-Objekte ein Admin-Interface haben. Um dies zu tun, erstelle eine
+Datei mit dem Namen ``admin.py`` in deinem ``polls``-Verzeichnis und bearbeite
+sie so, dass sie so aussieht::
+
+    from mysite.polls.models import Poll
+    from django.contrib import admin
+
+    admin.site.register(Poll)
+
+Du wirst den Entwicklungsserver neu starten müssen, um die Änderungen zu sehen.
+Normalerweise lädt der Server sich automatisch neu, jedes Mal, wenn du eine
+Datei verändert hast, aber eine neue Datei anzulegen, spricht die Logik des
+automatischen Neuladens nicht an.
+
+Erkunde die Funktionalität des Admin-Interface
+==============================================
+
+Jetzt, wo wir ``Poll`` registriert haben, weiß Django, dass es auf der
+Index-Seite des Admin-Interface angezeigt werden soll:
+
+.. image:: _images/admin03t.png
+   :alt: Django-Admin-Interface Index-Seite, jetzt mit angezeigten "Polls"
+
+Klicke "Polls". Jetzt bist du auf der Seite, auf der man die Umfragen zum Ändern
+aufgelistet bekommt. Diese Seite zeigt alle Umfragen in der Datenbank an und
+erlaubt es dir einen zum ändern auszuwählen. Dort befindet sich die Umfrage
+"What's up?", die wir im ersten Tutorial erstellt haben:
+
+.. image:: _images/admin04t.png
+   :alt: Listenanzeige zum Ändern der Umfragen
+
+Klicke auf die Umfrage "What's up?", um sie zu bearbeiten:
+
+.. image:: _images/admin05t.png
+   :alt: Formular zum Bearbeiten von Umfrage-Objekten
+
+Sachen, die hier notiert werden sollten:
+
+    * Das Formular wird automatisch durch das Datenmodell von "Poll" generiert.
+
+    * Die unterschiedlichen Feldertypen des Datenmodells
+      (:class:`~django.db.models.DateTimeField`, 
+      :class:`~django.db.models.CharField`) entsprechen den passenden
+      HTML-Eingabe-Widgets. Jeder Feldertyp weiß, wie er sich selbst im
+      Django-Admin-Interface darstellen soll.
+
+    * Jedes :class:`~django.db.models.DateTimeField` hat automatisch
+      JavaScript-Shortcuts. Daten bekommen einen "Today"-Shortcut und 
+      Kalender-Pop-up und Zeiten bekommen einen "Now"-Shortcut und ein bequemes
+      Pop-up-Fenster, dass übliche Zeiten auflistet.
+
+Der untere Teil der Seite gibt dir einige Optionen:
+
+    * Save – Speichert Änderungen und gibt die Änderunglistenseite für diesen Typ
+      von Objekt zurück.
+
+    * Save and continue editing – Speichert die Änderungen und lädt die 
+      Admin-Interfaceseite für dieses Objekt zurück.
+
+    * Save and add another – Speichert Änderungen und lädt ein neues, leeres
+      Formular für diesen Typ von Objekt.
+
+    * Delete – Zeigt eine Seite mit Löschbestätigung an.
+
+Ändere das "Date published" durch Klicken auf den "Today"- und "Now"-Shortcut.
+Dann klicke auf "Save and continue editing". Danach klicke "History" in der
+oberen, rechten Ecke. Du wirst eine Listenansicht mit allen Änderungen sehen, die
+auf dieses Objekt mit dem Django-Admin-Interface durchgeführt wurden, mit
+Zeitstempel und Benutzername der Person, die die Änderung durchgeführt hat:
+
+.. image:: _images/admin06t.png
+   :alt: Seite mit Änderungsverlauf für das Umfrage-Objekt
+
+Passe das Formular des Admin-Interface an
+=========================================
+
+Nimm dir einige Minuten um über all den Code zu stauen, den du nicht zu schreiben
+brachtest. Wenn du ``admin.site.register(Poll)`` aufrufst, lässt dich Django
+einfach das Objekt verändern und "rät", wie es im Admin-Interface angezeigt
+werden soll. Oft wirst du aber kontrollieren wollen, wie das Admin-Interface
+aussieht und arbeitet. Du wirst dies machen, indem du Django mitteilst, welche
+Optionen du mit dem Objekt registrieren willst.
+
+Lass uns sehen, wie dies funktioniert, indem wir die Felder im Eingabeformular
+umsortieren. Ersetze die Zeile ``admin.site.register(Poll)`` mit::
+
+    class PollAdmin(admin.ModelAdmin):
+        fields = ['pub_date', 'question']
+
+    admin.site.register(Poll, PollAdmin)
+
+Du wirst diesem Muster folgen müssen – erstelle ein Datenmodell-Admin-Objekt,
+dann gib es als zweites Argument an ``admin.site.register()`` – wann immer du
+eine Änderunge an den Optionen des Admin-Interfaces für ein Objekt benötigst.
+
+Diese bestimmte Änderung oben lässt das "Publication date" vor dem Feld
+"Question" kommen:
+
+.. image:: _images/admin07.png
+   :alt: Die Felder wurden umsortiert
+   
+Dies ist noch nichts besonderes bei nur zwei Felder, aber für Formulare des
+Admin-Interfaces mit dutzenden Felder, ist es ein wichtiges Detail für die
+Benutzbarkeit, eine intuitive Reihenfolge auszuwählen.
+
+Und wo wir gerade von Formularen mit dutzenden Felder sprechen, möchtest du
+vielleicht das Formular in Fieldsets aufteilen::
+
+    class PollAdmin(admin.ModelAdmin):
+        fieldsets = [
+            (None,               {'fields': ['question']}),
+            ('Date information', {'fields': ['pub_date']}),
+        ]
+
+    admin.site.register(Poll, PollAdmin)
+
+Das erste Element von jedem Tuple in ``fieldsets`` ist der Titel des Fieldsets.
+Hier kannst du sehen, wie unser Formular jetzt aussieht:
+
+.. image:: _images/admin08t.png
+   :alt: Das Formular hat jetzt Fieldsets
+
+Du kannst beliebige HTML-Klassen zu jedem Fieldset zuweisen. Django bietet 
+eine ``"collapse"``-Klasse, die eine bestimmtest Fieldset zu beginn 
+zusammenklappt. Dies ist nützlich, wenn du ein langes Formular hast, das eine
+Reihe von Feldern enthält, die nicht häufig gebraucht werden::
+
+    class PollAdmin(admin.ModelAdmin):
+        fieldsets = [
+            (None,               {'fields': ['question']}),
+            ('Date information', {'fields': ['pub_date'], 'classes': ['collapse']}),
+        ]
+
+.. image:: _images/admin09.png
+   :alt: Das Fieldset ist zu Beginn zusammengeklappt
+
+Verknüpfte Objekte hinzufügen
+=============================
+
+OK, jetzt haben wir unsere Administrationsseite für Umfragen. Aber ein ``Poll``
+hat mehrere ``Choices`` und das Admin-Interface zeigt diese nicht an.
+
+Noch.
+
+Es gibt zwei Wege dieses Problem zu lösen. Das erste ist ``Choice`` im 
+Admin-Interface zu registrieren, wie wir es bereits bei ``Poll`` gemacht haben.
+Das ist leicht::
+
+    from mysite.polls.models import Choice
+
+    admin.site.register(Choice)
+
+Jetzt ist "Choices" eine auswählbare Option im Django-Admin-Interface. Das
+"Add choice"-Formular sieht so aus:
+
+.. image:: _images/admin10.png
+   :alt: Choice-Administrationsseite
+
+In diesem Formular ist das Feld "Poll" eine Select-Box, die jede Umfrage in der
+Datenbank enthält. Django weiß, dass ein :class:`~django.db.models.ForeignKey`
+als ``<select>`` im Admin-Interface repräsentiert werden sollte. In unserem Fall
+existiert zu diesem Zeitpunkt nur eine Umfrage.
+
+Beachte auch den Link "Add Another" neben "Poll". Jedes Objekt mit einer
+``ForeignKey``-Verknüpfung zu einer anderen bekommt diesen automatisch. Wenn du
+auf "Add Another" klickst, wirst du ein Pop-Up-Fenster mit dem Formular 
+"Add poll" bekommen. Wenn du in diesem Fenster eine Umfrage hinzufügst und 
+"Save" drückst, speichert Django die Umfrage in der Datenbank und fügt sie
+als Auswahl dynamisch zum Formular "Add choice" hinzu, das du gerade anschaust.
+
+Aber im Ernst, dies ist eine ineffizente Möglichkeit, Choice-Objete zum System 
+hinzuzufügen. Es würde besser sein, wenn du direkt bei der Erstellung eines
+Poll-Objektes schon eine Reihe von Choices hinzufügen könntest. Lass uns das
+umsetzen.
+
+Entferne den Aufruf ``register()`` für das Datenmodell. Dann ändere den 
+``Poll``-Registrationscode so ab, dass er sich so liest::
+
+    class ChoiceInline(admin.StackedInline):
+        model = Choice
+        extra = 3
+
+    class PollAdmin(admin.ModelAdmin):
+        fieldsets = [
+            (None,               {'fields': ['question']}),
+            ('Date information', {'fields': ['pub_date'], 'classes': ['collapse']}),
+        ]
+        inlines = [ChoiceInline]
+
+    admin.site.register(Poll, PollAdmin)
+
+Dies sagt Django: "Choice-Objekte werden auf der Poll-Administrationsseite
+bearbeitet. Biete standardmäßig genug Felder für drei Wahlmöglichkeiten an."
+
+Lade die Seite "Add poll" und schau dir an, wie das aussieht:
+
+.. image:: _images/admin11t.png
+   :alt: Die Seite "Add poll" hat jetzt Wahlmöglichkeiten
+
+Es funktioniert so in etwa: Es gibt drei Felder für verknüpfte Objekte – wie
+unter ``extra`` spezifierziert wurde – und jedes Mal, wenn du zur
+"Change"-Seite zurückkommst, bekommst du drei weitere Felder.
+
+Ein kleines Problem bleibt aber. Es nimmt eine Menge Bildschirmplatz weg, alle
+Felder zur Eingabe der verknüpften Objekte anzuzeigen. Aus diesem Grund, bietet
+Django ein Möglichkeit inline verknüpfte Objekte tabular anzuzeigen; du musst
+nur die Deklaration ``ChoiceInline`` abändern, dass sie sich so liest::
+
+    class ChoiceInline(admin.TabularInline):
+        #...
+
+Mit ``TabularInline`` (anstelle von ``StackedInline``) werden die verknüpften
+Objekte in einem kompakteren, tabellenbasierenden Format angezeigt:
+
+.. image:: _images/admin12.png
+   :alt: Die Seite "Add poll" hat jetzt kompaktere Wahlmöglichkeiten
+
+Anpassen der Änderungliste des Admin-Interface
+==============================================
+
+Jetzt, wo die Administrationsseite der Umfrage gut aussieht, lass und einige
+Anpassungen auf der Änderungliste machen – die Seite, die alle Umfragen des
+Systems anzeigt.
+
+So sieht sie zu diesem Zeitpunkt aus:
+
+.. image:: _images/admin04t.png
+   :alt: Änderungsliste der Umfragen
+
+Standardmäßig zeigt Django das ``str()`` von jedem Objekt an. Aber manchmal
+wäre es hilfreicher, wenn wir individuelle Felder anzeigen könnten. Um das zu
+tun, benutzte die Admin-Option ``list_display``, die ein Tuple von Feldnamen
+ist, die in Spalten angezeigt werden, auf der Änderunglistenseite für das
+Objekt::
+
+    class PollAdmin(admin.ModelAdmin):
+        # ...
+        list_display = ('question', 'pub_date')
+
+Nur zur guten Überprüfen, lass uns auch die selbstdefinierte Methode
+``was_published_today`` aus Tutorial 1 einfügen::
+
+    class PollAdmin(admin.ModelAdmin):
+        # ...
+        list_display = ('question', 'pub_date', 'was_published_today')
+
+Jetzt sieht die Änderungsliste für Umfragen so aus:
+
+.. image:: _images/admin13t.png
+   :alt: Änderungsliste der Umfragen, aktualisiert
+
+Du kannst auf die Titelzeile der Spalten klicken, um nach deren Werten zu
+sortieren – außer auf ``was_published_today``, weil das Sortieren nach der
+Ausgabe von frei wählbaren Methoden nicht unterstützt wird. Beachte auch, dass
+die Titelzeile von ``was_published_today`` standardmäßig der Name der Methode
+ist (die Unterstriche durch Leerzeichen ersetzt). Aber du kannst das ändern,
+indem du der Methode ein Attribut ``short_description`` gibst::
+
+    def was_published_today(self):
+        return self.pub_date.date() == datetime.date.today()
+    was_published_today.short_description = 'Published today?'
+
+Lass uns noch eine weitere Verbesserung zur Änderungsliste der Umfragen
+hinzufügen: Filter. Füge die folgende Zeile zu ``PollAdmin`` hinzu::
+
+    list_filter = ['pub_date']
+
+Das fügt eine "Filter"-Seitenleiste hinzu, die es Menschen ermöglicht die
+Änderungsliste nach dem Feld ``pub_date`` zu filtern:
+
+.. image:: _images/admin14t.png
+   :alt: Änderungsliste der Umfragen, aktualisiert
+
+Welcher Typ von Filter angezeigt wird, hängt vom Typ des Feldes ab, auf das du
+filterst. Weil ``pub_date`` ein Datums- und Zeitfeld ist, weiß Django, dass es
+die standardmäßigen Filteroptionen für Datums- und Zeitfelder anbieten soll:
+"Any date", "Today", "Past 7 days", "This month" und "This year".
+
+Das sieht jetzt immer besser aus. Lass und eine Suchmöglichkeit hinzufügen::
+
+    search_fields = ['question']
+
+Dies fügt eine Sucheingabebox über der Änderungsliste ein. Wenn jemand einen
+Suchbegriff eingibt, wird Django das Feld ``question`` durchsuchen. Du kannst
+soviele Felder wie du willst hinzufügen – aber weil es die Abfrage ``LIKE`` im
+Hintergrund nutzt, benutze diese Funktion angemessen, damit die Datenbank
+glücklich bleibt.
+
+Zum Abschluss wäre es noch angenehm, wenn man nach Datum gruppieren könnte.
+Füge diese Zeile hinzu::
+
+    date_hierarchy = 'pub_date'
+
+Dies fügt eine hierarchisch Navigation nach Datum hinzu, die oben auf der 
+Änderungsseite eingefügt wird. Auf oberster Ebene zeigt sie die verfügbaren
+Jahre an. Dann die Monate und schließlich Tage.
+
+Jetzt ist es auch ein guter Zeitpunkt anzumerken, dass Änderunslisten dir
+automatisch Seitennummerierungen bieten. Der Standard zeigt 50 Objekte pro
+Seite an. Änderungsseiten-Seitennummerierungen, Suchfelder, Filter, 
+Datumshierarchien und Spaltenüberschriftsortierung arbeiten alle zusammen,
+wie du es erwartest.
+
+Anpassen der Anmutung des Admin-Interface
+=========================================
+
+Offenkundig ist es lächerlich oben auf jeder Seite "Django administration"
+stehen zu haben. Das ist nur ein Platzhaltertext.
+
+Dieses ist leicht zu ändern, indem man Djangos Templatesystem benutzt. Das
+Django-Admin-Interface wird mit Django selbst angetrieben und seine Oberflächen
+benutzen das eigenen Templatesystem (wie Meta!).
+
+Öffnen seine Einstellungsdatei (``mysite/settings.py``, erinnere dich) und
+schau unter die Einstellung :setting:`TEMPLATE_DIRS`. :setting:`TEMPLATE_DIRS`
+ist ein Tupel von Verzeichnissen des Dateisystems, die Django beim Laden von
+Templates prüfen soll. Es ist ein Suchpfad.
+
+Standardmäßig ist :setting:`TEMPLATE_DIRS` leer. Also lass uns eine Zeile
+hinzufügen, um Django zu sagen, wo deine Templates liegen::
+
+    TEMPLATE_DIRS = (
+        "/home/my_username/mytemplates", # Ändere dies zu deinem eigenen Verzeichnis
+    )
+
+jetzt kopiere das Template ``admin/base_site.html`` aus dem standardmäßigen
+Admin-Templateverzeichnis (``django/contrib/admin/templates``) in ein
+Unterverzeichnis ``admin`` des Verzeichnisses, das du in
+:setting:`TEMPLATE_DIRS` benutzt. Wenn zum Beispiel dein
+:setting:`TEMPLATE_DIRS` ``"/home/my_username/mytemplates"`` enthält, wie oben,
+dann kopiere ``django/contrib/admin/templates/admin/base_site.html`` zu
+``/home/my_username/mytemplates/admin/base_site.html``. Vergiss nicht das
+Unterverzeichnis ``admin``.
+
+Jetzt ändere einfach die Datei und ersetzte den allgemeinen Text mit dem eigenen
+Namen deiner Seite.
+
+Beachte, dass alle von Djangos standardmäßigen Templates übersschriben werden
+können. Um ein Template zu überschreiben, mache einfach das gleiche, was wir mit
+``base_site.html`` gemacht haben – kopiere es aus dem standardmäßigen 
+Verzeichnis in dein eigenen Verzeichnis und mache die Änderungen.
+
+Kluge Leser werden sich fragen: Aber wenn :setting:`TEMPLATE_DIRS` standardmäßig
+leer war, wie konnte Django dann die standardmäßigen Admin-Templates finden?
+Die Antwort ist, dass Django standardmäßig nach einem Unterverzeichnis 
+``templates/`` in jedem Paket sucht, um dies als Ausweichlösung zu benutzen.
+Schaue in die :ref:`template loader-Dokumentation <template-loaders>` für
+vollständige Informationen.
+
+Anpassen der Index-Seite des Admin-Interfaces
+=============================================
+
+Auf ähnliche Weise möchtest du vielleicht die Anmutung der Index-Seite von
+Django anpassen.
+
+Standardmäßig zeigt sie alle Applikationen, die für die Admin-Applikation unter
+:setting:`INSTALLED_APPS` registriert wurden, in alphabetischer Reihenfolge an.
+Du möchtest vielleicht wesentliche Änderungen auf das Layout durchführen.
+Immerhin ist die Index-Seite wahrscheinlich die wichtigste Seite des
+Admin-Interface und sollte leicht zu bedienen sein.
+
+Das anzupassenden Template ist ``admin/index.html``. (Mache das gleiche, wie
+mit ``admin/base_site.html`` im vorherigen Abschnitt – kopiere es aus dem
+standardmäßigen Verzeichnis in dein eigenes Templateverzeichnis). Bearbeite die
+Datei und du wirst eine Templatevariabele mit Namen ``app_list`` sehen. Diese 
+Variable enthält jede installierte Django-Applikation. Stattdessen kannst du
+deine Links zu objektspezifischen Adminseiten auch hardcoden, wie du denkst,
+dass sie am besten wären.
+
+Wenn du zufrieden mit dem Admin-Interface bist, lies :ref:`Teil 3 dieses
+Tutorials <intro-tutorial03>` um mit der Arbeit an den öffentlichen
+Umfrage-Views zu beginnen.
