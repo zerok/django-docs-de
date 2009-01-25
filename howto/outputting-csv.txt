@@ -1,0 +1,118 @@
+.. _howto-outputting-csv:
+
+=============================
+CSV-Daten mit Django ausgeben
+=============================
+
+Dieses Dokument erklärt, wie man mithilfe von Django-Views dynamisch CSVs (Comma Separated Values) ausgibt. Hierfür kannst du entweder `Pythons CSV-Bibliothek`_ oder Djangos Template-System verwenden.
+
+.. _Pythons CSV-bibliothek: http://docs.python.org/library/csv.html
+
+Pythons CSV-Bibliothek verwenden
+================================
+
+Pythons Standardbibliothek enthält bereits eine CSV-Bibliothek namens ``csv``,
+die u.a. die Generierung von CSV-Daten auf dateiähnlichen Objekten und somit
+auch Djangos :class:`~django.http.HttpResponse`-Objekten ermöglicht.
+
+Hier ein kurzes Beispiel::
+
+    import csv
+    from django.http import HttpResponse
+
+    def some_view(request):
+        # Create the HttpResponse object with the appropriate CSV header.
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
+
+        writer = csv.writer(response)
+        writer.writerow(['First row', 'Foo', 'Bar', 'Baz'])
+        writer.writerow(['Second row', 'A', 'B', 'C', '"Testing"', "Here's a quote"])
+
+        return response
+
+Der Code und die Kommentare sollte selbsterklärend sein, ein paar Dinge 
+sollte jedoch hervorgehoben werden:
+
+    * In der Antwort wird der MIME-Type auf ``text/csv`` gesetzt, wodurch dem 
+      Browser mitgeteilt wird, dass es sich um eine CSV-Datei handelt und er 
+      die Daten nicht wie HTML behandeln soll.
+
+    * Weiters enthält die Antwort einen zusätzlichen ``Content-Disposition``-
+      Header, der den Namen der CSV-Datei enthält. Der Name ist hierbei
+      frei wählbar und wird u.a. im "Speichern unter ..."-Dialog des
+      Web-Browsers verwendet.
+
+    * Übergib einfach ein :class:`~django.http.HttpResponse`-Objekt als erstes
+      Argument an ``csv.writer`` und schon werden die Schreiboperationen 
+      direkt auf der Antwort durchgeführt.
+
+    * Rufe für jede Zeile in der CSV-Datei ``writer.writerow`` mit einem 
+      iterierbaren Objekt wie einer Liste oder einem Tuple Argument auf.
+      
+    * Das CSV-Modul erledigt die gesamte Formatierung für dich, weshalb du
+      dich nicht mehr getrennt um Strings mit Kommas und Anführungszeichen
+      kümmern musst. Übergibt ``writerow()`` einfach ganz normale Strings
+      (natürlich in einem iterierbaren-Objekt).
+
+Das Template-System verwenden
+=============================
+
+Alternativ kannst du auch :ref:`Djangos Template-System <topics-templates>`
+für die Generierung von CSV-Daten verwenden. Das ist zwar ein bisschen
+umständlicher als die Verwendung der ``csv``-Bibliothek, soll hier aber
+trotzdem der Vollständigkeit wegen beschrieben werden.
+
+Die Idee hier ist, dass du eine Liste von Elementen deinem Template übergibst,
+welches dann die entsprechende Zeilenformatierung in einer
+:ttag:`for`-Schleife durchführt.
+
+Hier ist ein Beispiel, welches die gleiche CSV-Datei wie oben erzeugt::
+    
+    from django.http import HttpResponse
+    from django.template import loader, Context
+
+    def some_view(request):
+        # Create the HttpResponse object with the appropriate CSV header.
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
+
+        # Die Daten sind hier hartkodiert, könnten aber natuerlich auch aus
+        # einer Datenbank oder einer anderen Quelle stammen.
+        csv_data = (
+            ('First row', 'Foo', 'Bar', 'Baz'),
+            ('Second row', 'A', 'B', 'C', '"Testing"', "Here's a quote"),
+        )
+
+        t = loader.get_template('my_template_name.txt')
+        c = Context({
+            'data': csv_data,
+        })
+        response.write(t.render(c))
+        return response
+
+Der einzige Unterschied zum Beispiel von oben ist, dass hier das 
+Template-System anstelle des CSV-Moduls geladen wird. Der restliche Code -- 
+wie zum Beispiel das Setzen des MIME-Types -- ist gleich.
+
+Als nächstes brauchen wir nun das ``my_template_name.txt``-Template mit
+folgendem Code:
+
+.. code-block:: html+django
+
+    {% for row in data %}"{{ row.0|addslashes }}", "{{ row.1|addslashes }}", "{{ row.2|addslashes }}", "{{ row.3|addslashes }}", "{{ row.4|addslashes }}"
+    {% endfor %}
+
+Das Template ist sehr einfach. Es iteriert über die übergebenen Daten und 
+zeigt eine CSV-Zeile für jede übergebene Zeile an. Es verwendet ausserdem den 
+:tfilter:`addslashes`-Templatefilter, um Probleme mit Anführungszeichen etc. 
+vorzubeugen.
+
+Andere textbasierte Formate
+===========================
+
+In beiden Beispielen passiert eigentlich nichts wirklich CSV-Spezifisches mit
+Ausnahme des Ausgabeformats. Du kannst somit beide Methoden für beliebige
+textbasierte Formate verwenden. Wenn du Binärdaten erzeugen willst, geht das
+ebenfalls sehr ähnlich, was zum Beispiel in :ref:`howto-outputting-pdf` 
+beschrieben wird.
