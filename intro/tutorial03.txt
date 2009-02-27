@@ -1,0 +1,522 @@
+.. _intro-tutorial03:
+
+===============================================
+Schreibe deine erste Django-Applikation, Teil 3
+===============================================
+
+Dieses Tutorial beginnt dort, wo :ref:`Tutorial 2 <intro-tutorial02>` aufgehört
+hat. Wir machen mit der Internetabstimmungsapplikation weiter, und werden uns
+darauf konzentrieren das öffentliche Interface zu erstellten – "Views".
+
+Philosophie
+===========
+
+Eine View ist ein "Typ" von Webseite, in deiner Django-Applikation, die generell
+eine bestimmte Funktion bedient und ein bestimmtes Template hat. In einer
+Weblog-Applikation könntest du z. B. die folgenden Views haben:
+
+    * Blog-Homepage – Zeigt die letzten paar Einträge an.
+    
+    * Eintrags-"Detail"-Seite – Permalink-Seite für einen einzelnen Eintrag.
+    
+    * Jahresbasierende Archivseite – zeigt alle Monate mit Einträgen im
+      gegebenen Jahr an.
+      
+    * Monatsbasierende Archivseite – zeigt alle Tage mit Einträgen im gegebenen
+      Monat an.
+      
+    * Tagesbasierende Archivseite – Zeigt alle Einträge an einem gegebenen Tag
+      an.
+    
+    * Kommentar-Aktion – behandelt das Kommentarabgeben auf einen gegebenen
+      Eintrag.
+
+In unserer Abstimmungs-Applikation werden wir die folgenden vier Views haben:
+
+    * Abstimmungs-"Archiv"-Seite – zeigt die letzten paar Abstimmungen an.
+
+    * Abstimmungs-"Detail"-Seite – zeigt die Abstimmungsfrage ohne Ergebnisse,
+      aber mit einem Formular zum Abstimmen.
+    
+    * Abstimmungs-"Ergebnis"-Seite – zeigt die Ergebnisse für eine bestimmte
+      Abstimmung.
+     
+    * Abstimmungsaktion – verarbeitet das Wählen für eine bestimmte Wahl in
+      einer bestimmen Abstimmung.
+
+In Django wird jede View von einer einfachen Python-Funktion repräsentiert.
+
+Gestalte deine URLs
+===================
+
+Der erste Schritt beim Schreiben von Views ist das Gestalten der URL-Struktur.
+Du machst dies, indem du ein Python-Modul erstellt, das URLconf heißt. Mit
+URLconfs assoziiert Django eine bestimmte URL mit dem dazugehörigen Code.
+
+Wenn ein Benutzer eine Djangoseite anfragt, schaut das System in die
+:setting:`ROOT_URLCONF`-Einstellungen, die einen String in Python-Punktsyntax
+enthält. Django lädt das Modul und schaut nach einer Modullevel-Variable, die
+``urlpatterns`` heißt, die eine Sequenz von Tuples in folgendem Format enthält::
+
+    (Regular Expression, Python-Callback-Funktion [, Optionales Dictionary])
+
+Django beginnt mit der ersten Regular Expression und arbeitet sich durch die
+Liste nach unten, wobei es die angefragte URL gegen jede Regular Expression
+abgleicht, bis es eine findet, die passt.
+
+Wenn es einen Treffer findet, ruft Django die Python-Callback-Funktion auf, mit
+einem :class:`~django.http.HttpRequest`-Objekt als erstes Argument, weiteren
+"gefangenen" Werten von der Regular Expression als Schlüsselwort-Argumente und 
+optional beliebige Schlüsselwort-Argumente aus einem Dictionary (ein optionales
+drittes Element in dem Tuple).
+
+Für mehr über :class:`~django.http.HttpRequest`-Objekte, siehe 
+:ref:`ref-request-response`. Für mehr Details über URLconfs, siehe 
+:ref:`topics-http-urls`.
+
+Als du ``python django-admin.py startproject mysite`` zum Beginn von Tutorial 1
+ausgeführt hast, hat es eine standardmäßige URLconf in ``mysite/urls.py``
+erstellt. Es hat außerdem automatisch deine :setting:`ROOT_URLCONF`-Einstellung
+(in ``settings.py``) gesetzt, so dass es auf die Datei zeigt::
+
+    ROOT_URLCONF = 'mysite.urls'
+
+Zeit für ein Beispiel. Ändere ``mysite/urls.py``, so dass sie so aussieht::
+
+    from django.conf.urls.defaults import *
+
+    urlpatterns = patterns('',
+        (r'^polls/$', 'mysite.polls.views.index'),
+        (r'^polls/(?P<poll_id>\d+)/$', 'mysite.polls.views.detail'),
+        (r'^polls/(?P<poll_id>\d+)/results/$', 'mysite.polls.views.results'),
+        (r'^polls/(?P<poll_id>\d+)/vote/$', 'mysite.polls.views.vote'),
+    )
+
+Das lohnt es sich noch einmal näher anzusehen. Wenn jemand eine Seite von deiner
+Website – sagen wir "/polls/23/" anfordert, wird Django dieses Python-Modul
+laden, weil darauf von der Einstellung :setting:`ROOT_URLCONF` gezeigt wird.
+Es findet die Variable ``urlpatterns`` und durchläuft die Regular Expressions
+in Reihenfolge. Wenn es eine Regular Expression findet, die passt – 
+``r'^polls/(?<poll_id>\d+)/$'`` – lädt es das dazugehörende Python-Paket/-Modul:
+``mysite.polls.views.detail``. Das entspricht der Funktion ``detail()`` in 
+``mysite/polls/views.py``. Zum Schluss ruft es die Funktion ``detail()`` so
+auf::
+
+    detail(request=<HttpRequest object>, poll_id='23')
+
+Der Teil ``poll_id='23'`` kommt von ``(?P<poll_id>\d+)``. Wenn man Klammern um
+einen Teil der Abfrage setzt, "fängt" dies den Text, der auf die Abfrage passt
+und sendet ihn als Argument zur View-Funktion; die ``?P<poll_id>`` definiert den
+Namen, der benutzt wird, um den Teil der Abfrage zu identifizieren; und ``\d+``
+ist eine Regular Expression, um eine Reihe von Zahlen (z. B. eine Nummer) zu
+überprüfen.
+
+Weil die URL-Pattern Regular Expressions sind, gibt es wirklich keine
+Begrenzungen, was du damit tun kannst. Und es gibt keinen Grund überflüssigen
+Müll, wie ``.php`` anzuhängen – es sei denn du hast einen kranken Sinn für
+Humor, dann machst du etwas wie dies::
+
+    (r'^polls/latest\.php$', 'mysite.polls.views.index'),
+
+Aber, im Ernst. Mach das nicht. Das ist dumm.
+
+Beachte, dass Regular Expressions nicht nach GET- und POST-Parametern suchen,
+oder nach dem Domainnamen. Eine Anfrage nach ``http://www.example.com/myapp/``
+würde z. B. nach ``/myapp/`` schauen. Bei einer Anfrage nach 
+``http://www.expample.com/myapp/?page?3`` würde die URLconf nach ``/myapp/``
+schauen.
+
+Wenn du Hilfe mit Regular Expressions benötigst, schaue in den 
+`Wikipedia-Beitrag`_. Ebenfalls fantastisch ist das Buch "Mastering Regular
+Expressions" von Jeffrey Friedl.
+
+Zum Schluss noch eine Anmerkung zur Leistung: diese Regular Expressions werden
+das erste Mal, wenn die URLconf geladen wird, kompiliert. Sie sind 
+superschnell.
+
+.. _Wikipedia-Beitrag: http://en.wikipedia.org/wiki/Regular_expression
+.. _Python documentation: http://docs.python.org/library/re.html
+
+Schreibe deine erste View
+=========================
+
+Gut, bislang haben wir noch keine Views erstellt – wir haben nur die URLconf.
+Aber lass und sicherstellen, dass Django der URLconf richtig folgt.
+
+Starte den Django-Entwicklungsserver:
+
+.. code-block:: bash
+
+    python manage.py runserver
+
+Jetzt gehe zu "http://localhost:8000/polls/" in der Eingabezeile deines
+Webbrowsers. Du solltest eine angenehm eingefärbte Fehlerseite mit folgender
+Meldung angezeigt bekommen::
+
+    ViewDoesNotExist at /polls/
+
+    Tried index in module mysite.polls.views. Error was: 'module'
+    object has no attribute 'index'
+
+Dieser Fehler ist passiert, weil du noch keine Funktion ``index()`` im Modul
+``mysite/polls/views.py`` geschrieben hast.
+
+Versuche "/polls/23/", "/polls/23/results/" und "/polls/23/vote/". Die
+Fehlermeldungen teilen dir mit, welche View Django versucht hat (und sie nicht
+gefunden hat, weil du noch keine Views geschrieben hast).
+
+Es ist Zeit deine erste View zu schreiben. Öffne die Datei 
+``mysite/polls/views.py`` und füge den folgenden Python-Code ein::
+
+    from django.http import HttpResponse
+
+    def index(request):
+        return HttpResponse("Hello, world. You're at the poll index.")
+
+Dies ist die einfachste View, die möglich ist. Gehe zu "/polls/" in deinem
+Browser und du solltest den Text sehen.
+
+Füge jetzt die folgende View hinzu. Sie ist ein wenig anders, weil sie ein
+Argument entgegennimmt (welches, wenn du dich erinnerst, von der 
+Regular Expression weitergegeben wurde))::
+
+    def detail(request, poll_id):
+        return HttpResponse("You're looking at poll %s." % poll_id)
+
+Schaue in deinen Browser unter "/polls/34". Er wird dir genau die ID anzeigen,
+die du in der URL angegeben hast.
+
+Schreibe Views, die wirklich etwas tun
+======================================
+
+Jede View ist verantwortlich für eines von beidem: Ein 
+:class:`~django.http.HttpResponse`-Objekt mit dem Inhalt für die angeforderte
+Seite zurückzugeben oder eine Exception wie z. B. :exc:`~django.http.Http404` zu
+erzeugen. Der Rest ist dir überlassen.
+
+Deine View kann Datensätze aus einer Datenbank lesen, oder nicht. Sie kann ein
+Templatesystem, wie Djangos benutzen – oder ein Python-Templatesystem eines
+Drittanbieters – oder nicht. Sie kann ein PDF generieren, XML ausgeben oder
+mal eben eine ZIP-Datei erzeugen. Was immer du willst, mit welchen 
+Python-Bibliotheken du willst.
+
+Alles, was Django erwartet ist :class:`~django.http.HttpResponse`. Oder eine
+Exception.
+
+Weil es bequem ist, lass und Djangos eigene Datenbank-API benutzen, die wir in
+:ref:`Tutorial 1 <intro-tutorial01>` näher behandelt haben. Hier ist eine
+Anfrage an die ``index()``-View, die die letzten 5 Umfragen im System anzeigt,
+getrennt durch Kommas, entsprechend ihres Veröffentlichungsdatums::
+
+    from mysite.polls.models import Poll
+    from django.http import HttpResponse
+
+    def index(request):
+        latest_poll_list = Poll.objects.all().order_by('-pub_date')[:5]
+        output = ', '.join([p.question for p in latest_poll_list])
+        return HttpResponse(output)
+
+Doch es gibt hier ein Problem: Das Seitendesign ist in die View hart-gecodet.
+Wenn du das Aussehen der Seite verändern möchtest, wirst du den Python-Code
+ändern müssen. Also lass und Djangos Templatesystem benutzen um das Design vom
+Code zu trennen::
+
+    from django.template import Context, loader
+    from mysite.polls.models import Poll
+    from django.http import HttpResponse
+
+    def index(request):
+        latest_poll_list = Poll.objects.all().order_by('-pub_date')[:5]
+        t = loader.get_template('polls/index.html')
+        c = Context({
+            'latest_poll_list': latest_poll_list,
+        })
+        return HttpResponse(t.render(c))
+
+Dieser Code lädt ein Template "polls/index.html" und übergibt einen Kontext.
+Der Kontext ist ein Directory, das Python-Objekte zu Templatevariablen zuordnet.
+
+Lade die Seite neu. Jetzt wirst du einen Fehler sehen::
+
+    TemplateDoesNotExist at /polls/
+    polls/index.html
+
+Ah. Da ist noch kein Template. Zuerst legst du ein Verzeichnis irgendwo in
+deinem Dateisystem an, auf dessen Inhalt Django zugreifen kann (Django läuft mit
+egal welchem Benutzer, mit dem dein Server läuft). Stell sie aber nicht in 
+deinen Document-Root. Du solltest sie aus Sicherheitsgründen am besten nicht
+öffentlich machen.
+Dann bearbeite :setting:`TEMPLATE_DIRS` in deiner Datei ``setting.py``, um
+Django mitzuteilen, wo es die Templates finden kann – genau wie du es im
+Abschnitt "Passe das Formular des Admin-Interface an" in Tutorial 2 gemacht
+hast.
+
+Wenn du das gemacht hast, lege ein Verzeichnis ``polls`` in deinem 
+Template-Verzeichnis an. Darin erstellst du eine Datei, die du ``index.html``
+nennst. Beachte, dass der Code von oben im Dateisystem auf  
+"[Tempalte-Verzeichnis]/polls/index.html" zeigt.
+
+Schreibe folgenden Code in das Template:
+
+.. code-block:: html+django
+
+    {% if latest_poll_list %}
+        <ul>
+        {% for poll in latest_poll_list %}
+            <li>{{ poll.question }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No polls are available.</p>
+    {% endif %}
+
+Lade deine Seite im Webbrowser, und du solltest eine unnummerierte Liste sehen,
+die die Abstimmung "What's up" aus Tutorial 1 enthält.
+
+Ein Abkürzung: render_to_response()
+-----------------------------------
+
+Es ist eine gebräuchliche Aufgabe, ein Template zu laden, einen Kontext zu
+füllen und ein :class:`~django.http.HttpResponse`-Objekt mit dem Ergebnis des 
+gerenderten Templates zurückzugeben. Django bietet dafür eine Abkürzung. Hier
+ist die vollständige ``index()``-View, neu geschrieben::
+
+    from django.shortcuts import render_to_response
+    from mysite.polls.models import Poll
+
+    def index(request):
+        latest_poll_list = Poll.objects.all().order_by('-pub_date')[:5]
+        return render_to_response('polls/index.html', {'latest_poll_list': latest_poll_list})
+
+Sobald wir das mit allen dieser Views gemacht haben, brauchen wir nicht länger
+:mod:`~django.template.loader`, :class:`~django.template.Context` und
+:class:`~django.http.HttpResponse` laden.
+
+Die Funktion :func:`~django.shortcuts.render_to_response` nimmt einen 
+Templatenamen als erstes Argument entgegen und ein Dictionary als optionales,
+zweites Argument. Sie gibt ein Objekt :class:`~django.http.HttpResponse` des
+gegebenen Templates gerendert mit dem gegebenen Kontext zurück.
+
+404 erzeugen
+============
+
+Jetzt lass uns die Abstimmungs-Detail-View anpacken – die Seite, die eine Frage
+zu einer gegebenen Abstimmung anzeigt. Hier ist die View::
+
+    from django.http import Http404
+    # ...
+    def detail(request, poll_id):
+        try:
+            p = Poll.objects.get(pk=poll_id)
+        except Poll.DoesNotExist:
+            raise Http404
+        return render_to_response('polls/detail.html', {'poll': p})
+
+Das neue Konzept ist hier: Die View erzeugt eine Exception
+:exc:`~django.http.Http404`, wenn eine Abstimmung angefordert wurde, dessen ID
+nicht existiert.
+
+Eine Abkürzung: get_object_or_404()
+-----------------------------------
+
+Es ist eine sehr gebräuchliche Aufgabe ein
+:meth:`~django.db.models.QuerySet.get` zu benutzen und eine
+:exc:`~django.http.Http404` zu erzeugen, wenn das Objekt nicht existiert. 
+Django bietet dafür eine Abkürzung. Hier ist die neu geschriebene View
+``detail()``::
+
+    from django.shortcuts import render_to_response, get_object_or_404
+    # ...
+    def detail(request, poll_id):
+        p = get_object_or_404(Poll, pk=poll_id)
+        return render_to_response('polls/detail.html', {'poll': p})
+
+Die Funktion :func:`~django.shortcuts.get_object_or_404` nimmt ein 
+Django-Datenmodell-Modul als erstes Argument und eine beliebige Anzahl von
+Schlüsswelwortargumenten, die es an die Funktion 
+:meth:`~django.db.models.QuerySet.get` des Moduls weiterreicht. Es erzeugt ein
+:exc:`~django.http.Http404`, wenn das Objekt nicht existiert. 
+
+.. admonition:: Philosophie
+
+    Warum benutzen wir eine Hilfsfunktion 
+    :func:`~django.shortcuts.get_object_or_404` und cachen die 
+    :exc:`~django.core.exceptions.ObjectDoesNotExist`-Exceptions nicht auf einer
+    höheren Ebene, oder lassen die Datenmodell-API nicht 
+    :exc:`~django.http.Http404` anstelle von 
+    :exc:`~django.core.exceptions.ObjectDoesNotExist` erzeugen?
+
+    Weil dies den Datenmodell-Layer an den View-Layer binden würde. Eines der
+    höchsten Design-Ziele von Django ist die Einhaltung von losem Koppeln.
+
+Es gibt auch eine Funktion :func:`~django.shortcuts.get_list_or_404`, die wie
+:func:`~django.shortcuts.get_object_or_404` funktioniert – ausser dass sie
+:meth:`~django.db.models.QuerySet.filter` anstelle von 
+:meth:`~django.db.models.QuerySet.get` benutzt. Sie erzeugt ein
+:exc:`~django.http.Http404`, wenn die Liste leer ist. 
+
+Schreibe eine 404-View (Seite nicht gefunden)
+=============================================
+
+Wenn du ein :exc:`~django.http.Http404` aus einer View erzeugst, lädt Django
+eine spezielle View, die sich ganz der Behandlung von 404-Fehlern widmet. Es
+findet sie indem es nach der Variable ``handler404`` suchst, die ein String in
+Python-Punktsyntax ist – das gleiche Format, das normale URLconf-Callbacks
+benutzen. Eine 404-View ist selbst nichts besonders: sie ist nur eine normale
+View.
+
+Normalerweise musst du dich nicht damit beschäftigen 404-Views zu schreiben.
+Standardmäßig haben URLconfs die folgende Zeile oben stehen::
+
+    from django.conf.urls.defaults import *
+
+Diese kümmert sich darum ``handler404`` im aktuellen Modul zu setzen. Wie du in
+``django/conf/urls/defaults.py`` sehen kannst, ist ``handler404``
+standardmäßig auf :func:`django.views.defaults.page_not_found` gesetzt.
+
+Drei weitere Dinge, die über 404-Views anzumerken sind:
+
+    * Die 404-View wird auch aufgerufen, wenn Django keinen Treffer beim
+      durchprüfen der Regular Expression in der URLconf findet.
+    
+    * Wenn du keine eigene 404-View definiert – und einfach die standardmäßige,
+      was empfohlen ist, benutzt – hast du immer noch eine Aufgabe: Ein
+      ``404.html``-Template im Root deines Templateverzeichnisses zu erstellen.
+      Die standardmäßige 404-View wird dieses Template für alle 404-Fehler
+      benutzen.
+
+    * Wenn :setting:`DEBUG` auf ``True`` gesetzt ist (in deinem 
+      Einstellungsmodul), wird deine 404-View niemals benutzt, und der
+      Traceback wird stattdessen benutzt.
+
+Schreibe eine 500-View (Serverfehler)
+=====================================
+
+Auf ähnliche Weise können URLconfs auch ``handler500`` definieren, die auf eine
+View verweisen, die im Falle eines Serverfehlers aufgerufen wird. Serverfehler
+können auftreten, wenn du einen Laufzeitfehler im View-Code hast.
+
+Benutze das Templatesystem
+==========================
+
+Zurück zur ``detail()``-View für unsere Abstimmungsapplikation. Wenn wir die
+Kontext-Variable ``poll`` hätten, könnte das Template "polls/detail.html" so
+aussehen:
+
+.. code-block:: html+django
+
+    <h1>{{ poll.question }}</h1>
+    <ul>
+    {% for choice in poll.choice_set.all %}
+        <li>{{ choice.choice }}</li>
+    {% endfor %}
+    </ul>
+
+Das Templatesystem benutzt eine Punktsyntax, um auf Attribute von Variablen 
+zuzugreifen. Am Beispiel von ``{{ poll.question }}`` macht Django zuerst eine
+Anfrage auf das Dictionary ``poll``. Wenn diese fehlschlägt, versucht es eine
+Anfrage auf das Attribut – welches in diesem Fall funktioniert. Wäre die 
+Anfrage auf das Attribut fehlgeschlagen, hätte es die Methode ``question()``
+auf dem Poll-Objekt aufgerufen.
+
+Methodenaufrufe passieren in der ``{% for %}``-Schleife: ``poll.choice_set.all``
+wird als der Python-Code ``poll.choice_set.all()`` interpretiert, der eine
+Reihe von Choice-Objekten zurückgibt und für eine Nutzung innerhalb des 
+``{% for %}``-Tags geeigenet ist.
+
+Lies das :ref:`Template-Handbuch <topics-templates>` für mehr über Templates.
+
+Vereinfachen der URLconfs
+=========================
+
+Nimm dir etwas Zeit mit den Views und dem Templatesystem zu herumzuspielen.
+Wenn du die URLconf bearbeitest, ist dir vielleicht aufgefallen, dass es einiges
+an Wiederholung gibt::
+
+    urlpatterns = patterns('',
+        (r'^polls/$', 'mysite.polls.views.index'),
+        (r'^polls/(?P<poll_id>\d+)/$', 'mysite.polls.views.detail'),
+        (r'^polls/(?P<poll_id>\d+)/results/$', 'mysite.polls.views.results'),
+        (r'^polls/(?P<poll_id>\d+)/vote/$', 'mysite.polls.views.vote'),
+    )
+
+Genauer gesagt ist ``mysite.polls.views`` in jedem Aufruf vorhanden.
+
+Weil dies ein üblicher Fall ist, bietet die URLconf eine Abkürzung für
+gemeinsame Präfixe. Du kannst die gleichen Präfixe ausklammern und sie als
+erstes Argument zu :func:`~django.conf.urls.defaults.patterns` hinzufügen, 
+und zwar so::
+
+    urlpatterns = patterns('mysite.polls.views',
+        (r'^polls/$', 'index'),
+        (r'^polls/(?P<poll_id>\d+)/$', 'detail'),
+        (r'^polls/(?P<poll_id>\d+)/results/$', 'results'),
+        (r'^polls/(?P<poll_id>\d+)/vote/$', 'vote'),
+    )
+
+Dies ist funktional identisch zur vorherigen Formatierung. Es ist nur etwas
+sauberer.
+
+Entkoppelt der URLconfs
+=======================
+
+Wenn wir schon dabei sind, sollten wir uns die Zeit nehmen unsere 
+Abstimmungsapplikation-URLs von unserer Django-Projekt-Konfiguration
+abzukoppeln. Django-Applikationen sind dazu gedacht steckbar zu sein – das
+bedeutet, dass jede einzelne Applikation ohne viel Aufwand in eine andere
+Django-Installation übertragbar sein sollte.
+
+Unsere Abstimmungsapplikation ist zum jetzigen Zeitpunkt dank der strengen
+Verzeichnisstruktur, die ``python manage.py startapp`` erzeugt hat, schon recht
+gut entkoppelt. Aber ein Teil ist noch an die Django-Einstellungen gekoppelt:
+Die URLconf.
+
+Wir haben die URLs in ``mysite/urls.py`` bearbeitet, aber das URL-Design einer
+Applikation ist spezifisch für die Applikation, nicht für die
+Django-Installation – also lass uns die URLs in das Applikationsverzeichnis
+umziehen.
+
+Kopiere die Datei ``mysite/urls.py`` nach ``mysite/polls/urls.py``. Dann ändere
+``mysite/urls.py`` und entferne die Abstimmungsspezifischen URLs und füge eine
+:func:`~django.conf.urls.defaults.include` ein::
+
+    (r'^polls/', include('mysite.polls.urls')),
+
+:func:`~django.conf.urls.defaults.include` referenziert einfach eine andere
+URLconf. Beachte bitte, dass die Regular Expression kein ``$`` (das Zeichen für
+das Ende eines Strings), sondern einen abschließenden Slash hat. Wann immer
+Django auf ein :func:`~django.conf.urls.defaults.include` trifft, schneidet es
+den passenden Teil ab und schickt den übrigen Teil zur weiteren Bearbeitung an
+die eingebundene URLconf.
+
+Das passiert, wenn ein Benutzer auf "/polls/34/" im System geht:
+
+    * Django wird einen Treffer bei ``'^polls/'`` finden
+
+    * Dann wird Django den passenden Text (``"polls/"``) abschneiden und den
+      verbleibenden Text – ``"34/"`` – zur URLconf 'mysite.polls.urls' zur
+      weiteren Bearbeitung schicken.
+
+Jetzt, wo wir das entkoppelt haben, müssen wir noch die URLconf 
+'mysite.polls.urls' entkoppeln, indem wir das führende "polls/" von jeder Zeile
+entfernen::
+
+    urlpatterns = patterns('mysite.polls.views',
+        (r'^$', 'index'),
+        (r'^(?P<poll_id>\d+)/$', 'detail'),
+        (r'^(?P<poll_id>\d+)/results/$', 'results'),
+        (r'^(?P<poll_id>\d+)/vote/$', 'vote'),
+    )
+
+Die Idee hinter :func:`~django.conf.urls.defaults.include` und dem Entkoppeln
+der URLconf ist, leicht URLs zu erstellen, die mit Plug-und-Play funktionieren.
+Jetzt wo die Abstimmungen in ihrer eigenen URLconf sind, können sie unter
+"/polls/", unter "/fun_polls/", unter "/content/polls/" oder jeder anderen URL
+platziert werden, und die Applikation wird immer noch funktionieren.
+
+Alles, worum sich die Abstimmungsaktion kümmert sind ihre relativen URLs, nicht
+seine absoluten URLs.
+
+Wenn du dich sicher darin fühlst Views zu schreiben, lies :ref:`Teil 4 von
+diesem Tutorial <intro-tutorial04>`, um mehr über einfache Formularverarbeitung
+und Generische Views zu lernen.
