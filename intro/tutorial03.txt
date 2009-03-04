@@ -5,7 +5,7 @@ Schreibe deine erste Django-Applikation, Teil 3
 ===============================================
 
 Dieses Tutorial beginnt dort, wo :ref:`Tutorial 2 <intro-tutorial02>` aufgehört
-hat. Wir machen mit der Internetabstimmungsapplikation weiter, und werden uns
+hat. Wir machen mit der Internetumfrage-Applikation weiter, und werden uns
 darauf konzentrieren, das öffentliche Interface zu erstellten – "Views".
 
 Philosophie
@@ -31,18 +31,18 @@ Weblog-Applikation könntest du z. B. die folgenden Views haben:
     * Kommentar-Aktion – behandelt das Kommentarabgeben auf einen gegebenen
       Eintrag.
 
-In unserer Abstimmungs-Applikation werden wir die folgenden vier Views haben:
+In unserer Umfrage-Applikaton werden wir die folgenden vier Views haben:
 
-    * Abstimmungs-"Archiv"-Seite – zeigt die letzten paar Abstimmungen an.
+    * Umfrage-"Archiv"-Seite – zeigt die letzten paar Umfragen an.
 
-    * Abstimmungs-"Detail"-Seite – zeigt die Abstimmungsfrage ohne Ergebnisse,
+    * Umfrage-"Detail"-Seite – zeigt die Umfrage ohne Ergebnisse,
       aber mit einem Formular zum Abstimmen.
     
-    * Abstimmungs-"Ergebnis"-Seite – zeigt die Ergebnisse für eine bestimmte
-      Abstimmung.
+    * Umfrage-"Ergebnis"-Seite – zeigt die Ergebnisse für eine bestimmte
+      Umfrage.
      
-    * Abstimmungsaktion – verarbeitet das Wählen für eine bestimmte Wahl in
-      einer bestimmen Abstimmung.
+    * Umfrageaktion – verarbeitet das Wählen für eine bestimmte Wahl in
+      einer bestimmen Umfrage.
 
 In Django wird jede View von einer einfachen Python-Funktion repräsentiert.
 
@@ -270,7 +270,7 @@ Schreibe folgenden Code in das Template:
     {% endif %}
 
 Lade deine Seite im Webbrowser, und du solltest eine unnummerierte Liste sehen,
-die die Abstimmung "What's up" aus Tutorial 1 enthält.
+die die Umfrage "What's up" aus Tutorial 1 enthält.
 
 Ein Abkürzung: render_to_response()
 -----------------------------------
@@ -299,8 +299,8 @@ gegebenen Templates gerendert mit dem gegebenen Kontext zurück.
 404 erzeugen
 ============
 
-Jetzt lass uns die Abstimmungs-Detail-View anpacken – die Seite, die eine Frage
-zu einer gegebenen Abstimmung anzeigt. Hier ist die View::
+Jetzt lass uns die Umfrage-Detail-View anpacken – die Seite, die eine Frage
+zu einer gegebenen Umfrage anzeigt. Hier ist die View::
 
     from django.http import Http404
     # ...
@@ -312,7 +312,7 @@ zu einer gegebenen Abstimmung anzeigt. Hier ist die View::
         return render_to_response('polls/detail.html', {'poll': p})
 
 Das neue Konzept ist hier folgendes: Die View erzeugt eine Exception
-:exc:`~django.http.Http404`, wenn eine Abstimmung angefordert wurde, dessen ID
+:exc:`~django.http.Http404`, wenn eine Umfrage angefordert wurde, dessen ID
 nicht existiert.
 
 Eine Abkürzung: get_object_or_404()
@@ -398,7 +398,7 @@ können auftreten, wenn du einen Laufzeitfehler im View-Code hast.
 Benutze das Templatesystem
 ==========================
 
-Zurück zur ``detail()``-View für unsere Abstimmungsapplikation. Wenn wir die
+Zurück zur ``detail()``-View für unsere Umfrageapplikation. Wenn wir die
 Kontext-Variable ``poll`` hätten, könnte das Template "polls/detail.html" so
 aussehen:
 
@@ -460,12 +460,12 @@ Entkoppeln der URLconfs
 =======================
 
 Wenn wir schon dabei sind, sollten wir uns die Zeit nehmen unsere
-Abstimmungsapplikation-URLs von unserer Django-Projekt-Konfiguration
+Umfrageapplikation-URLs von unserer Django-Projekt-Konfiguration
 abzukoppeln. Django-Applikationen sind dazu gedacht, frei kombinierbar zu sein
 – das bedeutet, dass jede einzelne Applikation ohne viel Aufwand in eine
 andere Django-Installation übertragbar sein sollte.
 
-Unsere Abstimmungsapplikation ist zum jetzigen Zeitpunkt dank der strengen
+Unsere Umfrageapplikation ist zum jetzigen Zeitpunkt dank der strengen
 Verzeichnisstruktur, die ``python manage.py startapp`` erzeugt hat, schon recht
 gut entkoppelt. Aber ein Teil ist noch an die Django-Einstellungen gekoppelt:
 Die URLconf.
@@ -476,7 +476,7 @@ Django-Installation – also lass uns die URLs in das Applikationsverzeichnis
 umziehen.
 
 Kopiere die Datei ``mysite/urls.py`` nach ``mysite/polls/urls.py``. Dann ändere
-``mysite/urls.py``, entferne die abstimmungsspezifischen URLs und füge eine
+``mysite/urls.py``, entferne die umfragespezifischen URLs und füge eine
 :func:`~django.conf.urls.defaults.include` ein::
 
     (r'^polls/', include('mysite.polls.urls')),
@@ -513,7 +513,7 @@ funktionieren.  Jetzt wo die Applikation ihre eigene URLconf hat, kann sie
 unter "/polls/", unter "/fun_polls/", unter "/content/polls/" oder jeder
 anderen URL platziert werden und sie wird noch immer funktionieren.
 
-Alles, worum sich die URLconf der Abstimmungsapplikation kümmert, sind ihre
+Alles, worum sich die URLconf der Umfrageapplikation kümmert, sind ihre
 eigenen (relativen) URLs. Die globalen URLs des restlichen Projektes
 interessieren sie nicht.
 

@@ -5,13 +5,13 @@ Schreibe deine erste Django-Applikation, Teil 4
 ===============================================
 
 Dieses Tutorial beginnt dort, wo :ref:`Tutorial 3 <intro-tutorial03>` aufgehört
-hat. Wir machen mit der Internetabstimmungsapplikation weiter, und werden uns
+hat. Wir machen mit der Internetumfrage-Applikation weiter, und werden uns
 auf einfache Formularbearbeitung konzentrieren und unseren Code vereinfachen.
 
 Schreibe ein einfaches Formular
 ===============================
 
-Lass uns unser Abstimmungs-Detail-Template ("polls/detail.html") aus dem letzten
+Lass uns unser Umfrage-Detail-Template ("polls/detail.html") aus dem letzten
 Tutorial aktualisieren, so dass das Template ein HTML ``<form>``-Element
 enthält:
 
@@ -32,8 +32,8 @@ enthält:
 Eine schnelle Zusammenfassung:
 
     * Das oben stehende Template zeigt einen Radio-Button für jede 
-      Abstimmungsmöglichkeit an. Der ``value`` jedes Radio-Button ist der ID
-      der Abstimmungsmöglichkeit zugeordnet. Der ``name`` von jedem
+      Umfragemöglichkeit an. Der ``value`` jedes Radio-Button ist der ID
+      der Umfragemöglichkeit zugeordnet. Der ``name`` von jedem
       Radio-Button ist ``"choice"``. Das bedeutet, wenn jemand einen der
       Radio-Button auswählt und das Formular abschickt, sendet es die POST-Daten
       ``choice=3``. Dies sind die Grundlagen von Formularen.
@@ -52,7 +52,7 @@ Eine schnelle Zusammenfassung:
 Jetzt lass uns eine Django-View erstellen, die die abgeschickten Daten 
 verarbeitet und etwas damit macht. Erinnere dich daran, in 
 :ref:`Tutorial 3 <intro-tutorial03>` haben wir eine URLconf für die
-Abstimmungsapplikation erstellt, die diese Zeile enthält::
+Umfrageapplikation erstellt, die diese Zeile enthält::
 
     (r'^(?P<poll_id>\d+)/vote/$', 'mysite.polls.views.vote'),
 
@@ -101,7 +101,7 @@ behandelt haben:
 
     * ``request.POST['choice']`` wird einen :exc:`KeyError` erzeugen, wenn
       ``choice`` nicht in den POST-Daten enthalten ist. Der oben stehende Code
-      prüft auf :exc:`KeyError` und zeigt das Abstimmungsformular mit einer
+      prüft auf :exc:`KeyError` und zeigt das Umfrageformular mit einer
       Fehlermeldung, dass ``choice`` nicht angegeben wurde, wieder an.
 
     * Nachdem die Anzahl von choice erhöht wurde, gibt der Code ein 
@@ -172,7 +172,7 @@ Benutze Generic Views: Weniger Code ist besser
 
 Die Views ``detail()`` (aus :ref:`Tutorial 3 <intro-tutorial03>`) und 
 ``result()`` sind sehr einfach – und, wie oben erwähnt, redundant. Die View
-``index()`` (ebenfalls aus Tutorial 3), die eine Liste von Abstimmungen anzeigt,
+``index()`` (ebenfalls aus Tutorial 3), die eine Liste von Umfragen anzeigt,
 ist sehr ähnlich.
 
 Diese Views repräsentieren einen üblichen üblichen Fall von grundlegender
@@ -184,7 +184,7 @@ zurückzugeben. Weil dies so üblich ist, bietet Django eine Abkürzung, das Sys
 Generic Views abstrahieren übliche Muster bis zu dem Punkt, wo du noch nicht
 einmal Python-Code schreiben musst, um eine Applikation zu schreiben.
 
-Lass und unsere Abstimmungsapplikation konvertieren, so dass sie das System der
+Lass und unsere Umfrageapplikation konvertieren, so dass sie das System der
 Generic Views benutzt, damit wir eine Menge von unserem eigenen Code löschen
 können. Wir müssen nur einige wenige Schritte für die Konvertierung machen.
 
@@ -266,7 +266,7 @@ In ähnlicher Weise benutzt die Gerneric View
 
 Weil wir mehr als einen Eintrag in der URLconf haben, 
 der :func:`~django.views.generic.list_detail.object_detail` für die 
-Abstimmungsapplikation benutzt, definieren wir einen Templatename für die
+Umfrageapplikation benutzt, definieren wir einen Templatename für die
 Ergebnis-View manuell:
 ``template_name='polls/results.html'``. Ansonsten würden beide Views das selbe
 Template benutzen. Beachte bitte, dass wir ``dict()`` benutzen, um ein verändertes
@@ -305,7 +305,7 @@ werden, damit sie mit den neuen Kontext-Variablen übereinstimmt. Im Aufruf
 ``poll`` in ``object`` um.
 
 Die letzte Sache, die wir noch korrigieren müssen, ist die URL-Behandlung, die
-eine Benutzung von Generic Views berücksichtigen muss. In der Abstimmungs-View
+eine Benutzung von Generic Views berücksichtigen muss. In der Umfrage-View
 oben, haben wir die Funktion :func:`~django.core.urlresolvers.reverse` benutzt,
 um das harte kodieren unserer URLs zu vermeiden. Jetzt, wo wir auf Generic Views
 umgestellt haben, müssen wir den Aufruf 
@@ -316,7 +316,7 @@ können den Namen verwenden, den wir vergeben haben::
 
     return HttpResponseRedirect(reverse('poll_results', args=(p.id,)))
 
-Starte den Server und benutze unsere neue Abstimmungsapplikations, die auf 
+Starte den Server und benutze unsere neue Umfrageapplikations, die auf 
 Generic Views basiert.
 
 Für vollständige Details über Generic Views, siehe die :ref:`Dokumentation für
