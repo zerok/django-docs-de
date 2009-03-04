@@ -1,0 +1,339 @@
+.. _intro-tutorial04:
+
+===============================================
+Schreibe deine erste Django-Applikation, Teil 4
+===============================================
+
+Dieses Tutorial beginnt dort, wo :ref:`Tutorial 3 <intro-tutorial03>` aufgehört
+hat. Wir machen mit der Internetabstimmungsapplikation weiter, und werden uns
+auf einfache Formularbearbeitung konzentrieren und unseren Code vereinfachen.
+
+Schreibe ein einfaches Formular
+===============================
+
+Lass uns unser Abstimmungs-Detail-Template ("polls/detail.html") aus dem letzten
+Tutorial aktualisieren, so dass das Template ein HTML ``<form>``-Element
+enthält:
+
+.. code-block:: html+django
+
+    <h1>{{ poll.question }}</h1>
+
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+    <form action="/polls/{{ poll.id }}/vote/" method="post">
+    {% for choice in poll.choice_set.all %}
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
+        <label for="choice{{ forloop.counter }}">{{ choice.choice }}</label><br />
+    {% endfor %}
+    <input type="submit" value="Vote" />
+    </form>
+
+Eine schnelle Zusammenfassung:
+
+    * Das oben stehende Template zeigt einen Radio-Button für jede 
+      Abstimmungsmöglichkeit an. Der ``value`` jedes Radio-Button ist der ID
+      der Abstimmungsmöglichkeit zugeordnet. Der ``name`` von jedem
+      Radio-Button ist ``"choice"``. Das bedeutet, wenn jemand einen der
+      Radio-Button auswählt und das Formular abschickt, sendet es die POST-Daten
+      ``choice=3``. Dies sind die Grundlagen von Formularen.
+
+    * Wir haben die ``action`` des Formulars auf ``/polls/{{ poll.id }}/vote/``
+      gesetzt und ``method="post"`` gesetzt. Es ist sehr wichtig
+      ``method="post"`` zu benutzen (im Gegensatz zu ``method="get"``), weil
+      das Abschicken des Formulars Daten auf Serverseite verändern wird. Immer
+      wenn du ein Formular erstellst, das Daten auf Serverseite verändert,
+      benutze ``method="post"``. Dieser Tipp ist nicht spezifisch für Django;
+      er ist gute Praxis in der Webentwicklung.
+
+    * ``forloop.counter`` zeigt an, wie viele Male das :ttag:`for`-Tag durch
+      diese Schleife gelaufen ist.
+
+Jetzt lass uns eine Django-View erstellen, die die abgeschickten Daten 
+verarbeitet und etwas damit macht. Erinnere dich daran, in 
+:ref:`Tutorial 3 <intro-tutorial03>` haben wir eine URLconf für die
+Abstimmungsapplikation erstellt, die diese Zeile enthält::
+
+    (r'^(?P<poll_id>\d+)/vote/$', 'mysite.polls.views.vote'),
+
+Also lass uns jetzt eine ``vote()``-Funktion in ``mysite/polls/views.py``
+erstellen::
+
+    from django.shortcuts import get_object_or_404, render_to_response
+    from django.http import HttpResponseRedirect
+    from django.core.urlresolvers import reverse
+    from mysite.polls.models import Choice, Poll
+    # ...
+    def vote(request, poll_id):
+        p = get_object_or_404(Poll, pk=poll_id)
+        try:
+            selected_choice = p.choice_set.get(pk=request.POST['choice'])
+        except (KeyError, Choice.DoesNotExist):
+            # Zeige das Umfrage-Auswahlformular erneut an.
+            return render_to_response('polls/detail.html', {
+                'poll': p,
+                'error_message': "You didn't select a choice.",
+            })
+        else:
+            selected_choice.votes += 1
+            selected_choice.save()
+            # Gib immer ein HttpResponseRedirect zurück, nachdem erfolgreich
+            # POST-Daten bearbeitet wurden. Das verhintert, dass ein 
+            # Datensatz zweimal abgeschickt wird, wenn ein Benutzer den
+            # Zurück-Button des Browsers drückt.
+            return HttpResponseRedirect(reverse('mysite.polls.views.results', args=(p.id,)))
+
+Dieser Code enthält einige Dinge, die wir bislang noch nicht in diesem Tutorial
+behandelt haben:
+
+    * :attr:`request.POST <django.http.HttpRequest.POST>` ist ein Objekt, das
+      einem Dictionary ähnlich ist, und dich auf abgeschickte Daten mit einem
+      Schlüsselnamen zugreifen lässt. In diesem Fall, gibt 
+      ``request.POST['choice']`` eine ID der ausgewählten Wahl zurück. 
+      :attr:`request.POST <django.http.HttpRequest.POST>`-Werte sind immer
+      Zeichenketten.
+
+      Beachte bitte, dass Django auch ein :attr:`request.GET 
+      <django.http.HttpRequest.GET>` für den Zugriff auf GET-Daten in der 
+      gleichen Weise anbietet – aber wir verwenden explizit :attr:`request.POST 
+      <django.http.HttpRequest.POST>` in unserem Code, um sicherzustellen, dass
+      Daten nur über einen POST-Aufruf verändert werden.
+
+    * ``request.POST['choice']`` wird einen :exc:`KeyError` erzeugen, wenn
+      ``choice`` nicht in den POST-Daten enthalten ist. Der oben stehende Code
+      prüft auf :exc:`KeyError` und zeigt das Abstimmungsformular mit einer
+      Fehlermeldung, dass ``choice`` nicht angegeben wurde, wieder an.
+
+    * Nachdem die Anzahl von choice erhöht wurde, gibt der Code ein 
+      :class:`~django.http.HttpResponseRedirect` zurück, anstelle eines normalen
+      :class:`~django.http.HttpResponse`. 
+      :class:`~django.http.HttpResponseRedirect` nimmt ein einzelnes Argument
+      entgegen: die URL, zu der der Benutzer weitergeleitet wird (siehe den
+      folgenden Punkt, um zu sehen, wie wir die URL in diesem Fall
+      konstruieren).
+      
+      Wie der Python-Kommentar oben schon anmerkt, solltest du immer ein
+      :class:`~django.http.HttpResponseRedirect` zurückgeben, nachdem die 
+      POST-Daten erfolgreich verarbeitet wurden. Das ist kein spezifischer Tipp
+      für Django; es ist gute Praxis in der Webentwicklung.
+
+    * Wir benutzen die Funktion :func:`~django.core.urlresolvers.reverse` im
+      :class:`~django.http.HttpResponseRedirect`-Konstruktor in diesem Beispiel.
+      Diese Funktion hilft dabei, es zu vermeiden, die URL hart zu kodierten.
+      An sie wird der Name der View übergeben, an die wir die Kontrolle
+      übergeben möchten, und der variable Teil der URL-Pattern, der auf diese
+      View zeigt. In diesem Fall, unter Benutzung der URLconf, die wir in
+      Tutorial 3 aufgesetzt haben, wird dieser 
+      :func:`~django.core.urlresolvers.reverse`-Aufruf, eine Zeichenkette wie
+      diese zurückgeben::
+
+        '/polls/3/results/'
+
+      … wo die ``3`` der Wert von ``p.id`` ist. Diese weitergeleitete URL wird
+      dann die View ``'results'`` aufrufen, um die finale Seite anzuzeigen.
+      Beachte bitte, dass du hier den vollen Namen der View benutzen musst
+      (inklusive des Präfix).
+
+Wie in Tutorial 3 erwähnt, ist ``request`` ein 
+:class:`~django.http.HttpRequest`-Objekt. Für mehr über 
+:class:`~django.http.HttpRequest`-Objekte, schaue in die :ref:`Dokumentation für
+Request und Response <ref-request-response>`.
+
+Nachdem jemand für eine Umfrage abgestimmt hat, leitet die ``vote()``-View zur
+Ergebnisseite für die Umfrage. Lass und diese View schreiben::
+
+    def results(request, poll_id):
+        p = get_object_or_404(Poll, pk=poll_id)
+        return render_to_response('polls/results.html', {'poll': p})
+
+Dies ist fast genau das Gleiche, wie die ``detail()``-View von :ref:`Tutorial 3
+<intro-tutorial03>`. Der einzige Unterschied ist der Template-Name. Wir kümmern
+uns um diese Redundanz später.
+
+Erstelle jetzt ein Template ``results.html``:
+
+.. code-block:: html+django
+
+    <h1>{{ poll.question }}</h1>
+
+    <ul>
+    {% for choice in poll.choice_set.all %}
+        <li>{{ choice.choice }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
+    {% endfor %}
+    </ul>
+
+Gehe jetzt zu ``/polls/1/`` in deinem Browser und stimme für die Umfrage ab.
+Du solltest eine Ergebnisseite sehen, die jedes mal, wenn du abstimmst,
+aktualisiert wird. Wenn du das Formular abschickst, ohne eine Wahl getroffen zu
+haben, solltest du eine Fehlermeldung sehen.
+
+Benutze Generic Views: Weniger Code ist besser
+==============================================
+
+Die Views ``detail()`` (aus :ref:`Tutorial 3 <intro-tutorial03>`) und 
+``result()`` sind sehr einfach – und, wie oben erwähnt, redundant. Die View
+``index()`` (ebenfalls aus Tutorial 3), die eine Liste von Abstimmungen anzeigt,
+ist sehr ähnlich.
+
+Diese Views repräsentieren einen üblichen üblichen Fall von grundlegender
+Webentwicklung: Daten entsprechend zu einem Parameter in der URL aus der 
+Datenbank bekommen, ein Template laden und das gerenderte Template 
+zurückzugeben. Weil dies so üblich ist, bietet Django eine Abkürzung, das System
+"Generic Views".
+
+Generic Views abstrahieren übliche Muster bis zu dem Punkt, wo du noch nicht
+einmal Python-Code schreiben musst, um eine Applikation zu schreiben.
+
+Lass und unsere Abstimmungsapplikation konvertieren, so dass sie das System der
+Generic Views benutzt, damit wir eine Menge von unserem eigenen Code löschen
+können. Wir müssen nur einige wenige Schritte für die Konvertierung machen.
+
+.. admonition:: Warum das Hin- und Herwechseln von Code?
+
+    Normalerweise wirst du, wenn du eine Django-Applikation schreibst, im 
+    Vorweg prüfen, ob Generic Views eine gute Lösung für dein Problem sind und
+    sie von Beginn an benutzen, und nicht den Code mitten im Projekt umschreiben.
+    Aber dieses Tutorial hat mit Absicht Wert darauf gelegt, die Views bis jetzt
+    "auf schwere Art und Weise" zu schreiben, damit du dich auf die Kernkonzepte
+    konzetrieren kannst.
+
+    Du solltest ja auch grundlegende Mathematik beherrschen, bevor du einen 
+    Taschenrechner benutzt.
+
+Zuerst öffnest du die URLconf ``polls/urls.py``. Sie sieht bislang entsprechend
+des Tutorials so aus::
+
+    from django.conf.urls.defaults import *
+
+    urlpatterns = patterns('mysite.polls.views',
+        (r'^$', 'index'),
+        (r'^(?P<poll_id>\d+)/$', 'detail'),
+        (r'^(?P<poll_id>\d+)/results/$', 'results'),
+        (r'^(?P<poll_id>\d+)/vote/$', 'vote'),
+    )
+
+Ändere den Code so::
+
+    from django.conf.urls.defaults import *
+    from mysite.polls.models import Poll
+
+    info_dict = {
+        'queryset': Poll.objects.all(),
+    }
+
+    urlpatterns = patterns('',
+        (r'^$', 'django.views.generic.list_detail.object_list', info_dict),
+        (r'^(?P<object_id>\d+)/$', 'django.views.generic.list_detail.object_detail', info_dict),
+        url(r'^(?P<object_id>\d+)/results/$', 'django.views.generic.list_detail.object_detail', dict(info_dict, template_name='polls/results.html'), 'poll_results'),
+        (r'^(?P<poll_id>\d+)/vote/$', 'mysite.polls.views.vote'),
+    )
+
+Wir benutzen zwei Generic Views hier: 
+:func:`~django.views.generic.list_detail.object_list` und 
+:func:`~django.views.generic.list_detail.object_detail`. Diese beiden Views
+abstrahieren entsprechend der Konzepte "Zeige eine Liste von Objekten" und 
+"Zeige eine Detailseite für ein bestimmten Typ von Objekt an".
+
+    * Jede Generic View muss wissen, mit was für Daten sie es zu tun hat. Diese
+      Daten werden in einem Dictionary geliefert. Der Schlüssel ``queryset`` in
+      diesem Dictionary zeigt auf die Liste von Objekten, die von der Generic
+      View manipuliert werden soll.
+
+    * Die Generic View :func:`~django.views.generic.list_detail.object_detail`
+      erwartet einen ID-Wert ``"object_id"``, den sie aus der URL empfängt, also
+      haben wir ``poll_id`` zu ``object_id`` für Generic Views geändert.
+
+    * Wir haben einen Namen zur Ergebnis-View ``poll_results`` hinzugefügt, 
+      damit wir später eine Möglichkeit haben auf seine URL zu verweisen (sie
+      die  Dokumentation über :ref:`URL-Patterns benennen <naming-url-patterns>`
+      für weitere Informationen). Wir habe auch die Funktion
+      :func:`~django.conf.urls.default.url` aus :mod:`django.conf.urls.defaults`
+      hier verwendet. Es ist eine gute Angewohnheit 
+      :func:`~django.conf.urls.defaults.url` zu verwenden, wenn du ein 
+      Namensmuster, wie dieses anbietest.
+
+Standardmäßig benutzt die Generic View
+:func:`~django.views.generic.list_detail.object_detail` ein Template, das
+``<Applikationsname>/<Datenmodellname>_detail.html`` heißt. In unserem Fall
+benutzt es das Template ``"polls/poll_detail.html"``. Daher benenne dein
+Template ``polls/detail.html`` in ``polls/poll_detail.html`` um und ändere die
+Zeile :func:`~django.shortcuts.render_to_response` in ``vote()``.
+
+In ähnlicher Weise benutzt die Gerneric View
+:func:`~django.views.generic.list_detail.object_list` ein Template, das
+``<Applikationsname>/<Datenmodellname>_list.html`` heißt. Benenne daher
+``polls/index.html`` in ``polls/poll_list.html``.
+
+Weil wir mehr als einen Eintrag in der URLconf haben, 
+der :func:`~django.views.generic.list_detail.object_detail` für die 
+Abstimmungsapplikation benutzt, definieren wir einen Templatename für die
+Ergebnis-View manuell:
+``template_name='polls/results.html'``. Ansonsten würden beide Views das selbe
+Template benutzen. Beachte bitte, dass wir ``dict()`` benutzen, um ein verändertes
+Dictionary einzufügen.
+
+.. note:: :meth:`django.db.models.QuerySet.all` ist faul
+
+    Möglicherweise kann es ein wenig beängstigend aussehen, dass wir
+    ``Poll.objects.all()`` in der Detail-View verwenden, die nur ein 
+    ``Poll``-Objekt benötigt, aber keine Sorge; ``Poll.objects.all()`` ist in
+    Wirklichkeit ein spezielles Object, ein :class:`~django.db.models.QuerySet`,
+    dass "faul" ist und solange nicht deine Datenbank aufruft, bis sie unbedingt
+    muss. Zu der Zeit, wenn die Datenbankanfrage ausgeführt wird, hat die
+    Generic View :func:`~django.views.generic.list_detail.object_detail` bereits
+    seinen Bereich auf ein einzelnes Objekt eingegrenzt, so das die tatsächliche
+    Anfrage nur eine einzige Reihe aus der Datenbank auswählt.
+
+    Wenn du mehr darüber wissen möchtest, wie das funktioniert, die 
+    Django-Datenbank-API-Dokumentation :ref:`erklärt die faule Eigenschaft von
+    QuerySet-Objekten <querysets-are-lazy>`.
+
+In vorherigen Teilen des Tutorials, wurden die Templates mit einem Kontext
+ausgestattet, der die Kontext-Variablen ``poll`` und ``latest_poll_list`` als
+Kontext bereitstellte. Daher musst du deine Templates anpassen, damit sie mit
+den neuen Tempate-Variablen übereinstimmen. Gehe durch deine Templates und
+modifiziere jede Referenz auf ``latest_poll_list`` in ``object_list`` und jede
+Referenz auf ``poll`` in ``object``.
+
+Jetzt kannst du die Views ``index()``, ``detail()`` und ``result()`` aus
+``polls/views.py`` löschen. Wir brauchen sie nicht mehr – sie wurden durch
+Generic Views ersetzt.
+
+Die View ``vote()`` wird immer noch benötigt. Allerdings muss sie verändert
+werden, damit sie mit den neuen Kontext-Variablen übereinstimmt. Im Aufruf
+:func:`~django.shortcuts.render_to_response` benenne die Kontext-Variable 
+``poll`` in ``object`` um.
+
+Die letzte Sache, die wir noch korrigieren müssen, ist die URL-Behandlung, die
+eine Benutzung von Generic Views berücksichtigen muss. In der Abstimmungs-View
+oben, haben wir die Funktion :func:`~django.core.urlresolvers.reverse` benutzt,
+um das harte kodieren unserer URLs zu vermeiden. Jetzt, wo wir auf Generic Views
+umgestellt haben, müssen wir den Aufruf 
+:func:`~django.core.urlresolvers.reverse` ändern, um auf unsere neuen Generic
+Views zurückzuverweisen. Wir können nicht mehr einfach die View-Function 
+benutzen – Generic Views können (und werden) mehrere Male benutzt – aber wir
+können den Namen verwenden, den wir vergeben haben::
+
+    return HttpResponseRedirect(reverse('poll_results', args=(p.id,)))
+
+Starte den Server und benutze unsere neue Abstimmungsapplikations, die auf 
+Generic Views basiert.
+
+Für vollständige Details über Generic Views, siehe die :ref:`Dokumentation für
+Generic Views <topics-http-generic-views>`.
+
+Kommt bald
+==========
+
+Das Tutorial endet hier vorerst. Zukünftige Versionen des Tutorials werden
+folgendes behandeln:
+
+    * Fortgeschrittene Formularverarbeitung
+    * Benutzung des RSS-Frameworks
+    * Benutzung des Cache-Frameworks
+    * Benutzung des Kommentar-Frameworks
+    * Fortgeschrittene Admin-Besonderheiten: Zugriffe
+    * Fortgeschrittene Admin-Besonderheiten: Eigenes JavaScript
+
+In der Zwischenzeit möchtest du vielleicht einigen Hinweisen folgen :ref:`wo du
+von hier aus hingehen könntest <intro-whatsnext>`
