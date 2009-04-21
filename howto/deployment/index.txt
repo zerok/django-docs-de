@@ -1,0 +1,28 @@
+.. _howto-deployment-index:
+
+Django in Betrieb nehmen
+========================
+
+All die tollen Features, die dir Django bietet, bringen dir herzlich wenig,
+wenn du sie nicht einfach auf deinen Seiten einsetzen kannst. Von Anfang an
+war einfache Inbetriebnahme ein großes Ziel von Django. Es gibt nun eine Reihe
+von Wegen hierfür:
+
+.. toctree::
+   :maxdepth: 1
+   
+   modwsgi
+   modpython
+   modwsgi
+   fastcgi
+
+Wenn du noch keine dieser Optionen ausgeprobiert hast, fang mit :ref:`mod_wsgi
+<howto-deployment-modwsgi>` an. In den meisten Fällen ist mod_wsgi der
+einfachste, schnellste und robusteste Weg.
+
+.. seealso::
+
+    * `Kapitel 20 des Django-Books`_ behandelt die Inbetriebnahme und geht
+      auch hinsichtlich Skalierung ein bisschen mehr ins Detail.
+      
+.. _`Kapitel 20 des Django-Books`: http://djangobook.com/en/1.0/chapter20/
