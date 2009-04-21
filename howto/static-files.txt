@@ -1,0 +1,169 @@
+.. _howto-static-files:
+
+==========================
+Statische Dateien anbieten
+==========================
+
+.. module:: django.views.static
+   :synopsis: Statische Dateien während der Entwicklung anbieten.
+
+Django selbst ist nicht dafür konzipiert, statische Dateien wie Bilder,
+Stylesheets oder Videos auszuliefern. Standard Web-Server wie Apache_,
+lighttpd_ und Cherokee_ sind für diese Aufgabe optimiert, folglich sollte man
+ihnen diese Arbeit überlassen. 
+
+Django kann jedoch zumindest **während der Entwicklungsphase** auch dazu
+genutzt werden, solche Dateien auszuliefern und bietet hierfür den
+:func:`django.views.static.serve`-View.
+
+.. _Apache: http://httpd.apache.org/
+.. _lighttpd: http://www.lighttpd.net/
+.. _Cherokee: http://www.cherokee-project.com/
+
+.. seealso::
+
+    Wenn du lediglich die Admin-Dateien aus einem bestimmten Verzeichnis
+    anbieten möchtest, dann sollte dir der
+    :djadminopt:`--adminmedia`-Parameter von :djadmin:`runserver` helfen.
+
+Die wirklich große Warnung
+===========================
+
+Diese Methode ist **ineffizient** und **unsicher**. Verwende sie **nie** in
+einem Produktivsystem sondern lediglich während der Entwicklungsphase.
+
+Für Information wie du statische Dateine mit Apache in einem Produktivsystem
+ausliefern kannst, schau dir die :ref:`"Django mit mod_python"-Documentation
+<serving-media-files>` an.
+
+Wie benutzt man diesen View
+===========================
+
+So sieht die Signatur vom :func:`~django.views.static.serve`-View aus:
+
+.. function:: def serve(request, path, document_root, show_indexes=False):
+
+Um ihn zu verwende, trage folgende Zeilen in deine :ref:`URLconf
+<topics-http-urls>` ein::
+
+    (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': '/path/to/media'}),
+
+... wobei ``site_media`` die Basis-URL ist und ``/path/to/media`` das
+Basisverzeichnis im Dateisystem darstellt. Der ``document_root``-Parameter,
+mit dem die View-Funktion dann schlussendlich aufgerufen wird, ist für dies
+View verpflichtend.
+
+Mit dieser URLConf steht ...
+
+    * ``/path/to/media/foo.jpg`` unter ``/site_media/foo.jpg``
+
+    * und ``/path/to/media/css/mystyles.css`` unter der URL
+      ``/site_media/css/mystyles.css`` zur Verfügung.
+
+    * ``/path/bar.jpg``, auf der anderen Seite, wird nicht angeboten, da es
+      sich nicht innerhalb des mit ``document_root`` angegebenen
+      Verzeichnisses befindet.
+
+Natürlich musst du den Document-Root nicht dermaßen fix in der URLConf
+angeben. Einfacher verwaltbar wäre eine neue Einstellung innerhalb der
+``settings.py`` für diesen Pfad::
+
+    STATIC_DOC_ROOT = '/path/to/media'
+
+Der :ref:`URLconf <topics-http-urls>`-Eintrag von oben würde dann so aussehen::
+
+    from django.conf import settings
+    ...
+    (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': settings.STATIC_DOC_ROOT}),
+
+Sei jedoch vorsichtig, dass du nicht denselben Pfad wie für die
+:setting:`ADMIN_MEDIA_PREFIX`-Einstellung (welche standardmässig auf
+``/media/`` gesetzt ist) verwendest, da diese deinen URLConf-Eintrag
+überschreibt.
+
+Auflisten von Verzeichnissen
+============================
+
+Wenn du dem :func:`~django.views.static.serve`-View den optionalen Parameter
+``show_indexes`` übergibst und diesen auf ``True`` setzt, wird Django auch die
+Dateien in Verzeichnissen auflisten. Standardmässig ist dieser Parameter auf
+``False`` gesetzt.
+
+Zum Beispiel::
+
+    (r'^site_media/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': '/path/to/media', 'show_indexes': True}),
+
+Du kannst die Darstellung auch über das
+``static/directory_index.html``-Template verändern. Es erhält zwei Objekte
+über den Kontext:
+
+    * ``directory`` -- der Name des Verzeichnisses als String
+    * ``file_list`` -- eine Liste von Dateinamen als String in diesem 
+      Verzichnis
+
+So sieht das ursprüngliche ``static/directory_index.html``-Template aus:
+
+.. code-block:: html+django
+
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+        <meta http-equiv="Content-Language" content="en-us" />
+        <meta name="robots" content="NONE,NOARCHIVE" />
+        <title>Index of {{ directory }}</title>
+    </head>
+    <body>
+        <h1>Index of {{ directory }}</h1>
+        <ul>
+        {% for f in file_list %}
+        <li><a href="{{ f }}">{{ f }}</a></li>
+        {% endfor %}
+        </ul>
+    </body>
+    </html>
+
+.. versionchanged:: 1.0.3
+    Vor Django 1.0.3 existierte ein Bug in diesem View, wodurch das Template, 
+    nachdem gesucht wurde, den Namen ``static/directory_listing`` (ohne 
+    ``.html``) hatte. Um kompatibel mit diesen Versionen zu bleiben, wird 
+    Django auch weiterhin dieses Template finden, jedoch zieht es 
+    ``static/directory_index.html`` diesem vor.
+
+View mit DEBUG=True beschränken
+================================
+
+Da Djangos URLConfs normale Python-Module sind, kannst du einfach
+erreichen, dass der hier behandelte View lediglich während der
+Entwicklungsphase deines Projektes verwendet wird. 
+
+Umschließe einfach den :func:`django.views.static.serve`-Eintrag mit ``if
+settings.DEBUG``::
+
+    from django.conf.urls.defaults import *
+    from django.conf import settings
+
+    urlpatterns = patterns('',
+        (r'^articles/2003/$', 'news.views.special_case_2003'),
+        (r'^articles/(?P<year>\d{4})/$', 'news.views.year_archive'),
+        (r'^articles/(?P<year>\d{4})/(?P<month>\d{2})/$', 'news.views.month_archive'),
+        (r'^articles/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d+)/$', 'news.views.article_detail'),
+    )
+
+    if settings.DEBUG:
+        urlpatterns += patterns('',
+            (r'^site_media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/path/to/media'}),
+        )
+
+Hier wird das ``settings``-Modul geladen und dazu genutzt, der
+``django.views.static.serve``-View nur dann eine URL zuzuweisen, wenn sich die
+Seite im DEBUG-Modus befindet. Wenn nicht, steht dieser View nicht zur
+Verfügung und die statischen Dateien werden nicht durch Django selbst
+ausgeliefert.
+
+Natürlich musst du dich nun daran erinnern, ``DEBUG=False`` zu setzen, sobald
+du die Seite im Produktivsystem einsetzt. Aber das solltest du ohnehin immer.
+
