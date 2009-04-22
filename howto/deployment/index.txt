@@ -13,7 +13,6 @@ von Wegen hierfür:
    
    modwsgi
    modpython
-   modwsgi
    fastcgi
 
 Wenn du noch keine dieser Optionen ausgeprobiert hast, fang mit :ref:`mod_wsgi
