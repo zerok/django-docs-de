@@ -1,0 +1,69 @@
+.. _howto-deployment-modwsgi:
+
+================================================
+Wie verwendet man Django mit Apache und mod_wsgi
+================================================
+
+Apache_ in Verbindung mit `mod_wsgi`_ ist die empfohlene Methode, um
+Django in einem Produktivsystem einzusetzen.
+
+.. _Apache: http://httpd.apache.org/
+.. _mod_wsgi: http://code.google.com/p/modwsgi/
+
+mod_wsgi ist ein Apache-Modul, das den Betrieb von Python-Applikationen
+ermöglicht, die, wie Django, das `Python-WSGI-Interface`_ implementieren.
+Django funktioniert mit jeder Version von Apache, die mod_wsgi unterstützt.
+
+.. _python-wsgi-interface: http://www.python.org/dev/peps/pep-0333/
+
+Die `offizielle mod_wsgi-Dokumentation`_ beschreibt sehr detailliert, wie man
+mod_wsgi installiert und konfiguriert und enthält auch eine ganze Reihe von
+Beispielkonfigurationen. Deine erste Adresse sollte hier die `Installations-
+und Konfigurationsdokumentation`_ sein.
+
+.. _offizielle mod_wsgi-dokumentation: http://code.google.com/p/modwsgi/
+.. _installations- und konfigurationsdokumentation: http://code.google.com/p/modwsgi/wiki/InstallationInstructions
+
+Basiskonfiguration
+==================
+
+Nachdem du mod_wsgi installiert und aktiviert hast, editiere deine
+``httpd.conf``-Datei und füge folgenden Eintrag hinzu::
+
+    WSGIScriptAlias / /path/to/mysite/apache/django.wsgi
+
+``/`` entspricht der URL, unter der ein Projekt angeboten werden soll.
+``/path/to/mysite/apache/django.wsgi`` ist der Pfad zur WSGI-Datei deines
+Projektes (mehr dazu gleich). Mit dieser Zeile weiß Apache nun, welche
+Applikation nun wo angeboten werden soll. 
+
+Als nächstes müssen wir die WSGI-Applikation schreiben, die über die
+.wsgi-Datei Apache zur Verfügung gestellt wird::
+
+    import os
+    import sys
+
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'mysite.settings'
+
+    import django.core.handlers.wsgi
+    application = django.core.handlers.wsgi.WSGIHandler()
+
+Sollte dein Projekt nicht im ``PYTHONPATH`` liegen, füge folgende Zeile direkt
+vor dem ``import``, das Django lädt:: 
+
+    sys.path.append('/usr/local/django')
+
+Vergiss auch nicht, 'mysite.settings' auf den entsprechenden Wert für dein
+Projekt zu ändern.
+
+Informationen zum Anbieten statischer Dateien findest du in der
+:ref:`Apache/mod_python-Documentation<howto-deployment-modpython>`.  Die
+``mod_wsgi-Dokumentation`` beschreibt ferner weitere Direktiven und
+Konfigurationsoptionen.
+
+Details
+=======
+
+Mehr Details gibt es, wie bereits erwähnt in der `mod_wsgi-Dokumentation`.
+
+.. _mod_wsgi-dokumentation: http://code.google.com/p/modwsgi/wiki/IntegrationWithDjango
