@@ -1,0 +1,394 @@
+.. _howto-deployment-modpython:
+
+==================================================
+Wie verwendet man Django mit Apache und mod_python
+==================================================
+
+.. highlight:: apache
+
+Das `mod_python`_-Modul für Apache_ kann dazu genutzt werden, um Django auf
+einem Produktivserver einzusetzen. Jedoch wurde es weitestgehend vom
+einfacheren :ref:`mod_python <howto-deployment-modwsgi>` abgelöst.
+
+mod_python ist `mod_perl`_ (von dem es inspiriert wurde) recht ähnlich: Es
+bindet Python direkt in Apache ein und lädt Python-Code in den Hauptspeicher,
+sobald der Server startet. Dort bleibt der Code auch, solange der
+Server-Prozess läuft, was zu deutlichen Performance-Vorteilen gegenüber
+anderen Server-Lösungen führt.
+
+Django benötigt Apache 2.x und mod_python 3.x. Du solltest hierfür Apaches
+`prefork MPM`_ anstelle des `worker MPM`_ verwenden.
+
+.. seealso::
+
+    * Apache ist ein großes, komplexes System und dieses Dokument kann all die
+      Optionen, die es bietet nur streifen. Wenn du detaillierte Information
+      über Apache benötigst, so ist die `offizielle Apache-Dokumentation`_
+      sicherlich der bessere Ort.
+
+    * Vielleicht interessiert dich auch, wie du :ref:`Django mit FastCGI, SCGI,
+      oder AJP verwenden kannst<howto-deployment-fastcgi>`.
+
+.. _Apache: http://httpd.apache.org/
+.. _mod_python: http://www.modpython.org/
+.. _mod_perl: http://perl.apache.org/
+.. _prefork MPM: http://httpd.apache.org/docs/2.2/mod/prefork.html
+.. _worker MPM: http://httpd.apache.org/docs/2.2/mod/worker.html
+.. _offizielle apache-dokumentation: http://httpd.apache.org/docs/
+
+Basiskonfiguration
+==================
+
+Bevor du mod_python konfigurierst, stelle sicher, dass du Apache installiert
+und das mod_python-Modul aktiviert hast. 
+
+Dann editiere deine ``httpd.conf``-Datei und füge Folgendes hinzu::
+
+    <Location "/mysite/">
+        SetHandler python-program
+        PythonHandler django.core.handlers.modpython
+        SetEnv DJANGO_SETTINGS_MODULE mysite.settings
+        PythonOption django.root /mysite
+        PythonDebug On
+    </Location>
+
+... und ersetze ``mysite.settings`` mit dem Import-Pfad für die
+``settings``-Datei deines Django-Projektes.
+
+Damit verwendet Apache mod_python und Djangos mod_python-Handler für alle URLs
+unterhalb von '/mysite/'. Es wird auch der Wert von
+:ref:`DJANGO_SETTINGS_MODULE` übergeben, damit mod_python weiß, welche
+Einstellungen verwendet werden sollen.
+
+.. versionadded:: 1.0
+    ``PythonOption django.root ...`` ist neu in dieser Version.
+
+Da mod_python nicht weiß, dass wir diese Seite unterhalb von ``/mysite/``
+anbieten wollen, muss dieser Wert durch den mod_python-Handler von Django
+durch ``PythonOption django.root ...`` übergeben werden. Der Wert, der in
+dieser Zeile gesetzt wird, sollte dem String in der ``<Location
+...>``-Direktive entsprechen. Damit entfernt Django ``/mysite`` von jeder URL,
+bevor es versucht, diese mit den URLconf-Mustern abzugleichen. Wenn du später
+deine Seite zum Beispiel unter ``/mysite2`` anbieten möchtest, musst du nichts
+in deiner URLconf, sondern lediglich die ``django.root``-Option in der
+Konfigurationsdatei ändern. 
+
+Wenn du ``django.root`` verwendest, solltest du sicherstellen, dass der Teil
+der URL nach dem Präfix mit einem Schrägstrich beginnt. Jene URLconf-Muster,
+die einen Schrägstrich am Anfang erwarten, funktionieren dann. Im Beispiel von
+oben möchten wir URLs wie ``/mysite/admin/`` an ``/admin/`` weiterleiten,
+weshalb ``django.root`` auf ``/mysite`` gesetzt wird. ``/mysite/`` (also mit
+einem Schrägstrich am Ende) wäre ein Fehler. 
+
+Beachte, dass wir hier die ``<Location>``-Direktive und nicht die
+``<Directory>``-Direktive verwenden. Letztere ist für Orte im Dateisystem
+gedacht, während ``<Location>`` auf der URL-Struktur operiert. ``<Directory>``
+wäre hier sinnlos.
+
+Wenn sich dein Django-Projekt zudem nicht im Standard-``PYTHONPATH`` befindet,
+musst du diesen auch um den Pfad zu deinem Projekt für mod_python erweitern:
+
+.. parsed-literal::
+
+    <Location "/mysite/">
+        SetHandler python-program
+        PythonHandler django.core.handlers.modpython
+        SetEnv DJANGO_SETTINGS_MODULE mysite.settings
+        PythonOption django.root /mysite
+        PythonDebug On
+        **PythonPath "['/path/to/project'] + sys.path"**
+    </Location>
+
+Der Wert, den du für den ``PythonPath`` verwendest, sollte das Oberverzeichnis
+aller Module enthalten, die du in deiner Applikation importierst. Er sollte
+auch das Elternverzeichnis deines :ref:`DJANGO_SETTINGS_MODULE`\s enthalten.
+Die Situation ist hier genau gleich wie wenn du den ``PYTHONPATH`` für den
+interaktiven Interpreter setzen willst. Sobald du versuchst, etwas zu
+importieren, geht Python sämtliche Verzeichnisse im ``sys.path`` durch und
+versucht von jedem einzelnen Verzeichnis das gewünschte Modul zu importieren,
+bis es ihn einem gelingt.
+
+Stelle sicher, dass deine Python-Quelldateien entsprechende Berechtigungen
+haben, damit der Apache-Benutzer (normalerweise ``apache`` oder ``httpd``
+genannt) auf die zugreifen kann.
+
+Ein Beispiel sollte das verdeutlichen. Stell dir vor, du hast eine Reihe von
+Applikationen in ``/usr/local/django-apps/`` (zum Beispiel
+``/usr/local/django-apps/weblog/``), deine Einstellungen sind in
+``/var/www/mysite/settings.py`` und du hast das
+:ref:`DJANGO_SETTINGS_MODULE` wie oben besprochen angegeben. Dann sollte deine
+``PythonPath``-Direktive so aussehen::
+
+    PythonPath "['/usr/local/django-apps/', '/var/www'] + sys.path"
+
+Mit diesem Pfad werden sowohl ``import weblog`` als auch ``import
+mysite.settings`` funktionieren. Wenn du irgendwo in deinem Code ein ``import
+blogroll`` hättest und ``blogroll`` sich im ``weblog/``-Verzeichnis befände,
+müsstest du auch ``/usr/local/django-apps/weblog/`` zu deinem ``PythonPath``
+hinzufügen. Zur Erinnerung: Das **Elternverzeichnis** jedes Moduls oder
+Packages, das du direkt importieren möchtest, muss sich im ``PythonPath``
+befinden.
+
+.. note::
+    
+    Wenn du Windows verwendest, solltest du ebenfalls Schrägstriche in den
+    Pfadnamen verwenden, obwohl Windows normalerweise an dieser Stelle
+    Backslashes verwendet. Apache kann Schrägstriche entsprechend
+    konvertieren, folglich sind sie der portablere (und leichter lesbare)
+    Weg. (Damit kannst du das Problem umgehen, dass du Backslashes doppelt
+    escapen musst.)
+    
+    Folgendes ist somit sogar unter Windows gültig::
+
+        PythonPath "['c:/path/to/project'] + sys.path"
+
+Um die Performance ein bisschen zu steigern, kannst du auch Direktiven wie
+``PythonAutoReload Off`` verwenden. Eine vollständige Liste von Optionen
+findest du in der `mod_python-Dokumentaton`_.
+
+Beachte, dass du ``PythonDebug Off`` auf Produktivsystemen setzen solltest.
+Wenn du dort ``PythonDebug On`` beibehälst, sehen deine Benutzer hässliche
+(und viel zu informative) Python-Tracebacks, wenn etwas innerhalb von
+mod_python schief läuft.
+
+Starte nun Apache neu und Requests auf ``/mysite/`` und tiefer werden von
+Django behandelt. Bedenke, dass Djangos URLconfs "/mysite/" nicht entfernen --
+sie bekommen die vollständige URL übergeben.
+
+Wenn du Django-Seiten mit mod_python betreibst, musst du Apache nach jeder
+Änderung an deinem Python-Code neustarten.
+
+Mehrere Django-Installationen am selben Apache-Server
+=====================================================
+
+Es ist möglich, mehrere Django-Installation mit ein und demselben
+Apache-Server zu betreiben. Verwende hierfür einfach ``VirtualHost``::
+
+    NameVirtualHost *
+
+    <VirtualHost *>
+        ServerName www.example.com
+        # ...
+        SetEnv DJANGO_SETTINGS_MODULE mysite.settings
+    </VirtualHost>
+
+    <VirtualHost *>
+        ServerName www2.example.com
+        # ...
+        SetEnv DJANGO_SETTINGS_MODULE mysite.other_settings
+    </VirtualHost>
+
+Wenn du zwei Django-Installation innerhalb eines ``VirtualHost``\s (oder in
+unterschiedlichen ``VirtualHost``\s, die jedoch denselben Servernamen haben)
+betreiben möchtest, musst du noch ein paar zusätzliche Vorbereitungen treffen,
+damit mod_python nicht vollkommen verwirrt wird und den Cache
+durcheinanderbringt. Verwende die ``PythonInterpreter``-Direktive, um
+unterschiedlichen ``<Location>``\s unterschiedliche Interpreter zuzuweisen::
+
+    <VirtualHost *>
+        ServerName www.example.com
+        # ...
+        <Location "/something">
+            SetEnv DJANGO_SETTINGS_MODULE mysite.settings
+            PythonInterpreter mysite
+        </Location>
+
+        <Location "/otherthing">
+            SetEnv DJANGO_SETTINGS_MODULE mysite.other_settings
+            PythonInterpreter othersite
+        </Location>
+    </VirtualHost>
+
+Die Werte der ``PythonInterpreter`` sind unwichtig, so lange sie
+zwischen den beiden ``Location``-Blöcken unterschiedlich sind.
+
+Einen Entwicklungsserver mit mod_python betreiben
+=================================================
+
+Wenn du mod_python als deine Entwicklungsumgebung verwendest, kannst du
+umgehen, dass du den Server nach jeder Codeänderung neustarten musst. Setze
+einfach in deiner ``httpd.conf`` ``MaxRequestsPerChild 1``, wodurch du Apache
+dazu zwingst, alles bei jedem Request neu zu laden. Aber mach das bloß nicht
+in deinem Produktivsystem. 
+
+Wenn du einer jener Programmierer bist, die für das Debugging gerne
+``print``-Statements einsetzen, beachte dass ``print`` in mod_python keine
+Auswirkungen hat; sie scheinen nicht einmal in den Log-Dateien auf. Wenn du
+Debug-Informationen in einer mod_python-Umgebung unbedingt ausgeben musst,
+verwende entweder::
+
+    assert False, the_value_i_want_to_see
+
+... oder füge solche Debug-Informationen zu deinen Templates hinzu.
+
+.. _mod_python-dokumentation: http://modpython.org/live/current/doc-html/directives.html
+
+.. _serving-media-files:
+
+Statische Dateien
+=================
+
+Django selbst ist nicht für die Auslieferung von statischen Dateien
+konzipiert, sondern überlässt diese Aufgabe gerne dem Webserver deines
+Vertrauens.
+
+Wir empfehlen hierfür einen eigenen Webserver, also einen, der nicht auch
+schon für Django verwendet wird. Hier sind ein paar gute Optionen:
+
+    * lighttpd_
+    * Nginx_
+    * TUX_
+    * Eine leichtgewichtig konfigurierte Version von Apache_
+    * Cherokee_
+
+Solltest du jedoch keine andere Wahl haben, als auch die statischen Dateien
+mit demselben Apache-``VirtualHost`` wie auch Django selbst auszuliefern, so
+kannst du hiermit mod_python für einen bestimmten Bereich deiner Seite
+abschalten::
+
+    <Location "/media">
+        SetHandler None
+    </Location>
+
+Verwende einfach ``Location`` für die Basis-URL deiner Mediendateien. Du
+kannst auch ``<LocationMatch>`` mit einem entsprechenden regulären Ausdruck
+verwenden.
+
+In diesem Beispiel wird der Handler für Django für die gesamte Seite
+installiert, jedoch für das ``media``-Verzeichnis und für sämtliche URLs mit
+dem Suffix ``.jpg``, ``.gif`` oder ``.png`` deaktiviert::
+
+    <Location "/">
+        SetHandler python-program
+        PythonHandler django.core.handlers.modpython
+        SetEnv DJANGO_SETTINGS_MODULE mysite.settings
+    </Location>
+
+    <Location "/media">
+        SetHandler None
+    </Location>
+
+    <LocationMatch "\.(jpg|gif|png)$">
+        SetHandler None
+    </LocationMatch>
+
+
+.. _lighttpd: http://www.lighttpd.net/
+.. _Nginx: http://wiki.codemongers.com/Main
+.. _TUX: http://en.wikipedia.org/wiki/TUX_web_server
+.. _Apache: http://httpd.apache.org/
+.. _Cherokee: http://www.cherokee-project.com/
+
+.. _howto-deployment-modpython-serving-the-admin-files:
+
+.. _serving-the-admin-files:
+
+Statische Dateien der Admin-Komponente
+======================================
+
+Im Gegensatz zu Djangos eigenem Entwicklungsserver werden die statischen
+Dateien des Admin-Interfaces von anderen Servern nicht automatisch angeboten.
+Du musst selbst Apache (oder welchen Server auch immer du dafür verwenden
+möchtest) entsprechend konfigurieren, damit auch diese Dateien ausgeliefert
+werden. 
+
+Die Admin-Dateien befinden sich im
+:file:`django/contrib/admin/media`-Verzeichnis deiner Django-Distribution.
+
+Hier sind zwei empfohlene Ansätze:
+
+    1. Erzeuge einen symbolischen Link zu den Mediendateien des
+       Admin-Interfaces von innerhalb deines Document-Root. Damit bleiben all
+       deine Django-Dateien (Code **und** Templates) an einem Ort und du
+       kannst sie somit einfacher aktualisieren. 
+
+    2. Oder kopiere sämtliche Mediendateien für das Admin-Interface in dein
+       Document-Root-Verzeichnis.
+
+"eggs" und mod_python
+=====================
+
+Wenn du Django aus einem Python-Egg installiert hast oder Eggs irgendwo in
+deinem Django-Projekt verwendest, musst du weitere Konfigurationsschritte
+vornehmen. Erzeuge eine zusätzliche Datei in deinem Projekt (oder irgendwo
+anders), das folgenden Code enthält:
+
+.. code-block:: python
+
+    import os
+    os.environ['PYTHON_EGG_CACHE'] = '/some/directory'
+
+``/some/directory`` steht hierbei für ein Verzeichnis, in dem die
+Webserver-Prozesse von Apache schreiben können. Es dient als
+Extraktionsverzeichnis für die Eggs.
+
+Dann muss mod_python diese Datei noch importieren, bevor es irgendetwas
+anderes macht. Nutze hierfür die `PythonImport`_-Direktive von mod_python.
+Stelle sicher, dass du einen ``PythonInterpreter`` angibst (wie oben
+beschrieben), bevor du diese Direktive anwendest. Du musst den Interpreter in
+dieser Situation angeben ungeachtet dessen, wie viele Django-Installation hier
+verwendet werden. Trage nun die ``PythonImport``-Zeile nach dem
+``PythonInterpreter`` in die Hauptkonfiguration des Server (also außerhalb der
+``Location``- oder ``VirtualHost``-Abschnitte) ein::
+
+    PythonInterpreter my_django
+    PythonImport /path/to/my/project/file.py my_django
+
+Beachte, dass du hier sowohl einen absoluten Dateisystempfad als auch einen
+normalen Python-Modulpfad entsprechend der `mod_python-Anleitung`_ verwenden
+kannst. Wir verwenden hier einen absoluten Pfad, da, falls dein Projekt
+irgendwelche Änderungen am ``PYTHONPATH`` benötigt, diese zum Zeitpunkt der
+Ausführung von ``PythonImport`` noch nicht durchgeführt wurden.
+
+.. _Egg: http://peak.telecommunity.com/DevCenter/PythonEggs
+.. _PythonImport: http://www.modpython.org/live/current/doc-html/dir-other-pimp.html
+.. _mod_python-Anleitung: PythonImport_
+__ `Mehrere Django-Installationen am selben Apache-Server`_
+
+Fehlerbehandlung
+================
+
+Wenn du Apache/mod_python verwendest, werden Fehler direkt von Django
+behandelt und werden folglich nicht an Apache weitergeleitet und scheinen
+somit nicht in Apaches ``error_log`` auf.
+
+Die Ausnahme hier sind Probleme in deinem Django-Setup, die im Browser als
+"Internal Server Error"-Seiten aufscheinen. Hier wird ein Python-Traceback
+auch in das ``error_log`` geschrieben, was jedoch auf mehrere Zeilen
+aufgeteilt sehr hässlich wird. Leider macht das mod_python so.
+
+Speicherzugriffsfehler
+======================
+
+Falls Apache einen Speicherzugriffsfehler verursacht, sind zwei Ursachen
+wahrscheinlich. Keine der beiden hat jedoch direkt mit Django zu tun.
+
+    1. Es könnte sein, dass dein Python-Code das "pyexpat"-Modul importiert
+       und zwar in einer Version, die mit jener von Apache in Konflikt steht.
+       Mehr Details findest du in `Expat Causing Apache Crash`_.
+
+    2. Ein weiterer Grund könnte sein, dass du mod_python und mod_php in
+       derselben Apache-Instanz mit MySQL als Datenbank-Backend betreibst. In
+       manchen Fällen führt das zu einem bekannten Problem in mod_python
+       aufgrund von einem Versionskonflikt zwischen dem PHP- und dem
+       Python-MySQL-Backend. Mehr dazu findest du in diesem
+       `mod_python-FAQ-Eintrag`_.
+
+Falls du noch immer Probleme hast, mod_python zum Laufen zu bekommen, versuche
+zuerst eine einfach mod_python-Seite einzurichten, also ohne Django. Damit
+kannst du recht einfach mod_python-spezifische Probleme entlarven. `Getting
+mod_python Working`_ beschreibt diese Prozedur genauer.
+
+Als Nächstes solltest du deinen Test-Code editieren und versuchen,
+Django-spezifischen Code -- deine Views, Modell, URLconf, RSS-Konfiguration
+etc. -- zu importieren. Füge diese Imports in deine Test-Handler-Funktion ein
+und greife auf deine Test-URL mit einem Browser zu. Führt das zu einem Crash,
+dann hast du damit nachgewiesen, dass der Import von Django-Code das Problem
+darstellt. Entferne nun wieder schrittweise die Imports bis die Seite nicht
+mehr abstürzt, wodurch du das genaue Modul finden kannst, das die Probleme
+verursacht. Falls notwendig, schau auch in die importierten Module und teste
+jene Module, die sie wiederum importieren.
+
+.. _Expat Causing Apache Crash: http://www.dscpl.com.au/articles/modpython-006.html
+.. _mod_python-FAQ-Eintrag: http://modpython.org/FAQ/faqw.py?req=show&file=faq02.013.htp
+.. _Getting mod_python Working: http://www.dscpl.com.au/articles/modpython-001.html
