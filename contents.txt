@@ -17,8 +17,8 @@ Inhalte
    releases/index
    internals/index
 
-Indizes, Gloassare und Tabelle
-==============================
+Indizes, Glossare und Tabelle
+=============================
 
 * :ref:`genindex`
 * :ref:`modindex`
