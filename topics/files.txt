@@ -127,8 +127,8 @@ Deren Konstruktor akzeptiert zwei Argumente:
 Attribut                Beschreibung
 ======================  ===================================================
 ``location``            Optional. Absoluter Pfad zu dem Order in dem die
-			            Dateien abgespeichert werden. Wenn nicht angegeben,
-            			wird dies auf die ``MEDIA_ROOT``-Einstellung 
+                        Dateien abgespeichert werden. Wenn nicht angegeben,
+                        wird dies auf die ``MEDIA_ROOT``-Einstellung 
                         gesetzt.
 ``base_url``            Optional. URL von der aus die Dateien, die hier
                         gespeichert sind, ausgeliefert werden. Wenn nicht 
