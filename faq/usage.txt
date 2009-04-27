@@ -72,3 +72,14 @@ Das Verwenden eines :class:`~django.db.models.FileField` oder
        zu nutzen. Wenn dein :class:`~django.db.models.ImageField` z.B. 
        ``mug_shot`` heißt, kannst du in deinem Template, die absolute URL zu 
        dem Bild mit ``{{ object.mug_shot.url }}`` ausgeben.
+
+Wie kann ich eine Variable in all meinen Templates verwenden?
+-------------------------------------------------------------
+
+Manchmal möchtest du in all deinen Templates dieselben Variablen verwenden --
+wie zum Beispiel bei globalen Menüs. Der erste Ansatz wäre hier zu versuchen,
+irgendwie einen Teil des Kontext überall abzugleichen. 
+
+Dabei hilft dir der ``RequestContext``. Mehr dazu findest du in
+:ref:`subclassing-context-requestcontext`.
+
