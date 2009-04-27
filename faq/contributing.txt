@@ -28,7 +28,82 @@ Frameworks aufwenden kann. Da die vorhandene Freizeit von Woche zu Woche
 unterschiedlich ist, können wir uns eventuell nicht so oft mit Django
 beschäftigen, wie wir es geplant haben.
 
-Auch wenn deine Anfrage für eine neue Funktion keine Chance auf Integration in
-Django hat, werden wir sie nicht ignorieren, sondern einfach das Ticket
-schliessen. Wenn dein Ticket also noch offen ist, heisst das nicht das wir
-dich ignorieren, sondern einfach noch keine Zeit hatten, es uns anzusehen.
+Um sicherzustellen, dass ein Ticket schnellstmöglich abgearbeitet wird, sollte
+es auch für Personen, die nicht direkt mit dem entsprechenden Problembereich
+zu tun haben, so einfach wie möglich gemacht werden, das Problem zu verstehen
+und auch die vorgeschlagene Lösung zu verifizieren:
+
+    * Ist es klar, wie der Fehler reproduziert werden kann? Falls das Problem
+      Abhängigkeiten (wie etwa PIL), contrib-Module oder ein bestimmtes
+      Datenbanksystem betrifft, sind die entsprechenden Anleitungen allgemein
+      verständlich?
+
+    * Wenn mehrere Patches bereits an das Ticket angehängt wurden, ist es
+      ersichtlich, welche davon was machen und welche ignoriert werden können?
+
+    * Enthält der Patch auch Unittests? Falls nicht, wird verdeutlicht warum
+      nicht? Tests verdeutlichen Probleme und zeigen, ob der vorgeschlagene
+      Patch das Problem auch wirklich behebt.
+
+Falls dein Patch keine Chance hat, in Django zu landen, ignorieren wir das
+Ticket nicht, sondern schließen es. Wenn dein Ticket noch immer offen ist,
+dann heißt das nicht, dass wir dich ignorieren, sondern dass wir einfach noch
+nicht die Zeit hatten, es durchzusehen.
+
+Wann und wie sollte ich die Kern-Entwickler an einen Patch erinnern, der mir Herzen liegt?
+------------------------------------------------------------------------------------------
+
+Eine freundliche Nachricht zum richtigen Zeitpunkt an die Mailing-List ist ein
+Weg, um Aufmerksamkeit zu bekommen. Ein Blick auf den Kalender hilft, den
+richtigen Zeitpunkt für eine solche Nachricht zu bestimmen. Wenn die
+Kern-Entwickler gerade auf eine Feature-Deadline hinarbeiten oder in der
+Plannungsphase sind, wirst du vermutlich ihr Aufmerksamkeit nicht auf dich
+ziehen können. Wenn die Entwickler aber gerade ohnehin nach Bugs Ausschau
+halten -- zum Beispiel vor einem Bugfix-Sprint oder vor einem Beta-Release --,
+stehen deine Chancen deutlich besser.
+
+Sanftes Anstupsen via IRC kann ebenfalls funktionieren -- aber natürlich auch
+wieder nur zum richtigen Zeitpunkt. Zum Beispiel während einem Bug-Sprint wäre
+so ein Zeitpunkt.
+
+Ein weiterer Weg, um Aufmerksamkeit zu bekommen, ist verwandte Tickets
+zusammenzufassen. Wenn ein/eine Kern-EntwicklerIn ein Problem in einem
+Bereich beheben möchte, den er/sie schon lange nicht mehr gesehen hat, kann es
+einige Minuten dauern, bis er/sie sich wieder an all die Details erinnert, wie
+der Code überhaupt funktioniert. Wenn du mehrere kleinere Fixes in einer
+gemeinsamen Gruppe sammelst, machst du sie attraktiver. 
+
+Bitte kontaktiere Kern-Entwickler nicht direkt via E-Mail oder versuche ein
+Thema wiederholt in der Vordergrund zu rücken. Diese Art von Aufmerksamkeit
+hilft deinem Ticket nicht wirklich weiter.
+
+Aber ich habe euch schon mehrmals erinnert und ihr ignoriert meinen Patch einfach weiter!
+-----------------------------------------------------------------------------------------
+
+Nochmal: Wir ignorieren dich nicht. Wenn dein Patch keine Chance hat, in
+Django eingebaut zu werden, werden wir das Ticket schließen. Für alle anderen
+Tickets müssen wir unsere Anstrengungen priorisieren, weshalb manche Tickets
+vor anderen drankommen.
+
+Ein Kriterium ist hier die Anzahl der Personen, die von dem Bug betroffen
+sind. Bugs, die wahrscheinlich viele Leute betreffen, bekommen in der Regel
+eine höhere Priorität als andere.
+
+Ein weitere Grund für einen ignorierten Bugreport ist, wenn der Fehler nur ein
+Symptom für ein größeres Problem ist. Hier könnte eine groß angelegte
+Umstrukturierung angebracht sein. Wenn eine solche Umstrukturierung
+einer Komponente vorgeschlagen wurde oder bereits im Gange ist, bekommen
+Problemberichte zu dieser Komponente nicht viel Aufmerksamkeit. Hier geht es
+wirklich nur um die Priorisierung unserer eingeschränkten Ressourcen. Durch
+eine solche Großanstrengung können wir alle kleinen Probleme auf einen Schlag
+beheben und hoffentlich auch weitere kleine Problem für die Zukunft umgehen.
+
+Bitte bedenke auch, dass selbst wenn du ein bestimmtes Problem regelmässig
+antriffst, dies nicht zwangsläufig für jeden Django-Benutzer zutreffen muss.
+Unterschiedliche Benutzer nutzen Django auf unterschiedliche Weise,
+unterschiedliche Code-Bereiche werden unter unterschiedlichen Voraussetzungen
+ausgeführt. Bei unserer Priorisierung versuchen wir, die Bedürfnisse der
+gesamten Community zu befriedigen und nicht nur jene eines bestimmten
+Benutzers. Das bedeutet nicht, dass wir denken, dein Problem wäre unwichtig.
+Es heißt viel mehr, dass wir eher versuchen werden, 10 Leute glücklich zu
+machen, als eine einzige.
