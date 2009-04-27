@@ -16,11 +16,6 @@ Wie fange ich an?
 .. _`Lade dir den Code herunter`: http://www.djangoproject.com/download/
 .. _stelle Fragen: http://www.djangoproject.com/community/
 
-Wie behebe ich die Fehlermeldung "install a later version of setuptools"?
--------------------------------------------------------------------------
-
-Führe einfach das ``ez_setup.py``-Skript im Django-Verzeichnis aus.
-
 Was sind Djangos Abhängigkeiten?
 --------------------------------
 
