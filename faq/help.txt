@@ -1,0 +1,74 @@
+.. _faq-help:
+
+FAQ: Hilfe bekommen
+===================
+
+Wie mache ich X? Warum funktioniert Y nicht? Wo kann mir geholfen werden?
+-------------------------------------------------------------------------
+
+Wenn diese FAQ deine Frage noch nicht beantwortet, dann könntest du den
+`django-users-Verteiler`_ versuchen. Das ist der richtige Ort um Fragen zur
+Installation, Verwendung und dem Debugging von Django zu stellen. 
+
+Falls du IRC vorziehst, so findest du im `#django-IRC-Channel`_ auf Freenode
+eine aktive Community voller hilfsbereiter Leute.
+
+.. _`django-users-Verteiler`: http://groups.google.com/group/django-users
+.. _`#django-IRC-channel`: irc://irc.freenode.net/django
+
+Warum sehe ich meine Nachricht nicht in django-users?
+-----------------------------------------------------
+
+django-users_ hat eine ganze Menge Teilnehmer. Das ist gut für die Community,
+da somit viele Leute da sind, um bei der Beantwortung von Fragen zu helfen.
+Leider macht dieser Umstand django-users_ auch zu einem attraktiven Ziel für
+Spammer.
+
+Um dieses Problem zu bekämpfen, moderieren wir deine ersten Nachrichten an den
+Verteiler. Das hilft sehr dabei, Spammer abzufangen, aber es bedeutet auch,
+dass deine erste Frage etwas länger braucht. Wir entschuldigen uns für die
+Probleme, die diese Vorkehrungen möglicherweise produzieren.
+
+.. _django-users: http://groups.google.com/group/django-users
+
+Niemand auf django-users beantwortet meine Frage! Was soll ich tun?
+-------------------------------------------------------------------
+
+Versuche deine Frage genauer zu formulieren oder gib vielleicht ein besser
+Beispiel für dein Problem.
+
+Wie bei auf den meisten Open-Source-Verteilers sind die Teilnehmer auf
+django-users_ Freiwillige. Wenn niemand deine Frage bisher beantwortet hat,
+kann das bedeuten, dass niemand die Antwort kennt oder dass niemand die Frage
+verstanden hat oder dass jeder, der helfen könnte, derzeit beschäftigt ist.
+Alternativ könntest du auch im `#django-IRC-Channel`_ auf Freenode fragen.
+
+Du hast vielleicht unseren zweiten Verteiler django-developers_ entdeckt.
+Bitte schicke dorthin keine Support-Fragen. Das Thema dieses Verteilers ist
+die Entwicklung von Django selbst und dort Support-Fragen zu stellen, gilt als
+unhöflich.
+
+.. _django-developers: http://groups.google.com/group/django-developers
+
+Ich glaube, ich habe einen Bug gefunden! Was soll ich tun?
+----------------------------------------------------------
+
+Eine detaillierte Anleitung was mit potentiellen Bugs geschehen soll, findest
+du in unserer :ref:`Anleitung zur Mithilfe bei Django <reporting-bugs>`.
+
+Ich glaube, ich habe ein Sicherheitsproblem gefunden! Was soll ich tun?
+-----------------------------------------------------------------------
+
+Falls du glaubst, ein Sicherheitsproblem in Django gefunden zu haben, bitte
+sende eine Nachricht an security@djangoproject.com. Das ist ein privater
+Verteiler, zu dem nur sehr erfahrene und vertrauenswürdige Django-Entwickler
+Zugriff haben und dessen Archive nicht öffentlich zugänglich sind.
+
+Aufgrund der heiklen Natur von Sicherheitsproblemen, bitten wir dich, keine
+Mail darüber an eine der öffentlichen Verteilers zu schicken. Django hat ein
+:ref:`Regelwerk zum Umgang mit Sicherheitsproblemen
+<reporting-security-issues>`; solange ein Problem noch nicht behoben ist,
+möchten wir den Schaden eingrenzen, der durch Bekanntwerden des Fehlers
+entstehen könnte.
+
+.. _`Regelwerk zum Umgang mit Sicherheitsproblemen`: ../contributing/#reporting-security-issues
