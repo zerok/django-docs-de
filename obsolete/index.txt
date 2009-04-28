@@ -1,0 +1,15 @@
+.. _obsolete-index:
+
+Veraltete/ausgemusterte Dokumentation
+=====================================
+
+Diese Artikel behandeln Features, die entweder ausgemustert oder in neueren
+Version von Django ersetzt wurden. Diese Dokumente werden hier dennoch für
+Leute aufbewahrt, die noch alte Versionen von Django oder ausgemusterte APIs
+verwenden. Kein neuer Code sollte basierenden auf diesen APIs geschrieben
+werden.
+
+.. toctree::
+   :maxdepth: 1
+   
+   admin-css
