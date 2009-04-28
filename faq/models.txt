@@ -3,8 +3,8 @@
 FAQ: Datenbanken und Datenmodelle
 =================================
 
-Wie kann sehen welche SQL-Queries Django ausführt?
---------------------------------------------------
+Wie kann ich sehen, welche SQL-Queries Django ausführt?
+--------------------------------------------------------
 
 Stell sicher, dass die ``DEBUG`` Einstellung auf ``True`` gesetzt ist und führe
 dann folgendes aus::
@@ -14,24 +14,22 @@ dann folgendes aus::
     [{'sql': 'SELECT polls_polls.id,polls_polls.question,polls_polls.pub_date FROM polls_polls',
     'time': '0.002'}]
 
-``connection.queries`` ist nur verfügbar wenn ``DEBUG`` auf ``True`` steht. Es 
-ist eine Liste von Dictionaries in der Reihenfolge der Queryausführung.
+``connection.queries`` ist nur verfügbar, wenn ``DEBUG`` auf ``True`` steht.
+Es ist eine Liste von Dictionaries in der Reihenfolge der Queryausführung.
 Jedes Dictionary hat folgende Attribute:
 
     ``sql`` -- Das SQL-Statement
     ``time`` -- Die Ausführungszeit des Statements in Sekunden.
 
-``connection.queries`` includes all SQL statements -- INSERTs, UPDATES,
-SELECTs, etc. Each time your app hits the database, the query will be recorded.
-
-``connection.queries`` beinhaltet alle SQL-Statements wie z.B. INSERT's, 
-UPDATE's oder SELECT's. Jedes mal wenn deine Applikation die Datenbank nutzt
+``connection.queries`` beinhaltet alle SQL-Statements wie z.B. INSERTs, 
+UPDATEs oder SELECTs. Jedes mal, wenn deine Applikation die Datenbank nutzt,
 wird die Abfrage gespeichert.
 
 Kann ich Django mit einer bereits bestehenden Datenbank nutzen?
 ---------------------------------------------------------------
 
-Ja. Siehe dazu :ref:`Integration mit einer bereits bestehenden Datenbank <howto-legacy-databases>`.
+Ja. Siehe dazu :ref:`Integration mit einer bereits bestehenden Datenbank
+<howto-legacy-databases>`.
 
 Wie aktualisiere ich die Datenbank wenn ich ein Datenmodell ändere?
 -------------------------------------------------------------------
@@ -42,27 +40,27 @@ zurückzusetzen::
 
     manage.py reset appname
 
-Dies löscht alle Tabellen die zu ``appname`` gehören und erstellt sie neu.
+Dies löscht alle Tabellen, die zu ``appname`` gehören und erstellt sie neu.
 
-Falls dir bestehende Daten wichtig sind, musst du die 
-``ALTER TABLE``-Statement's manuell in deiner Datenbank ausführen. So haben 
-wir es bisher immer gemacht, da das Behandeln von Daten eine sehr empfindliche 
-Arbeit ist, die wir nicht automatisieren wollten. Dennoch wird daran 
-gearbeitet teilweise-automatisierte Datenbank-Aktualisierungen zu ermöglichen.
+Falls dir bestehende Daten wichtig sind, musst du die ``ALTER
+TABLE``-Statements manuell in deiner Datenbank ausführen. So haben wir es
+bisher immer gemacht, da das Behandeln von Daten eine sehr empfindliche Arbeit
+ist, die wir nicht automatisieren wollten. Dennoch wird daran gearbeitet,
+teilweise-automatisierte Datenbank-Aktualisierungen zu ermöglichen.
 
-Unterstützen Django's Datenmodelle mehrspaltige Primary Keys?
--------------------------------------------------------------
+Unterstützen Djangos Datenmodelle mehrspaltige Primärschlüssel?
+---------------------------------------------------------------
 
-Nein, es werden lediglich einspaltige Primary Keys unterstützt.
+Nein, es werden lediglich einspaltige Primärschlüssel unterstützt.
 
-Dies spielt in der Praxis jedoch keine große Rolle, da du die Einzigartigkeit 
-auch durch andere Bedingungen (mithilfe der ``unique_together`` Modeloption 
-oder durch das Erstellen der Bedingungen direkt in der Datenbank) durchsetzen 
-kannst. Einspaltige Primary Keys werden z.B. für das spezifizieren der 
-zu editierenden oder löschenden Datensätze in der Administrationsoberfläche 
+Dies spielt in der Praxis jedoch keine große Rolle, da du die Einzigartigkeit
+auch durch andere Bedingungen (mithilfe der ``unique_together`` Modeloption
+oder durch das Erstellen der Bedingungen direkt in der Datenbank) durchsetzen
+kannst. Einspaltige Primary Keys werden z.B. für das Spezifizieren der zu
+editierenden oder zu löschenden Datensätze in der Administrationsoberfläche
 benötigt.
 
-Wie kann ich Datenbank-spezifische Optionen, wie z.B. den MyISAM Tabellentyp, zu meinen CREATE TABLE-Statements hinzufügen? 
+Wie kann ich Datenbank-spezifische Optionen, wie z.B. den MyISAM-Tabellentyp, zu meinen CREATE TABLE-Statements hinzufügen? 
 ---------------------------------------------------------------------------------------------------------------------------
 
 Wir versuchen Spezialfälle im Django-Code (z.B. Datenbank-spezifische 
@@ -73,7 +71,7 @@ den ``CREATE TABLE``-Statements in der Datenbank ausgeführt.
 
 Wenn du beispielsweise MySQL verwendest und MyISAM als Tabellentyp 
 spezifizieren willst, musst du eine SQL-Startdatei mit folgendem Inhalt 
-anlegen:
+anlegen::
 
     ALTER TABLE myapp_mytable ENGINE=MyISAM;
 
@@ -85,15 +83,15 @@ Warum belegt Django immer mehr Arbeitsspeicher?
 -----------------------------------------------
     
 Dies sollte normalerweise nicht passieren. Wenn deine Django-Prozesse grundlos
-immer mehr Speicher belegen und diesen nicht wieder freigeben, solltest du 
-prüfen ob die ``DEBUG``-Einstellung auf ``False`` steht. Sollte ``DEBUG`` 
-auf ``True`` gesetzt sein speichert Django eine Kopie jedes ausgeführten 
+immer mehr Speicher belegen und diesen nicht wieder freigeben, solltest du
+prüfen ob die ``DEBUG``-Einstellung auf ``False`` steht. Sollte ``DEBUG`` auf
+``True`` gesetzt sein, speichert Django eine Kopie jedes ausgeführten
 SQL-Statements.
 
 (Die Queries werden in ``django.db.connection.queries`` gespeichert. Siehe
-`Wie kann ich die SQL-Queries sehen, die Django ausführt?`_.)
+`Wie kann ich sehen, welche SQL-Queries Django ausführt?`_.)
 
-Setze ``DEBUG`` auf ``False`` um das Problem zu beheben.
+Setze ``DEBUG`` auf ``False``, um das Problem zu beheben.
 
 Falls du die Query-Liste manuell in einer deiner Funktionen leeren möchtest, 
 kannst du einfach die ``reset_queries()``-Funktion ausführen::
