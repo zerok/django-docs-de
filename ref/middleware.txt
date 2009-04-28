@@ -1,0 +1,214 @@
+.. _ref-middleware:
+
+========================
+Mitgelieferte Middleware
+========================
+
+.. module:: django.middleware
+   :synopsis: Djangos mitgelieferte Middleware-Klassen.
+
+Dieses Dokument beschreibt alle Middleware-Komponenten, die mit Django
+mitgeliefert werden. Wenn du wissen möchtest, wie du sie verwenden kannst und
+wie du eigenen Middleware-Klassen schreibst, wirf einen Blick in die
+:ref:`Middleware-Benutzeranleitung <topics-http-middleware>`.
+
+Verfügbare Middleware
+=====================
+
+Cache-Middleware
+----------------
+
+.. module:: django.middleware.cache
+   :synopsis: Middleware für Caching auf Website-Ebene.
+
+.. class:: django.middleware.cache.UpdateCacheMiddleware
+
+.. class:: django.middleware.cache.FetchFromCacheMiddleware
+
+Ermöglicht Caching auf der gesamten Website. Wenn aktiviert, wird jede
+Django-Seite für :setting:`CACHE_MIDDLEWARE_SETTINGS` Sekunden
+zwischengespeichert. Mehr dazu in der :ref:`Cache-Dokumentation
+<topics-cache>`.
+
+"Common"-Middleware
+-------------------
+
+.. module:: django.middleware.common
+   :synopsis: Middleware für allgemeine Hilfsaktionen.
+
+.. class:: django.middleware.common.CommonMiddleware
+
+Enthält ein paar Annehmlichkeiten für Perfektionisten:
+
+    * Unterbindet den Zugriff von User-Agents entsprechend der
+      :setting:`DISALLOWED_USER_AGENTS`-Einstellung, welche eine Liste von
+      Strings sein sollte.
+
+    * Schreibt URLs entsprechender der :setting:`APPEND_SLASH`- und
+      :setting:`PREPEND_WWW`-Einstellungen um.
+
+      Wenn :setting:`APPEND_SLASH` ``True`` ist, die angefragte URL nicht
+      mit einem Schrägstrich endet und sie nicht in der URLconf gefunden
+      wurde, wird eine neue URL mit einem Schrägstrich am Schluss generiert.
+      Wenn diese neue URL in der URLconf gefunden werden konnte, leitet Django
+      die Anfrage an diese neue URL um. Ansonsten wird die ursprüngliche URL
+      wie gewohnt behandelt.
+
+      So wird zum Beispiel ``foo.com/bar`` auf ``foo.com/bar/``
+      weitergeleitet, wenn ``foo.com/bar`` keinem gültigen URL-Muster
+      entspricht, jedoch für ``foo.com/bar/`` ein solches gültiges Muster
+      existiert.
+
+      .. versionchanged:: 1.0
+         Das Verhalten von :setting:`APPEND_SLASH` hat sich mit dieser
+         Version ein bisschen geändert. Früher wurde nicht überprüft, ob die
+         URL einem Muster in der URLconf entspricht.
+
+      Wenn :setting:`PREPEND_WWW`` auf ``True`` gesetzt ist, dann werden
+      URLs, die kein "www." am Anfang haben, auf URLs mit eben einem solchen
+      "www." am Anfang weitergeleitet.
+
+      Beide Optionen sind dazu gedacht, URLs zu normalisieren. Die Idee dabei
+      ist, dass jede URL nur an einem einzigen Ort existieren sollte.
+      Technisch sind ``foo.com/bar`` und ``foo.com/bar/`` unterschiedliche
+      URLs -- ein Indexer einer Suchmaschine würde sie als unterschiedliche
+      URLs behandeln --, folglich sollte man URLs normalisieren.
+
+    * Die Middleware behandelt auch ETags entsprechend der
+      :setting:`USE_ETAGS`-Einstellung. Wenn :setting:`USE_ETAGS` auf ``True``
+      gesetzt ist, berechnet Django einen ETag für jede Anfrage durch
+      Errechnung des MD5-Hashes des Seiteninhalts. Es wird ausserdem eine
+      ``Not Modified``-Antwort gesendet, wenn zutreffend.
+
+View-Metadaten-Middleware
+-------------------------
+
+.. module:: django.middleware.doc
+   :synopsis: Middleware zur Dokumentationsunterstützung.
+
+.. class:: django.middleware.doc.XViewMiddleware
+
+Sendet einen speziellen ``X-View``-HTTP-Header bei HEAD-Anfragen von einer
+IP-Adresse, die in den :setting:`INTERNAL_IPS` vorkommt. Diese Middleware wird
+von Djangos automatischem Dokumentationssystem verwendet.
+
+gzip-Middleware
+---------------
+
+.. module:: django.middleware.gzip
+   :synopsis: Middleware zur Auslieferung von gzipptem Inhalt zur Performancesteigerung.
+
+.. class:: django.middleware.gzip.GZipMiddleware
+
+Komprimiert Inhalte für Browser, die die gzip-Kompression unterstützen
+(alle modernen Browser).
+
+Es ist empfehlenswert, diese Middleware ganz oben in die Middleware-Liste
+einzutragen, damit die Kompression der Antwort zuletzt geschieht. Content von
+weniger als 200 Bytes länge wird ebensowenig komprimiert wie Antworten mit
+einem Status-Code ungleich 200, JavaScript-Dateien (für Kompatibilität mit IE)
+oder Antworten, die den ``Content-Encoding``-Header bereits gesetzt haben.
+
+Conditional-GET-Middleware
+--------------------------
+
+.. module:: django.middleware.http
+   :synopsis: Middleware für fortgeschrittene HTTP-Features.
+
+.. class:: django.middleware.http.ConditionalGetMiddleware
+
+Behandelt bedingte GET-Operationen. Wenn die Antwort einen ``ETag``- oder
+einen ``Last-Modified``-Header enthält und die Anfrage einen
+``If-None-Match``- oder ``If-Modified-Since``-Header aufweist, wird die
+Antwort durch :class:`~django.http.HttpNotModified` ersetzt.
+
+Hier werden auch die ``Date``- und ``Content-Length``-Antwort-Header gesetzt. 
+
+Reverse-Proxy-Middleware
+------------------------
+
+.. class:: django.middleware.http.SetRemoteAddrFromForwardedFor
+
+Setzt ``request.META['REMOTE_ADDR']`` basierend auf
+``request.META['HTTP_X_FORWARDED_FOR']``, falls letzteres gesetzt ist. Das ist
+dann nützlich, wenn du dich hinter einem Reverse-Proxy befindest, wodurch
+``REMOTE_ADDR`` auf ``127.0.0.1`` gesetzt wird.
+
+**Wichtig:** Der Wert von ``HTTP_X_FORWARDED_FOR`` wird hier *nicht*
+validiert. Falls du dich nicht hinter einem Reverse-Proxy befindest, der
+automatisch ``HTTP_X_FORWARDED_FOR`` setzt, verwende diese Middleware nicht.
+Jeder kann einen ``HTTP_X_FORWARDED_FOR``-Wert vortäuschen und da die
+Middleware ``REMOTE_ADDR`` entsprechend dieses Headers ändert, kann somit auch
+jeder einfach eine andere IP-Adresse vortäuschen. Verwende diese Middleware
+nur dann, wenn du dem Wert von ``HTTP_X_FORWARDED_FOR`` absolut vertrauen
+kannst.
+
+Locale-Middleware
+-----------------
+
+.. module:: django.middleware.locale
+   :synopsis: Middleware zur Sprachauswahl basierend auf der Anfrage.
+
+.. class:: django.middleware.locale.LocaleMiddleware
+
+Ermöglicht die Sprachauswahl anhand der im Request enthaltenen Daten. Es passt
+den Inhalt für jeden Benutzer an. Mehr Details findest du in der
+:ref:`Internationalisierung-Dokumentation <topics-i18n>`.
+
+Session-Middleware
+------------------
+
+.. module:: django.contrib.sessions.middleware
+   :synopsis: Session-Middleware.
+
+.. class:: django.contrib.sessions.middleware.SessionMiddleware
+
+Ermöglicht Sessions in Django. Mehr dazu findest du in der
+:ref:`Session-Dokumentation <topics-http-sessions>`.
+
+Authentifikationsmiddleware
+---------------------------
+
+.. module:: django.contrib.auth.middleware
+  :synopsis: Authentifikationsmiddleware.
+
+.. class:: django.contrib.auth.middleware.AuthenticationMiddleware
+
+Fügt den aktuell angemeldeten Benutzer als ``user``-Attribut zu jedem
+``HttpRequest``-Objekt hinzu. Siehe :ref:`Authentifikation in Web-Requests
+<topics-auth>`.
+
+CSRF-Schutz-Middleware
+--------------------------
+
+.. module:: django.contrib.csrf.middleware
+   :synopsis: Middleware, die einen Schutz vor Cross Site Request Forgeries hinzufügt.
+
+.. class:: django.contrib.csrf.middleware.CsrfMiddleware
+
+.. versionadded:: 1.0
+
+Dient als Schutz vor Cross Site Request Forgeries, indem versteckte
+Formularfelder bei POST-Formularen hinzugefügt werden, die dann im Request auf
+ihren korrekten Wert hin überprüft werden. Mehr dazu in der :ref:`Cross Site
+Request Forgery-Schutz-Dokumentation <ref-contrib-csrf>`.
+
+Transaktionsmiddleware
+----------------------
+
+.. module:: django.middleware.transaction
+   :synopsis: Middleware, die eine Datenbank-Transaktion an jeden Web-Request bindet.
+
+.. class:: django.middleware.transaction.TransactionMiddleware
+
+Integriert Commit und Rollback in die Request/Response-Phase. Wenn eine
+View-Funktion erfolgreich ausgeführt wird, wird ein Commit ausgeführt. Falls
+sie eine Exception wirft, erfolgt ein Rollback.
+
+Die Position dieser Middleware im Middleware-Stack ist wichtig:
+Middleware-Module ausserhalb dieses Moduls operieren im
+"Commit-On-Save"-Modus (dem Standardmodus in Django). Module innerhalb der
+Transaktionsmiddleware (also jene, die später im Stack kommen) laufen im
+selben Modus wie die Views.
+
+Mehr dazu in der :ref:`Dokumentation zur Transaktionsverwaltung  <topics-db-transactions>`.
