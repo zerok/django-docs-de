@@ -1,0 +1,204 @@
+.. _faq-general:
+
+FAQ: Allgemeines
+================
+
+Warum existiert dieses Projekt?
+-------------------------------
+
+Django ist aus einem praktischen Grund entstanden: World Online, die
+Webabteilung einer Zeitung, hat die Aufgabe, Web-Anwendungen mit
+journalistischen Deadlines zu erstellen. In der schnelllebigen Welt des
+Newsrooms hat World Online oft nur wenige Stunden, um eine komplizierte
+Web-Anwendung von der Konzeption zur Veröffentlichung zu führen. 
+
+Gleichzeitig sind die World Online-Webentwickler schon immer Perfektionisten
+gewesen, wenn es darum ging, Best-Practices der Webentwicklung zu befolgen.
+
+Im Herbst 2003 verwarfen die World Online-Entwickler (Adrian Holovaty und
+Simon Willison) PHP and begannen, Python für die Entwicklung ihrer Websites
+zu verwenden. Im Laufe der Entwicklung von interaktiven Websites wie
+Lawrence.com entstand ein generisches Web-Entwicklungsframework, durch das
+sie Web-Anwendung noch schneller entwickeln konnten. Über zwei Jahre wurde
+ständig an diesem Framework gearbeitet.
+
+Im Sommer 2005 entschloss sich World Online, das Ergebnis dieser Arbeit,
+Django, als Open-Source freizugeben. Django wäre nicht möglich gewesen ohne
+eine ganze Reihe von Open-Source-Projekten -- Apache_, Python_ und
+PostgreSQL_, um nur ein paar zu nennen -- und wir sind glücklich, etwas der
+Open-Source-Community zurückgeben zu können.
+
+.. _Apache: http://httpd.apache.org/
+.. _Python: http://www.python.org/
+.. _PostgreSQL: http://www.postgresql.org/
+
+Was bedeutet "Django" und wie wird der Name ausgesprochen?
+----------------------------------------------------------
+
+Django ist nach `Django Reinhardt`_ benannt, einem Jazz-Gitarristen der 1930er
+bis frühe 1950er Jahre. Bis heute gilt er als einer der besten Gitarristen
+aller Zeiten.
+
+Hör dir seine Musik an. Du wirst sie mögen.
+
+Django wird **DSCHÄNG**-oh augesprochen.
+
+Wir haben auch einen `Audioclip mit der korrekten Aussprache`_ aufgenommen.
+
+.. _Django Reinhardt: http://en.wikipedia.org/wiki/Django_Reinhardt
+.. _Audioclip mit der korrekten Aussprache: http://red-bean.com/~adrian/django_pronunciation.mp3
+
+Ist Django stabil?
+------------------
+
+Ja. World Online verwendet Django seit über drei Jahren. Websites, die mit
+Django gebaut wurden, haben Traffic-Spitzen von mehr als einer Million Hits
+pro Stunde und mehrere Slashdottings überstanden. Ja, es ist ziemlich stabil.
+
+Skaliert Django?
+----------------
+
+Ja. Im Vergleich zur Entwicklungszeit ist Hardware billig. Daher wurde Django
+entwickelt, um so viel Hardware, wie du dafür einsetzen möchtest, nutzen zu
+können.
+
+Django basiert auf einer "Shared-Nothing"-Architektur, was bedeutet, dass du
+auf jeder Ebene -- Datenbankserver, Caching-Server, Web-/Applikationsserver --
+Hardware hinzufügen kannst.
+
+Das Framework trennt Komponenten wie die Datenbank-Ebene und die
+Anwendungsebene sauber voneinander und es wird mit einem einfachen aber
+mächtigen :ref:`Cache-Framework <topics-cache>` ausgeliefert.
+
+Wer steht hinter dem Projekt?
+-----------------------------
+
+Django wurde ursprünglich von World Online, der Web-Abteilung einer Zeitung in
+Lawrence, Kansas, USA entwickelt. Heute wird Django von einem internationalen
+Team von Freiwilligen geführt; du kannst alles über das Team in der
+:ref:`Liste der Committer <internals-committers>` nachlesen.
+
+Welche Websites verwenden Django?
+---------------------------------
+
+Das Django-Wiki führt eine ständig wachsende `Liste von mit Django
+betriebenen Websites`_.  Trage deine ein!
+
+.. _liste von mit django betriebenen websites: http://code.djangoproject.com/wiki/DjangoPoweredSites
+
+.. _mtv:
+
+Django scheint ein MVC-Framework zu sein, aber ihr nennt den Controller "View" und den View "Template". Warum verwendet ihr nicht die üblichen Namen?
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Über die üblichen Namen kann gestritten werden.
+
+In unserer Interpretierung von MVC beschreibt der "View" die Daten, die dem
+Benutzer gezeigt werden. Es geht nicht zwangsläufig darum, *wie* die Daten
+aussehen, sondern *welche* Daten angezeigt werden. Der View beschreibt,
+*welche Daten du siehst* und nicht *wie du sie siehst*. Das ist ein feiner
+Unterschied.
+
+In unserem Fall ist ein "View" also eine Python-Callback-Funktion für eine
+bestimmten URL, da diese Callback-Funktion beschreibt, welche Daten dem
+Benutzer präsentiert werden soll.
+
+Zusätzlich ist es sinnvoll, den Inhalt von seiner Präsentation zu trennen.
+Hier kommen die Templates ins Spiel. In Django beschreibt ein "View", welche
+Daten präsentiert werden soll, aber ein View leitet diese Daten normalerweise
+an ein Template weiter, das festlegt, *wie* die Daten angezeigt werden sollen.
+
+Wo passt da der "Controller" nun hin? In Djangos Fall ist das vermutlich das
+Framework selbst: Das was einen Request an den zuständigen View entsprechend
+der URL-Konfiguration weiterleitet.
+
+Solltest du ein Freund von Akronymen sein, dann könntest du sagen, dass Django
+ein "MTV"-Framework ist -- "Model", "Template" und "View". Diese Unterteilung
+macht deutlich mehr Sinn.
+
+Schlussendlich geht es nur darum, die gestellte Aufgabe zu erfüllen. Und
+ungeachtet dessen wie Dinge nun heißen, hilft uns Django dabei in der für uns
+logischten Weise.
+
+<Framework X> kann <Feature Y> -- Warum kann das Django nicht?
+--------------------------------------------------------------
+
+Wir sind uns durchaus bewusst, dass es viele andere tolle Web-Frameworks da
+draußen gibt und wir haben auch nichts dagegen, Ideen wo sinnvoll zu borgen.
+Jedoch wurde Django entwickelt, da wir unglücklich mit dem Status Quo waren;
+also bitte bedenke, dass "weil <Framework X> es macht", das für uns noch nicht
+Grund genug ist, das Feature auch für Django umzusetzen.
+
+Warum habt ihr bei Django von Grund auf neu geschrieben und nicht existierende Python-Bibliotheken verwendet?
+-------------------------------------------------------------------------------------------------------------
+
+Als Django vor ein paar Jahren ursprünglich geschrieben wurde, verbrachten
+Adrian und Simon einige Zeit damit, andere bereits existierende
+Python-Web-Frameworks zu erforschen. 
+
+Unserer Meinung nach erfüllte keines von ihn all unsere Erwartungen.
+
+Wir sind da ein bisschen pingelig. Du könntest uns sogar Perfektionisten (mit
+Deadlines) nennen.
+
+Mit der Zeit stolperten wir über Open-Source-Bibliotheken für Dinge, die wir
+bereits implementiert hatten. Es war beruhigend zu sehen, dass andere Leute
+ähnliche Probleme ähnlich gelöst haben, jedoch war es zu diesem Zeitpunkt zu
+spät, externen Code einzubinden: Zu diesem Zeitpunkt hatten wir unsere
+Framework-Teile bereits geschrieben, getestet und in mehreren Umgebungen
+eingesetzt -- und unser Code entsprach einfach unseren Vorgaben.
+
+Meistens fanden wir jedoch irgendein Problem in anderen existierenden
+Frameworks/Tools, das uns störten. Und keines von Ihnen entsprach unseren
+Philosophien zu 100%. 
+
+Wie schon gesagt: Wir sind pingelig.
+
+Wir haben unsere Philosophien auch auf unserer :ref:`Design-Philosophien-Seite
+<misc-design-philosophies>` dokumentiert.
+
+Ist Django ein Content-Management-System (CMS)?
+-----------------------------------------------
+
+Nein, Django selbst ist kein CMS. Es ist ein Web-Framework, also ein
+Programmiertoolkit, das dir hilft, Websites zu bauen.
+
+So macht es beispielsweise wenig Sinn, Django mit Produkten wie Drupal_ zu
+vergleichen, da Django etwas ist, das du dazu verwenden kannst, um etwas wie
+Drupal zu bauen.
+
+Natürlich ist Djangos Administrationsoberfläche sehr hilfreich, jedoch ist sie
+nur ein Modul des Frameworks. Während Django ein paar Abkürzungen bietet, um
+CMS-ähnliche Anwendungen zu realisieren, bedeutet das nicht, dass es nicht
+auch das richtige Werkzeug für nicht-CMS-ähnliche Anwendungen sein kann.
+
+.. _Drupal: http://drupal.org/
+
+Wie kann ich Djangos Dokumentation herunterladen, damit ich sie offline lesen kann?
+-----------------------------------------------------------------------------------
+
+Djangos Dokumentation befindet sich im ``docs``-Verzeichnis jedes
+Tarball-Releases. Sie besteht aus einzelnen ReST-Text-Dateien (ReStructured
+Text), wobei jede einzelne einer Webseite auf der offiziellen Django-Website
+entspricht.
+
+Da die Dokumentation `unter Versionskontrolle steht`_, kannst du Änderungen an
+der Dokumentation genauso verfolgen wie die übrigen Code-Änderungen.
+
+Die Dokumentation, die du auf Djangos Website vorfindest, wurden entsprechend
+der aktuellen Entwicklungsversion generiert. Sie enthält somit
+möglicherweise mehr Information als die Dokumentation, die mit dem letzten
+Django-Release mitgeliefert wurde.
+
+.. _unter versionskontrolle steht: http://code.djangoproject.com/browser/django/trunk/docs
+
+Wo kann ich Django-Entwickler für Jobs finden?
+-----------------------------------------------
+
+Besuche unsere `Django-Jobs-Seite`_ für eine Liste von Django-Entwicklern, die
+dir gerne helfen würden.
+
+Du kannst Jobs auch auf http://djangogigs.com/. Falls du Entwickler in deiner
+Nähe suchst, versuche http://djangopeople.net/.
+
+.. _django-jobs-seite: http://code.djangoproject.com/wiki/DevelopersForHire
