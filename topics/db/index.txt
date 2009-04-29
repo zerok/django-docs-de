@@ -1,0 +1,17 @@
+.. _topics-db-index:
+
+Modelle und Datenbanken
+=======================
+
+Ein Modell ist die Beschreibung deiner Daten. Es enthält die Definition der
+Felder und des Verhaltens der Daten, die du speicherst. Allgemein wird jedes
+Modell auf eine einzige Tabelle in der Datenbank abgebildet.
+
+.. toctree::
+   :maxdepth: 1
+
+   models
+   queries
+   managers
+   sql
+   transactions
