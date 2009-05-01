@@ -1,0 +1,61 @@
+.. _ref-contrib-webdesign:
+
+========================
+django.contrib.webdesign
+========================
+
+.. module:: django.contrib.webdesign
+   :synopsis: Hilfsfunktionen für Web*designer*.
+
+Das ``django.contrib.webdesign``-Paket, welches Teil des
+:ref:`"django.contrib"-Addons <ref-contrib-index>` ist, bietet verschiedene
+Hilfsmethoden, die insbesondere für Web-*Designer* (im Gegensatz zu
+Entwicklern) hilfreich sind.
+
+Zum jetzigen Zeitpunkt enthält dieses Paket lediglich einen Tag. Wenn du eine
+Idee für eine speziell für Web-Designer interessante Funktion hast, bitte 
+:ref:`schlage sie vor <internals-contributing>`.
+
+Template-Tags
+=============
+
+Um die hier vorgestellten Template-Tags zu verwenden, füge
+``'django.contrib.webdesign'`` deiner :setting:`INSTALLED_APPS`-Einstellung
+hinzu.  Danach verwende ``{% load webdesign %}`` in einem Template, um diesem
+Template den Zugriff auf die neuen Tags zu ermöglichen.
+
+
+lorem
+=====
+
+Generiert einen zufälligen "lorem ipsum"-Text. Dies ist nützlich wenn man 
+Beispiel-Daten in Templates benötigt.
+
+Benutzung::
+    
+    {% lorem [count] [method] [random] %}
+    
+Der ``{% lorem %}``-Tag kann mit keinem, einem, zwei oder drei Argumenten
+verwendet werden. Die Argumente sind:
+    
+===========  =============================================================
+Argument     Beschreibung
+===========  =============================================================
+``count``    Eine Zahl (oder Variable), die die Anzahl der Absätze oder 
+             Wörter festsetzt, die generiert werden sollen
+             (Standardwert: 1).
+``method``   Entweder ``w`` für Wörter, ``p`` für HTML-Absätze oder
+             ``b`` für Klartext-Absätze (Standardwert ist ``b``).
+``random``   Das Argument ``random``, wenn angegeben, bewirkt, dass nicht
+             der übliche Absatz (also "Lorem ipsum dolor sit amet..."), 
+             sondern ein Absatz bestehend aus zufälligen Wörtern generiert
+             wird.
+===========  =============================================================
+    
+Beispiele:
+
+*   ``{% lorem %}`` generiert den üblichen "lorem ipsum"-Absatz.
+*   ``{% lorem 3 p %}`` generiert den üblichen "lorem ipsum"-Absatz und
+    zwei weitere zufällige Absätze, wobei alle von HTML-``<p>``-Tags
+    umschlossen sind.
+*   ``{% lorem 2 w random%}`` generiert 2 zufällige lateinische Worte.
