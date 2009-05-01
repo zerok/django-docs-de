@@ -1,0 +1,170 @@
+.. _misc-api-stability:
+
+==============
+API-Stabilität
+==============
+
+:ref:`Die Veröffentlichung von Django 1.0 <releases-1.0>` kommt mit dem
+Versprechen einer stabilen API mit Kompatibilität für die Zukunft. Kurz gesagt
+heißt das, dass Code, den du für Django 1.0 schreibst, auch mit 1.1 ohne
+Änderungen funktionieren wird und dass du nur kleinere Änderungen für folgende
+1.X-Releases vornehmen wirst müssen. 
+
+Was "stabil" bedeutet
+=====================
+
+In diesem Kontext bedeutet "stabil":
+
+    - Alle öffentlichen APIs -- also alles mit verlinkter Dokumentation und alle
+      Methoden, die nicht mit einem Unterstrich beginnen -- werden nicht
+      verschoben oder umbenannt, ohne dass rückwärts-kompatible Aliase angeboten
+      werden.
+    
+    - Wenn neue Features zu diesen APIs hinzugefügt werden -- was recht
+      wahrscheinlich ist -- werden sie die Funktion existierender Methoden
+      nicht beeinträchtigen oder verändern. Das heißt: "stabil" bedeutet nicht
+      (unbedingt) "vollständig".
+
+    - Sollte aus irgendeinem Grund eine "stabile" API entfernt oder ersetzt
+      werden müssen, wird die API als "veraltet" markiert, jedoch für
+      zumindest zwei Unterversionsreleases in der API verbleiben. Wenn
+      "veraltete" APIs benutzt werden, erscheinen hinweisende Warnungen.
+
+      Mehr zu Djangos Versionsnummern-System und wie die Ausmusterung
+      vorgenommen wird findest du in :ref:`official-releases`.
+    
+    - Wir werden die Rückwärts-Kompatibilität der APIs nur dann gefährden oder
+      beeinträchtigen, wenn es wegen eines Fehlers oder eines Sicherheitslochs
+      unausweichlich ist.
+
+"Stabile" APIs
+==============
+
+Alles, was in dieser Dokumentation behandelt wird -- mit Ausnahme aller
+Artikel im :ref:`Bereich über interne Funktionen <internals-index>`, wird als
+stabil ab Version 1.0 angesehen. Das beinhaltet folgende APIs:
+
+   - :ref:`Authorisierung <topics-auth>`
+
+   - :ref:`Cache <topics-cache>`
+
+   - :ref:`Modell-Definition, Managers, Abfragen und Transaktionen
+     <topics-db-index>`
+
+   - :ref:`Versenden von E-Mails <topics-email>`
+
+   - :ref:`Dateibehandlung und Speicherung <topics-files>`
+
+   - :ref:`Formulare <topics-forms-index>`
+
+   - :ref:`HTTP-Request/Response-Verarbeitung <topics-http-index>` inkl.
+     Dateiupload, Middleware, Sessions, Auflösung von URLs, Views und APIs für
+     Abkürzungen.
+
+   - :ref:`"Generic Views" <topics-http-generic-views>`
+
+   - :ref:`Internationalisierung <topics-i18n>`
+
+   - :ref:`Seiten-Nummerierung <topics-pagination>`
+
+   - :ref:`Serialisierung <topics-serialization>`
+
+   - :ref:`Signale <topics-signals>`
+
+   - :ref:`Templates <topics-templates>` inklusive der Sprache, der Python
+     :ref:`Template-API <ref-templates-index>` und wie man :ref:`eigene
+     Template-Tags und Bibliotheken anlegt <howto-custom-template-tags>`. Wir
+     fügen vielleicht in der Zukunft zusätzliche Template-Tags hinzu, deren
+     Namen möglicherweise mit externen Tags in Konflikt stehen. Bevor wir
+     jedoch solche Tags hinzufügen, werden wir sicherstellen, dass Django
+     einen Fehler wirft, wenn es versucht, Tags mit bereits verwendeten Namen
+     zu laden.
+
+   - :ref:`Testing <topics-testing>`
+
+   - :ref:`Das django-admin-Werkzeug <ref-django-admin>`
+
+   - :ref:`Mitgelieferte Middleware <ref-middleware>`
+
+   - :ref:`Request/Response-Objekte <ref-request-response>`
+
+   - :ref:`Einstellungen <ref-settings>`. Bedenke jedoch, dass obwohl die
+     :ref:`Liste der mitgelieferten Einstellungen <ref-settings>` als
+     vollständig angesehen werden kann, zukünftige Versionen wahrscheinlich
+     neue Einstellungen beeinhalten werden. Das ist eine der Stellen, wo
+     "stabil" nicht "vollständig" bedeutet.
+
+   - :ref:`Integrierte Signale <ref-signals>`. Wie bei den Einstellungen
+     werden wir auch wahrscheinlich in der Zukunft neue Signale einführen. Die
+     Derzeitigen bleiben jedoch bestehen.
+
+   - :ref:`Unicode <ref-unicode>`
+
+   - Alles, was in den :ref:`Anleitungen <howto-index>` behandelt wird.
+         
+``django.utils``
+----------------
+
+Die meisten Module in ``django.utils`` sind nur für die interne Verwendung
+gedacht. Nur die folgenden Teile können als stabil angesehen werden:
+
+    - ``django.utils.cache``
+    - ``django.utils.datastructures.SortedDict`` -- nur diese eine Klasse; der
+      Rest des Moduls ist nur zur internen Verwendung bestimmt.
+    - ``django.utils.encoding``
+    - ``django.utils.feedgenerator``
+    - ``django.utils.http``
+    - ``django.utils.safestring``
+    - ``django.utils.translation``
+    - ``django.utils.tzinfo``
+
+Ausnahmen
+=========
+
+Es gibt ein paar Ausnahmen bei diesem Stabilitätsversprechen.
+
+Behebung von Sicherheitsproblemen
+---------------------------------
+
+Wenn wir über ein Sicherheitsproblem informiert werden -- hoffentlich von
+jemandem, der sich an die :ref:`Richtlinien für das Melden von
+Sicherheitsproblemen <reporting-security-issues>` hält -- werden wir alles
+tun, um das Problem zu beheben. Wenn das heißt, dass dafür die
+Abwärtskompatibilität beeinträchtigt werden muss, so werden wir das tun.
+
+Beigesteuerte Applikationen (``django.contrib``)
+------------------------------------------------
+
+Obwohl wir uns bemühen, die APIs stabil zu halten -- und wir keinerlei Pläne
+haben, eine der ``contrib``-Applikationen kaputt zu machen --, wird dieser
+Bereich doch etwas weniger stabil über die Releases hinweg sein. Das Web
+entwickelt sich weiter und Django muss das auch.
+
+Alle Änderungen an diesen Applikationen kommen jedoch mit einer wichtigen
+Garantie: Wir werden sicherstellen, dass es immer möglich sein wird, ältere
+Versionen einer ``contrib``-Applikation zu verwenden, wenn wir Änderungen
+vornehmen müssen. Sollte Django 1.5 beispielsweise mit einer nicht mehr
+abwärtskompatiblen ``django.contrib.flatpages``-Applikation ausgeliefert
+werden, werden wir sicherstellen, dass du die Applikation aus Django 1.4 mit
+Django 1.5 verwenden kannst. Das wird auch weiterhin einfaches Updaten
+erlauben.
+
+Historisch betrachtet sind bisher ``django.contrib``-Applikationen stabiler
+als der Kern von Django gewesen. Somit werden wir uns wahrscheinlich nie auf
+diese Ausnahmen beziehen müssen.
+
+Als privat markierte APIs
+-------------------------
+
+Gewisse APIs wurden explizit auf verschiedene Arten als privat/intern
+markiert:
+
+    - Manche Artikel beziehen sich auf interne APIs und erwähnen sie auch als
+      solche. Wenn die Dokumentation etwas als intern/privat beschreibt,
+      behalten wir uns das Recht vor, es ändern zu können.
+
+    - Jede Funktion, Methode oder Objekt, dessen Name mit einem Unterstrich
+      beginnt (``_``). Das ist der in Python übliche Weg um zu sagen, dass
+      etwas privat ist. Wenn eine Methode mit einem einzelnen ``_`` anfängt,
+      ist sie Teil der internen API.
+

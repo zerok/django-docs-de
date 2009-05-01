@@ -16,6 +16,7 @@ howto/deployment/index.txt 10618 c38cdcfc7056da729364f4a1e918bf770689dfb0
 howto/deployment/modwsgi.txt 10618 c38cdcfc7056da729364f4a1e918bf770689dfb0
 howto/deployment/fastcgi.txt 10618 c38cdcfc7056da729364f4a1e918bf770689dfb0
 howto/deployment/modpython.txt 10618 c38cdcfc7056da729364f4a1e918bf770689dfb0
+misc/api-stability.txt 10632 cbe3847c6bdbc06a92b45d8c156a758908342571
 obsolete/index.txt 10632 cbe3847c6bdbc06a92b45d8c156a758908342571
 ref/contrib/webdesign.txt 10632 cbe3847c6bdbc06a92b45d8c156a758908342571
 ref/index.txt 10632 cbe3847c6bdbc06a92b45d8c156a758908342571
