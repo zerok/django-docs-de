@@ -1,0 +1,1096 @@
+.. _topics-db-models:
+
+=======
+Modelle
+=======
+
+.. module:: django.db.models
+
+Ein Modell ist die Beschreibung deiner Daten. Es enthält die Definition der
+Felder und des Verhaltens der Daten, die du speicherst. Allgemein wird jedes
+Modell auf eine einzige Tabelle in der Datenbank abgebildet.
+
+Die Grundlagen:
+
+    * Jedes Modell ist eine Python-Klasse, die eine Subklasse von
+      :class:`django.db.models.Model` darstellt.
+
+    * Jedes Attribut des Modells stellt eine Spalte in der Tabelle dar.
+
+    * Damit bietet dir Django eine automatisch generierte Datenbank-API; siehe
+      :ref:`topics-db-queries`.
+
+.. seealso::
+
+    Ein Begleitdokument hierfür stellt das `offizielle Repository für
+    Modell-Beispiele`_ dar. (In der Source-Distribution von Django findest du
+    diese Beispiele im ``tests/modeltests``-Verzeichnis.)
+
+    .. _offizielle Repository für Modell-Beispiele: http://www.djangoproject.com/documentation/models/
+
+Ein kurzes Beispiel
+===================
+
+In diesem Beispielmodell wird eine ``Person`` definiert, die einen Vornamen
+(``first_name``) und einen Nachnamen (``last_name``) hat::
+
+    from django.db import models
+
+    class Person(models.Model):
+        first_name = models.CharField(max_length=30)
+        last_name = models.CharField(max_length=30)
+
+``first_name`` und ``last_name`` sind Felder des Modells. Jedes Feld wird als
+Klassenattribut definiert und jedes dieser Klassenattribut wird auf eine
+Tabellenspalte in der Datenbank abgebildet.
+
+Dieses ``Person``-Modell würde folgende Datenbank-Tabelle erzeugen:
+
+.. code-block:: sql
+
+    CREATE TABLE myapp_person (
+        "id" serial NOT NULL PRIMARY KEY,
+        "first_name" varchar(30) NOT NULL,
+        "last_name" varchar(30) NOT NULL
+    );
+
+Ein paar technische Anmerkungen:
+
+    * Der Name der Tabelle (``myapp.person``) wird automatisch aus den
+      Metadaten des Modells abgeleitet, kann jedoch überschrieben werden. Mehr
+      dazu in :ref:`table-names`.
+
+    * Ein ``id``-Feld wird automatisch hinzugefügt, jedoch kann auch dieses
+      Verhalten abgeändert werden, siehe :ref:`automatic-primary-key-fields`.
+
+    * Das gezeigte ``CREATE TABLE``-Statement ist hier für PostgreSQL
+      formatiert, Django selbst jedoch generiert SQL durch ein
+      Datenbank-spezifisches Backend, das du in deiner
+      :ref:`Konfigurationsdatei <topics-settings>` auswählen kannst.
+
+Modelle verwenden
+=================
+
+Nachdem du deine Modelle definiert hast, muss du Django noch mitteilen, dass
+es sie auch *verwenden* soll. Das erreichst du, indem du den Namen jenes
+Moduls, das deine ``models.py`` enthält, in deiner Konfigurationsdatei in die
+:setting:`INSTALLED_APPS` einträgst. 
+
+Wenn die Modelle deiner Applikation sich in ``mysite.myapp.models`` befinden
+(entsprechend der Package-Struktur, die für Applikationen durch
+:djadmin:`manage.py startapp <startapp>` erzeugt wird), dann sollte deine
+:setting:`INSTALLED_APPS` auszugsweise so aussehen::
+
+    INSTALLED_APPS = (
+        #...
+        'mysite.myapp',
+        #...
+    )
+
+Nachdem du eine neue Applikation zu :setting:`INSTALLED_APPS` hinzugefügt
+hast, führe :djadmin:`manage.py syncdb <syncdb>` aus.
+
+Felder
+======
+
+Der wichtigste (und der einzig zwingend notwendige) Teil eines Modells ist die
+Liste der Datenbankfelder, die es definiert. Wie bereits erwähnt werden Felder
+durch Klassenattribute der Modellklasse definiert.
+
+Beispiel::
+
+    class Musician(models.Model):
+        first_name = models.CharField(max_length=50)
+        last_name = models.CharField(max_length=50)
+        instrument = models.CharField(max_length=100)
+
+    class Album(models.Model):
+        artist = models.ForeignKey(Musician)
+        name = models.CharField(max_length=100)
+        release_date = models.DateField()
+        num_stars = models.IntegerField()
+
+Feldtypen
+---------
+
+Jedes Feld in deinem Modell sollte eine Instanz der jeweils für seine Aufgabe
+geeigneten :class:`~django.db.models.Field`-Klasse sein. Django bestimmt
+entsprechend dem Feldklassentyp eine Reihe von Dingen:
+
+    * Den Typ der Tabellenspalte in der Datenbank ( ``INTEGER``, ``VARCHAR``,
+      etc.).
+
+    * Das Widget, das in Djangos Administrationsoberfläche für dieses Feld
+      benutzt werden soll (falls du das Interface verwendst) (``<input
+      type="text">``, ``<select>``, etc.).
+
+    * Ein paar grundlegende Validierungen, die von der Adminoberfläche und den
+      automatisch erzeugten Formularen verwendet werden.
+
+Django bietet eine Vielzahl an mitgelieferten Feldtypen; eine komplette Liste
+findest du in der :ref:`Modellfelder-Referenz <model-field-types>`. Du kannst
+auch einfach deine eigenen Feldtypen schreiben, sollte keines deinen
+Anforderungen entsprechen; siehe :ref:`howto-custom-model-fields`.
+
+Feldoptionen
+------------
+
+Jedes Feld akzeptiert eine Reihe von feldspezifizischen Argumenten, die in der
+:ref:`Modelfelder-Referenz <model-field-types>` dokumentiert sind. So verlangt
+:class:`~django.db.models.CharField` (und dessen Subklassen) ein
+:attr:`~django.db.models.CharField.max_length`-Argument, welches die Länge des
+``VARCHAR``-Feldes in der Datenbank bestimmt.
+
+Es gibt auch eine Reihe von optionalen Attributen, die von allen Feldtypen verwendet
+werden. Diese werden noch genauer in der :ref:`Referenz
+<common-model-field-options>` behandelt, hier jedoch eine kurze
+Zusammenfassung der am häufigsten verwendeten:
+
+    :attr:`~Field.null`
+        Wenn auf ``True`` gesetzt, wird Django leere Felder als ``NULL`` in
+        der Datenbank speichern. Standardmässig ``False``.
+
+    :attr:`~Field.blank`
+        Wenn auf ``True`` gesetzt, ist es auch erlaubt, das Feld leer zu
+        lassen. Der Standardwert ist hier ``False``.
+
+        Das ist ein bisschen anders als :attr:`~Field.null`, welches sich rein
+        auf die Datenbank bezieht, während dieses Attribut mit der Validierung
+        zusammenhängt. Sollte ein Feld :attr:`blank=True <Field.blank>``
+        gesetzt haben, erlaubt die Validierung in Djangos
+        Administrationsoberfläche auch einen leeren Wert für dieses Feld. Wenn
+        :attr:`blank=False <Field.blank>` gesetzt ist, ist das Feld als
+        erforderlich markiert.
+
+    :attr:`~Field.choices`
+        Ein iterierbares Objekt (z.B. eine Liste oder ein Tuple) bestehend aus
+        2-Feld-Tuples, das die Auswahlmöglichkeiten für dieses Feld angibt.
+        Wenn dieses Attribut gesetzt ist, wird die Administrationsoberfläche
+        eine Auswahlbox anstelle des Standard-Textfeldes verwenden und die
+        Auswahlmöglichkeiten entsprechend dem Wert dieses Attributes
+        einschränken.
+
+        Eine Liste von Auswahlmöglichkeiten sieht so aus::
+
+            YEAR_IN_SCHOOL_CHOICES = (
+                (u'FR', u'Freshman'),
+                (u'SO', u'Sophomore'),
+                (u'JR', u'Junior'),
+                (u'SR', u'Senior'),
+                (u'GR', u'Graduate'),
+            )
+
+        Das erste Element jedes Tuples ist der Wert, der in der Datenbank
+        gespeichert werden soll; das zweite Element wird durch die
+        Administrationsoberfläche oder durch das ``ModelChoiceField``
+        angezeigt.  In einer Instanz eines Modells kann auf den angezeigten
+        Wert des Auswahlfeldes durch die ``get_FOO_display``-Methode
+        zugegriffen werden. Zum Beispiel::
+        
+            from django.db import models
+            
+            class Person(models.Model):
+                GENDER_CHOICES = (
+                    (u'M', u'Male'),
+                    (u'F', u'Female'),
+                )
+                name = models.CharField(max_length=60)
+                gender = models.CharField(max_length=2, choices=GENDER_CHOICES)
+        
+        ::
+        
+            >>> p = Person(name="Fred Flinstone", gender="M")
+            >>> p.save()
+            >>> p.gender
+            u'M'
+            >>> p.get_gender_display()
+            u'Male'
+
+    :attr:`~Field.default`
+        Der Standardwert für dieses Feld. Das kann sowohl ein Wert als auch
+        ein ausführbares Objekt sein. Wenn es ausführbar ist, wird das Objekt
+        jedesmal ausgeführt, wenn eine neue Instanz angelegt wird.
+
+    :attr:`~Field.help_text`
+        Zusätzlicher Hilfe-Text, der unter dem Feld in der
+        Administrationsoberfläche angezeigt wird. Dieses Attribut dient auch
+        der Dokumentation und ist somit selbst dann nützlich, wenn du das 
+        Modell nicht in der Admin-Oberfläche verwendest.
+
+    :attr:`~Field.primary_key`
+        Wenn ``True``, dann ist dieses Feld der Primärschlüssel für das
+        aktuelle Modell.
+
+        Wenn du für keines der Feld in deinem Modell :attr:`primary_key=True
+        <Field.primary_key>` setzt, wird Django automatisch ein zusätzliches
+        :class:`IntegerField` anlegen, das den Primärschlüssel enthält. Somit
+        musst du nicht selbst einen Primärschlüssel angeben, außer du möchtest
+        das Standardverhalten überschreiben. Mehr dazu findest du in
+        :ref:`automatic-primary-key-fields`.
+
+    :attr:`~Field.unique`
+        Wenn dieses Attribut auf ``True`` gesetzt ist, muss das Feld einen
+        eindeutigen Wert in der Tabelle haben.
+
+Das waren nur Kurzbeschreibungen der am häufigsten verwendeten Feldoptionen.
+Mehr Details findest du in :ref:`common-model-field-options`.
+
+.. _automatic-primary-key-fields:
+
+Automatische Primärschlüssel-Felder
+-----------------------------------
+
+Standardmässig fügt Django jedem Modell folgendes Feld hinzu::
+
+    id = models.AutoField(primary_key=True)
+
+Das ist ein selbst-inkrementierender Primärschlüssel.
+
+Wenn du einen eigenen Primärschlüssel angeben möchtest, versehe eines deiner
+Felder mit dem :attr:`primary_key=True <Field.primary.key>`-Attribut. Wenn
+Django ein Feld mit diesem Attribut gesetzt findet, wird es keine eigene
+``id``-Spalte anlegen.
+
+Jedes Modell muss genau ein Feld mit :attr:`primary_key=True
+<Field.primary_key>` haben.
+
+.. _verbose-field-names:
+
+Detaillierte Feldnamen
+----------------------
+
+Jeder Feldtyp mit Ausnahme von :class:`~django.db.models.ForeignKey`,
+:class:`~django.db.models.ManyToManyField` und
+:class:`~django.db.models.OneToOneField` akzeptiert ein optionales erstes
+Argument -- einen detaillierten Namen. Wenn dieser nicht angegeben wird,
+generiert ihn Django automatisch, indem es den Attributnamen übernimmt und
+Unterstriche durch Leerzeichen ersetzt.
+
+In diesem Beispiel ist der detaillierte Name ``"Vorname der Person"``::
+
+    first_name = models.CharField("Vorname der Person", max_length=30)
+
+Hier wäre er ``"first name"``::
+
+    first_name = models.CharField(max_length=30)
+
+Bei :class:`~django.db.models.ForeignKey`,
+:class:`~django.db.models.ManyToManyField` und
+:class:`~django.db.models.OneToOneField` muss das erste Argument eine
+Modellklasse sein. Um eine längere Bezeichnung zu vergeben, benutze das
+:attr:`~Field.verbose_name`-Schlüsselwort-Argument::
+
+    poll = models.ForeignKey(Poll, verbose_name="referenzierte Umfrage")
+    sites = models.ManyToManyField(Site, verbose_name="Liste von Websites")
+    place = models.OneToOneField(Place, verbose_name="referenzierter Platz")
+
+Es ist Konvention, den ersten Buchstaben von :attr:`~Field.verbose_name` wo
+angebracht klein zu schreiben. Django wird ihn gegebenenfalls wenn benötigt in
+einen Großbuchstaben umwandeln.
+
+Relationen
+----------
+
+Die Stärke von relationalen Datenbank liegt in der Möglichkeit, Relationen
+zwischen Tabellen herzustellen. Django bietet hierfür die Möglichkeit, die
+drei häufigsten Relationsarten zu erzeugen: Many-to-many, Many-to-one und
+One-to-one.
+
+Many-to-one-Beziehungen
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Um eine Many-to-one-Beziehung zu erzeugen, benutze
+:class:`~django.db.models.ForeignKey`. Das geht genau gleich wie bei jedem
+anderen :class:`~django.db.models.Field`-Typ, indem du es als Klassenattribut
+in dein Modell einträgst.
+
+:class:`~django.db.models.ForeignKey` benötigt jene Klasse, mit der das Modell
+in Beziehung steht, als erstes Argument.
+
+Zum Beispiel, wenn ein Auto-Modell (``Car``) einen Erzeuger (``Manufacturer``)
+hat -- also ein ``Manufacturer`` baut mehrere Autos, aber jedes ``Car`` hat
+nur einen einzigen ``Manufacturer`` --, verwende die folgenden Definitionen:: 
+
+    class Manufacturer(models.Model):
+        # ...
+
+    class Car(models.Model):
+        manufacturer = models.ForeignKey(Manufacturer)
+        # ...
+
+Du kannst auch :ref:`rekursive Relationen <recursive-relationships>` (also
+Objekte, die Many-to-one-Beziehungen mit sich selbst haben) und
+:ref:`Relationen mit Modellen, die noch nicht definiert wurden
+<lazy-relationships>`` erzeugen. Mehr Details findest du in der
+:ref:`Modellfelder-Referenz <ref-foreignkey>`. 
+
+Es wird empfohlen (ist jedoch nicht absolut notwendig), dass der Name des
+:class:`~django.db.models.ForeignKey`-Feldes (also ``manufacturer`` in unserem
+Beispiel) dem Namen des Modells in Kleinbuchstaben entspricht. Jedoch kannst
+du das Feld natürlich beliebig benennen. Zum Beispiel::
+
+    class Car(models.Model):
+        company_that_makes_it = models.ForeignKey(Manufacturer)
+        # ...
+
+.. seealso::
+
+    Ein vollständiges Beispiel findest du in `Many-to-one-Relationsmodel-Beispiel`_.
+
+.. _Many-to-one-Relationsmodel-Beispiel: http://www.djangoproject.com/documentation/models/many_to_one/
+
+:class:`~django.db.models.ForeignKey`-Felder akzeptieren auch eine Reihe von
+zusätzlichen Argumenten, welche in der :ref:`Referenz <foreign-key-arguments>`
+genauer beschrieben werden. Diese Optionen helfen dabei, zu definieren, wie
+die Relation genau funktionieren soll und sind allesamt optional.
+
+Many-to-many-Beziehungen
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Um eine Many-to-many-Beziehung anzulegen, verwende
+:class:`~django.db.models.ManyToManyField`. Auch dieses verwendest du wie
+jedes andere :class:`~django.db.models.Field`, indem du es als Klassenattribut
+deinem Modell hinzufügst. 
+
+:class:`~django.db.models.ManyToManyField` benötigt als erstes Argument die
+Klasse des Modells, zu dem die Beziehung hergestellt werden soll.
+
+Zum Beispiel, wenn eine Pizza (``Pizza``) mehrere Beläge (``Topping``) hat --
+also ein Belag kann auf mehreren Pizzen sein und jede Pizza hat mehrere
+Beläge --, könnte das so aussehen::
+
+    class Topping(models.Model):
+        # ...
+
+    class Pizza(models.Model):
+        # ...
+        toppings = models.ManyToManyField(Topping)
+
+Wie auch bei :class:`~django.db.models.ForeignKey` kannst du auch hier
+:ref:`rekursive Beziehungen <recursive-relationships>` und :ref:`Beziehung zu
+noch nicht angelegten Modellen <lazy-relationships>` anlegen; mehr Details
+findest du in der :ref:`Modellfelder-Referenz <ref-manytomany>`.
+
+Es wird empfohlen, dass der Name eines
+:class:`~django.db.models.ManyToManyField`\s (``toppings`` in diesem
+Beispiel), die Pluralform der Beschreibung der referenzierten Modellobjekte
+ist.
+
+Es ist egal, welches deiner Modelle das
+:class:`~django.db.models.ManyToManyField` hat, aber du brauchst es nur in
+einem, nicht in beiden.
+
+Normalerweise solltest du :class:`~django.db.models.ManyToManyField`-Instanzen
+in jenen Modellen anlegen, die du in der Administrationsoberfläche editieren
+willst, falls du diese Komponente verwendest. Im Beispiel von oben ist
+``toppings`` in ``Pizza``  (anstelle von ``Topping`` mit dem Attribut
+``pizzas``), da es irgendwie verständlicher ist, dass Pizzen Beläge haben und
+nicht anders herum. Damit kannst du im Admin-Formular von ``Pizza`` Beläge
+auswählen.
+
+.. seealso::
+
+    Ein vollständiges Beispiel findest du im `Beispiel für
+    Many-to-many-Beziehungen`_.
+
+.. _Beispiel für Many-to-many-Beziehungen: http://www.djangoproject.com/documentation/models/many_to_many/
+
+:class:`~django.db.models.ManyToManyField`\s akzeptieren auch eine Reihe von
+optionalen, zusätzlichen Argumenten, welche in der :ref:`Modellfelder-Referenz
+<manytomany-arguments>` näher beschrieben werden.
+
+.. _intermediary-manytomany:
+
+Zusätzliche Felder bei Many-to-many-Beziehungen
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. versionadded:: 1.0
+
+Wenn du mit einfachen Many-to-many-Beziehungen arbeitest, wie jener in unserem
+vorigen Beispiel, macht ein normales
+:class:`~django.db.models.ManyToManyField` eigentlich alles, was du brauchst.
+Manchmal jedoch möchtest du vielleicht zusätzliche Daten zu deiner Beziehung
+hinzufügen.
+
+Denke zum Beispiel an eine Applikation, die speichert, zu welchen Musikgruppen
+welche Musiker gehören. Es gibt hier eine Many-to-many-Beziehung zwischen
+einer Person und den Gruppen, denen sie angehört. Somit könntest du ein
+:class:`~django.db.models.ManyToManyField` für diese Beziehung verwenden. Es
+existiert jedoch eine ganze Menge an Zusatzinformation -- wie das Datum, an
+dem die Person der Gruppe beigetreten ist --, die du ebenfalls speichern
+möchtest.
+
+Für genau solche Situationen erlaubt dir Django, ein zusätzliches Modell
+anzugeben, das die eigentliche Many-to-many-Beziehung verwaltet und in dem du
+dann zusätzliche Felder hinzufügen kannst. Dieses Zwischenmodell wird durch
+das :attr:`through <ManyToManyField.through>`-Argument an das
+:class:`~django.db.models.ManyToField` gebunden. Für unser Musikerbeispiel
+könnte der Code beispielsweise so aussehen::
+
+    class Person(models.Model):
+        name = models.CharField(max_length=128)
+
+        def __unicode__(self):
+            return self.name
+
+    class Group(models.Model):
+        name = models.CharField(max_length=128)
+        members = models.ManyToManyField(Person, through='Membership')
+
+        def __unicode__(self):
+            return self.name
+
+    class Membership(models.Model):
+        person = models.ForeignKey(Person)
+        group = models.ForeignKey(Group)
+        date_joined = models.DateField()
+        invite_reason = models.CharField(max_length=64)
+
+Wenn du ein Zwischenmodell einsetzt, muss du dort explizit Fremdschlüssel zu
+den anderen beteiligten Modellen anlegen. Damit definierst du explizit, wie
+die beiden Modell miteinander in Beiziehung stehen.
+
+Es existieren ein paar Einschränkungen bei diesen Zwischenmodellen:
+
+    * Es darf nur genau *einen* Fremdschlüssel zum Zielmodell (also
+      ``Person`` in unserem Beispiel) enthalten. Wenn du mehr hast, wird ein
+      Validierungsfehler geworfen.
+
+    * Es darf auch nur genau *einen* Fremdschlüssel zum Quellmodell (also
+      ``Group``) haben. Wenn du mehr als einen hast, wird ebenfalls ein
+      Validierungsfehler geworfen.
+
+    * Die einzige Ausnahme hierfür ist ein Modell, das eine Relation zu sich
+      selbst über ein Zwischenmodell hat. Dann sind zwei Fremdschlüssel zum
+      selben Modell erlaubt, jedoch werden sie als die beiden
+      unterschiedlichen Seiten der Many-to-many-Beziehung behandelt.
+
+    * Wenn du eine Many-to-many-Beziehung mit einem Zwischenmodell von einem
+      Modell zu sich selbst erzeugen möchtest, dann *musst* du
+      :attr:`symmetrical=False <ManyToManyField.symmentrical>` setzen (siehe
+      die :ref:`Modellfelder-Referenz <manytomany-arguments>`).
+
+Nachdem du nun dein :class:`~django.db.models.ManyToManyField` so konfiguriert
+hast, dass ein Zwischemodell (hier ``Membership``) verwendet wird, kannst du
+anfangen, Beziehungen anlegen. Dazu musst du Instanzen des Zwischenmodells
+erzeugen::
+
+    >>> ringo = Person.objects.create(name="Ringo Starr")
+    >>> paul = Person.objects.create(name="Paul McCartney")
+    >>> beatles = Group.objects.create(name="The Beatles")
+    >>> m1 = Membership(person=ringo, group=beatles,
+    ...     date_joined=date(1962, 8, 16),
+    ...     invite_reason= "Needed a new drummer.")
+    >>> m1.save()
+    >>> beatles.members.all()
+    [<Person: Ringo Starr>]
+    >>> ringo.group_set.all()
+    [<Group: The Beatles>]
+    >>> m2 = Membership.objects.create(person=paul, group=beatles,
+    ...     date_joined=date(1960, 8, 1),
+    ...     invite_reason= "Wanted to form a band.")
+    >>> beatles.members.all()
+    [<Person: Ringo Starr>, <Person: Paul McCartney>]
+
+Im Gegensatz zu normalen Many-to-many-Feldern, kannst du hier ``add``,
+``create`` oder Zuweisung wie ``beatles.members = [...]`` *nicht* verwenden, um
+Beziehungen zu erzeugen::
+
+    # DAS GEHT NICHT
+    >>> beatles.members.add(john)
+    # UND DAS AUCH NICHT
+    >>> beatles.members.create(name="George Harrison")
+    # GENAUSOWENIG WIE DAS
+    >>> beatles.members = [john, paul, ringo, george]
+
+Warum? Du kannst hier nicht einfach eine Beziehung zwischen einer ``Person``
+und einer ``Group`` erstellen, sondern du musst zusätzlich sämtliche
+Informationen angeben, die das ``Membership``-Modell benötigt. Weder ``add``,
+noch ``create``, noch der einfach Zuweisungsoperator bieten die Möglichkeit,
+diese Zusatzinformationen anzugeben. Aus diesem Grund wurden sie für
+Many-to-many-Beziehungen mit Zwischentabellen deaktiviert. Der einzige Weg, um
+eine solche Beziehung anzulegen, ist das Erzeugen einer
+``Membership``-Instanz.
+
+Aus einem ähnlichen Grund ist auch ``remove`` deaktiviert. Die
+``clear()``-Methode kann aber trotzdem verwendet werden, um sämtliche
+Many-to-many-Beziehungen eines Objektes zu entfernen::
+
+    # Die Beatles haben sich aufgeloest
+    >>> beatles.members.clear()
+
+Sobald du die Beziehung durch das Zwischenmodell hergestellt hast, kannst du
+darauf auch Anfragen absetzen. Genau wie bei normalen Many-to-many-Beziehungen
+kannst du auch hier Attribute des referenzierten Modells abfragen::
+
+    # Finde alle Gruppen mit einem Mitglied, dessen Name mit 'Paul' beginnt
+    >>> Groups.objects.filter(members__name__startswith='Paul')
+    [<Group: The Beatles>]
+
+Da du hier ein Zwischenmodell verwendest, kannst du auch dessen Attribute im
+Query mit einbeziehen::
+
+    # Finde alle Mitglieder der Beatles, die nach dem 1. Januar 1961 der
+    # Gruppe beigetreten sind
+    >>> Person.objects.filter(
+    ...     group__name='The Beatles',
+    ...     membership__date_joined__gt=date(1961,1,1))
+    [<Person: Ringo Starr]
+
+
+One-to-one-Beziehungen
+~~~~~~~~~~~~~~~~~~~~~~
+
+Um eine Many-to-many-Beziehung anzulegen, verwende ein
+:class:`~django.db.models.OneToOneField`. Auch dieses verwendest du wie
+jedes andere :class:`~django.db.models.Field`, indem du es als Klassenattribut
+deinem Modell hinzufügst. 
+
+Das ist vor allem bei Primärschlüsseln eines Objektes nützlich, das ein
+anderes Objekt "erweitern" soll.
+
+Das :class:`~django.db.models.OneToOneField` benötigt als erstes Argument die
+Klasse des Modells, zu dem die Beziehung hergestellt werden soll.
+
+Wenn du beispielsweise eine Datenbank für Orte aufbauen möchtest, wirst du
+hier vermutlich die üblichen Felder wie Adresse, Telefonnummer etc. verwenden. 
+Wenn du darauf aufbauend jetzt auch Restaurants verwalten möchtest, könntest
+du in deinem ``Restaurant``-Modell ein
+:class:`~django.db.models.OneToOneField` zum ``Place``-Modell einfügen (da ein
+Restaurant auch nur ein Platz ist). Eigentlich würdest du hier üblicherweise
+:ref:`Modellvererbung <model-inheritance>` einsetzen, was implizit eine
+One-to-one-Beziehung erzeugt).
+
+
+Wie bei :class:`~django.db.models.ForeignKey` kannst du auch hier
+:ref:`rekursive Beziehungen <recursive-relationships>` und :ref:`Beziehung zu
+noch nicht angelegten Modellen <lazy-relationships>` anlegen; mehr Details
+findest du in der :ref:`Modellfelder-Referenz <ref-manytomany>`.
+
+.. seealso::
+
+    Ein vollständiges Beispiel findest du im `Beispiel für eine
+    One-to-one-Beziehung`_.
+
+.. _Beispiel für eine One-to-one-Beziehung: http://www.djangoproject.com/documentation/models/one_to_one/
+
+.. versionadded:: 1.0
+
+Das :class:`~django.db.models.OneToOneField` akzeptiert auch ein optionales
+Argument, das in der :ref:`Modellfelder-Referenz <ref-onetoone>` beschrieben
+wird.
+
+Früher wurde :class:`~django.db.models.OneToOneField` automatisch zum
+Primärschlüssel eines Modells. Das ist jetzt nicht mehr länger der Fall (wobei
+du natürlich weiterhin das
+:attr:`~django.db.models.Field.primary_key`-Argument verwenden kannst, wenn
+du möchtest). Somit ist es nun möglich, mehrere
+:class:`~django.db.models.OneToOneField`\s in einem Modell zu haben.
+
+Modelle aus mehreren Dateien
+----------------------------
+
+Es ist natürlich möglich, eine Beziehung zu einem Modell aus einer anderen
+Applikation anzulegen. Dafür muss das referenzierte Modell oben im Modul
+deines Modells importiert werden. Danach referenziere es, wo auch immer du es
+brauchst::
+
+    from mysite.geography.models import ZipCode
+
+    class Restaurant(models.Model):
+        # ...
+        zip_code = models.ForeignKey(ZipCode)
+
+Einschränkungen für Feldnamen
+-----------------------------
+
+In Django gibt es nur zwei Einschränkungen, was Feldnamen betrifft:
+
+    1. Ein Feldname darf kein in Python reserviertes Wort sein, da das zu
+       einem Python-Syntaxfehler führen würde. Zum Beispiel::
+
+           class Example(models.Model):
+               pass = models.IntegerField() # 'pass' ist reserviert!
+
+    2. Er darf auch nicht mehr als einen Unterstrich in Folge haben, da das
+       schon in Djangos Query-Lookup-Syntax verwendet wird. Zum Beispiel::
+
+           class Example(models.Model):
+               foo__bar = models.IntegerField() # 'foo__bar' hat zwei Unterstriche nacheinander!
+
+Da die Feldnamen nicht unbedingt den Spaltennamen in der Tabelle entsprechen
+müssen, kannst du diese Einschränkungen relativ einfach umgehen. Schau dir
+dazu die :attr:`~Field.db_column`-Option an.
+
+Wörter, die in SQL reserviert sind (z.B.: ``join``, ``where`` oder ``select``)
+sind erlaubte Modellfeldnamen, da Django sämtliche Spalten- und Tabellennamen
+in jedem SQL-Query entsprechend der Syntax des jeweiligen Datenbanksystems
+maskiert werden.
+
+Eigene Feldtypen
+----------------
+
+.. versionadded:: 1.0
+
+Wenn du für deine Aufgabe kein geeignetes Modellfeld findest oder du einen
+weniger gebräuchlichen Spaltentyp deiner Datenbank verwenden möchtest, kannst
+du auch deine eigene Feldklasse implementieren. Eine genau Anleitung dafür
+findest du in :ref:`howto-custom-model-fields`.
+
+.. _meta-options:
+
+Meta-Optionen
+=============
+
+Du kannst auch Metadaten für dein Modell über eine innere Klasse ``class
+Meta`` definieren::
+
+    class Ox(models.Model):
+        horn_length = models.IntegerField()
+
+        class Meta:
+            ordering = ["horn_length"]
+            verbose_name_plural = "oxen"
+
+Modell-Metadaten sind "alles, das kein Feld ist", wie beispielsweise
+Sortieroptionen (:attr:`~Options.ordering`), Tabellennamen
+(:attr:`~Options.db_table`) oder Singular- und Pluralforen des Namen
+(:attr:`~Options.verbose_name` und :attr:`~Options.verbose_name_plural`). Das
+ist alles optional, inkl. der ``Meta``-Klasse selbst.
+
+Eine vollständige Liste aller unterstützten Metadaten findest du in der
+:ref:`Modelloptionen-Referenz <ref-models-options>`.
+
+.. _model-methods:
+
+Modell-Methoden
+===============
+
+Definiere zusätzliche Methoden für dein Modell, um Funktionalität auf der
+Zeilenebene der Datenbank hinzuzufügen. Im Gegensatz zu
+:class:`~django.db.models.Manager`-Methoden, welche auf der Tabellenebene
+operieren sollten, sollten Modellmethoden Operationen auf einzelnen
+Modellinstanzen ausführen.
+
+Damit kannst du deine Geschäftslogik an einem Ort konzentrieren: dem Modell.
+
+Das Modell in diesem Beispiel definiert ein paar zusätzliche Methoden::
+
+    from django.contrib.localflavor.us.models import USStateField
+
+    class Person(models.Model):
+        first_name = models.CharField(max_length=50)
+        last_name = models.CharField(max_length=50)
+        birth_date = models.DateField()
+        address = models.CharField(max_length=100)
+        city = models.CharField(max_length=50)
+        state = USStateField() # US-spezifisch
+
+        def baby_boomer_status(self):
+            "Gibt den Baby-Boomer-Status dieser Person zurueck."
+            import datetime
+            if datetime.date(1945, 8, 1) <= self.birth_date <= datetime.date(1964, 12, 31):
+                return "Baby boomer"
+            if self.birth_date < datetime.date(1945, 8, 1):
+                return "Pre-boomer"
+            return "Post-boomer"
+
+        def is_midwestern(self):
+            """Gibt True zurueck, wenn die Person aus dem mittleren Westen der
+            USA kommt."""
+            return self.state in ('IL', 'WI', 'MI', 'IN', 'OH', 'IA', 'MO')
+
+        def _get_full_name(self):
+            "Gibt den vollen Namen der Person zurueck."
+            return '%s %s' % (self.first_name, self.last_name)
+        full_name = property(_get_full_name)
+
+Falls du die :term:`property`-Funktion in der letzten Zeile des Beispiels
+nicht kennst, findest du mehr dazu in `der entsprechenden Dokumentation`_.
+
+.. _der entsprechenden dokumentation: http://www.python.org/download/releases/2.2/descrintro/#property
+
+Die :ref:`Referenz zu Modellinstanzen <ref-models-instances>` enthält eine
+vollständige Liste derjenigen :ref:`Methoden, die jedes Modell von Haus aus
+hat <model-instance-methods>`. Die meisten davon kannst du überschreiben --
+siehe `Vordefinierte Modellmethoden überschreiben`_ -- jedoch gibt es
+auch ein paar, die du eigentlich immer redefinieren willst.
+
+    :meth:`~Model.__unicode__`
+        Eine Python-Methode, die für jedes Objekt eine entsprechende
+        Unicode-Darstellung zurückgibt. Sie wird von Python und Django
+        verwendet, wenn die Instanz als String angezeigt werden soll (also
+        beispielsweise bei der Darstellung in der Konsole oder der
+        Administrationsoberfläche).
+
+        Die Standardimplementierung ist nicht wirklich hilfreich, folglich
+        wirst du diese Methode fast immer überschreiben.
+
+    :meth:`~Model.get_absolute_url`
+        Das teilt Django die URL des Objektes mit. Django verwendet diese
+        Methode beispielsweise in der Administrationsoberfläche und eigentlich
+        überall, wo es die URL eines Objekts benötigt. 
+
+        Jedes Objekt, das eine eindeutige URL haben soll, sollte diese Methode
+        haben.
+
+Vordefinierte Modellmethoden überschreiben
+------------------------------------------
+
+Es gibt auch noch weitere :ref:`Methoden von Modellen
+<model-instance-methods>`, die du anpassen kannst, um das Datenbankverhalten
+zu beeinflussen. Du wirst vor allem oft das Verhalten von :meth:`~Model.save`
+und :meth:`~Model.delete` abändern wollen.
+
+Ein klassischer Use-Case hier ist, dass etwas Zusätzliches geschehen soll,
+wenn du ein Objekt speicherst. Zum Beispiel::
+
+    class Blog(models.Model):
+        name = models.CharField(max_length=100)
+        tagline = models.TextField()
+
+        def save(self, force_insert=False, force_update=False):
+            do_something()
+            super(Blog, self).save(force_insert, force_update) # Rufe die "echte" save()-Methode auf.
+            do_something_else()
+
+Du kannst auch verhindern, dass das Objekt gespeichert wird::
+
+    class Blog(models.Model):
+        name = models.CharField(max_length=100)
+        tagline = models.TextField()
+
+        def save(self, force_insert=False, force_update=False):
+            if self.name == "Yoko Ono's blog":
+                return # Yoko soll nie ihr eigenes Blog haben!
+            else:
+                super(Blog, self).save(force_insert, force_update) # Rufe die "echte" save()-Methode auf.
+
+Vergiss nicht, die jeweilige Methode der Superklasse aufzurufen, damit das
+Objekt auch wirklich in die Datenbank gespeichert wird. Wenn diese Methode
+nicht aufgerufen wird, wird die Datenbank nicht verändert.
+
+SQL ausführen
+-------------
+
+Manchmal kommst du einfach nicht um eigene SQL-Statements herum. Mit
+:class:`django.db.connection <django.db.backends.DatabaseWrapper>` steht dir
+die von Django genutzte Datenbankverbindung zu Verfügung, von der du mit
+:meth:`connection.cursor() <database.db.backends.DatabaseWrapper.cursor>` ein
+neues Cursor-Objekt ableiten kannst. Rufe daraufhin ``cursor.execute(sql,
+[params])`` auf, um SQL-Statements auszuführen und :meth:`cursor-fetchone()
+<django.db.backends.CursorWrapper.fetchone>` oder :meth:`cursor-fetchall()
+<django.db.backends.CursorWraper.fetchall>` um das Ergebnis dieser Anfrage zu
+bekommen. Zum Beispiel::
+
+    def my_custom_sql(self):
+        from django.db import connection
+        cursor = connection.cursor()
+        cursor.execute("SELECT foo FROM bar WHERE baz = %s", [self.baz])
+        row = cursor.fetchone()
+        return row
+
+
+:class:`connection <django.db.backends.DatabaseWrapper>` und :class:`cursor
+<django.db.backends.CursorWrapper>` halten sich weitestgehend an die
+Python-DB-API -- siehe :pep:`249` -- mit Djangos :ref:`Transaktionsbehandlung
+<topics-db-transaction>` als Zusatz. Falls du noch nie mit der DB-API
+gearbeitet hast, bedenke, dass SQL-Statements, die mit :meth:`cursor.execute()
+<django.db.backends.CursorWrapper.execute>` ausgeführt werden, Platzhalter
+(``"%s"``) verwenden, anstatt die jeweiligen Parameter direkt in das Statement
+einzufügen. Wenn du diese Platzhalter verwendest, versieht die verwendete
+Datenbank-Bibliothek die Parameter gegebenenfalls automatisch mit den jeweils
+gültigen Anführungszeichen. (Bedenke weiters, dass Django, um die Konsistenz
+zu wahren,``"%s"`` als Platzhalter verwendet und nicht den zum Beispiel in der
+SQLite-Schnittstelle verwendeten ``"?"``-Platzhalter. 
+
+Und noch etwas: Wenn du nur eine spezielle ``WHERE``-Klausel verwenden
+möchtest, sieh dir einmal die :meth:`~QuerySet.extra`-Methode an. Diese
+erlaubt es dir, SQL mit normalen ORM-Abfragen zu kombinieren.
+
+.. _model-inheritance:
+
+Modell-Vererbung
+================
+
+.. versionadded:: 1.0
+
+Vererbung von Modellen funktioniert in Django weitestgehend gleich wie
+die Klassenvererbung in Python. Du musst lediglich entscheiden, ob das
+Supermodell auch selbst ein eigenes echtes Modell (also mit einer eigenen
+Tabelle) sein soll oder ob es nur gemeinsame Attribute verwalten soll, die
+ausschließlich über die Submodelle zugänglich sein sollen.
+
+Oftmals willst du die Elternklasse nur als Speicher gemeinsamer Information
+verwenden, so dass du diese nicht in allen Subklassen erneut festlegen muss.
+Hierfür werden :ref:`abstract-base-classes` angeboten. Wenn du jedoch eine
+Subklasse zu einem bereits existierenden Modell haben oder du für jedes Modell
+eine eigene Tabelle haben möchtest, dann dürfte dir
+:ref:`multi-table-inheritance` weiterhelfen.
+
+.. _abstract-base-classes:
+
+Abstrakte Basisklassen
+----------------------
+
+Abstrakte Basisklassen sind dann nützlich, wenn mehrere Modelle eine gewisse
+Menge an gleicher Information verwalten sollen. Versehe hierzu deine
+Basisklasse über die :ref:`Meta <meta-options>`-Klasse mit der Option
+``abstract=True``. Dadurch wird für dieses Modell keine eigene Tabelle in der
+Datenbank angelegt und wenn andere Modell von ihm erben, werden dort dann
+die Attribute der Basisklasse angelegt. Es ist nicht erlaubt, gleichnamige
+Element in der Basis- und der davon erbenden Klasse zu haben. Django wirft in
+diesem Fall eine Exception.
+
+Ein Beispiel::
+
+    class CommonInfo(models.Model):
+        name = models.CharField(max_length=100)
+        age = models.PositiveIntegerField()
+
+        class Meta:
+            abstract = True
+
+    class Student(CommonInfo):
+        home_group = models.CharField(max_length=5)
+
+In diesem Beispiel hat das ``Student``-Modell schlussendlich drei Felder:
+``name``, ``age`` und ``home_group``. Das ``CommonInfo``-Modell auf der
+anderen Seite kann nicht als normalen Modell verwendet werden, da es lediglich
+eine abstrakte Basisklasse ist. Als solche wird für das Modell keine Tabelle
+und kein Manager angelegt und es kann nicht instanziiert oder direkt
+gespeichert werden.
+
+Für viele Situationen dürfte das genau das sein, was du brauchst. Durch diese
+Art der Vererbung kannst du gemeinsame Informationen auf der Python-Ebene
+an einer Stelle verwalten, während auf der Datenbankebene für jedes Submodell
+eine eigene Tabelle angelegt wird.
+
+``Meta``-Vererbung
+~~~~~~~~~~~~~~~~~~
+
+Wenn eine abstrakte Basisklasse erzeugt wird, stellt Django auch eine etwaige
+von dir dort definierte  :ref:`Meta <meta-options>`-Klasse als Attribut zur
+Verfügung. Wenn du nun in einer deiner Subklassen eigene Optionen definieren
+möchtest, kannst du über dieses Attribut von der :ref:`Meta
+<meta-options>`-Klasse der Superklasse erben. Wenn du keine eigenen Optionen
+benötigst, übernimmt Django einfach die :ref:`Meta <meta-options>`-Klasse der
+Basisklasse. Die beschriebene Vererbung würde zum Beispiel so aussehen::
+
+    class CommonInfo(models.Model):
+        ...
+        class Meta:
+            abstract = True
+            ordering = ['name']
+
+    class Student(CommonInfo):
+        ...
+        class Meta(CommonInfo.Meta):
+            db_table = 'student_info'
+
+Django nimmt lediglich *eine* Änderung an der :ref:`Meta
+<meta-options>`-Klasse der abstrakten Basisklasse vor: Bevor sie in die
+Subklasse eingebunden wird, wird ``abstract=False`` gesetzt, damit die
+Subklassen nicht automatisch auch zu abstrakten Basisklassen werden. Natürlich
+kannst du auch einzelne abstrakte Basisklassen voneinander erben lassen. Dazu
+musst du jedoch jedesmal ``abstract=True`` setzen.
+
+Es gibt auch einige Optionen, bei denen es nur wenig Sinn macht, sie in einer
+abstrakten Basisklasse zu verwenden. ``db_table`` würde beispielsweise dazu
+führen, dass sämtliche Submodelle dieselbe Tabelle verwenden (sofern du diese
+Option nicht im jeweiligen Submodell überschreibst).
+
+.. _abstract-related-name:
+
+Sei vorsichtig mit ``related_name``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Wenn du das :attr:`~django.db.models.ForeignKey.related_name`-Attribut bei
+einem ``ForeignKey`` oder ``ManyToManyField`` verwendest, musst du immer einen
+eindeutigen ``related_name`` angeben. Normalerweise wäre das ein Problem bei
+abstrakten Basisklassen, da die dort angegebenen Felder direkt in den
+Submodellen verwendet werden.
+
+Um dieses Problem zu umgehen, kannst du als Teil des
+:attr:`~django.db.models.ForeignKey.related_name`-Wertes den String
+``'%(class)s'`` verwenden. Das wird dann durch den Namen der Subklasse in
+Kleinbuchstaben ersetzt. Da jede Klasse einen anderen Namen hat, ist nun auch
+jeder ``related_name`` anders. Das funktioniert jedoch ausschließlich in
+abstrakten Basisklassen. Ein kurzes Beispiel::
+
+    class Base(models.Model):
+        m2m = models.ManyToManyField(OtherModel, related_name="%(class)s_related")
+
+        class Meta:
+            abstract = True
+
+    class ChildA(Base):
+        pass
+
+    class ChildB(Base):
+        pass
+
+Der ``related_name`` des ``ChildA.m2m``-Feldes wird somit zu
+``childa_related``, während jener von ``ChildB.m2m`` auf ``childb_related``
+gesetzt wird. Es hängt ganz von dir ab, wie du nun ``%(class)s`` verwendest,
+jedoch solltest du es einmal nicht verwenden, wird Django eine Reihe von
+Fehlern werfen, wenn du deine Modelle validierst oder :djadmin:`syncdb`
+ausführst.
+
+Wenn du für keines der Felder in der abstrakten Basisklasse einen
+:attr:`~django.db.models.ForeignKey.related_name` angibst, wird der Name des
+Submodells mit dem Anhang ``'_set'``  als Standardwert verwendet. Wäre im
+oberen Beispiel der :attr:`~django.db.models.ForeignKey.related_name` nicht
+explizit angegeben worden, wäre er somit für ``ChildA.m2m`` auf ``childa_set``
+und für ``ChildB.m2m`` auf ``childb_set`` gesetzt worden,
+
+.. _multi-table-inheritance:
+
+"Multi-Table-Inheritance"
+-------------------------
+
+Die zweite Art der Modellvererbung, die von Django unterstützt wird, sieht
+vor, dass jedes Modell in der Vererbungshierarchie eine eigene Tabelle hat und
+auch entsprechend abgefragt und bearbeitet werden kann. Die Vererbungsrelation
+erzeugt zwischen den Submodellen und ihren Superklassen durch automatisch
+generierte :class:`~django.db.models.fields.OneToOneField`\s entsprechenden
+Verbindungen. Zum Beispiel::
+
+    class Place(models.Model):
+        name = models.CharField(max_length=50)
+        address = models.CharField(max_length=80)
+
+    class Restaurant(Place):
+        serves_hot_dogs = models.BooleanField()
+        serves_pizza = models.BooleanField()
+
+Alle Felder von ``Place`` stehen auch in ``Restaurant`` zur Verfügung, wobei
+die Daten selbst jedoch in unterschiedlichen Tabellen gespeichert werden.
+Somit sind beide der folgenden Abfragen möglich::
+
+    >>> Place.objects.filter(name="Bob's Cafe")
+    >>> Restaurant.objects.filter(name="Bob's Cafe")
+
+Wenn du einen ``Place`` hast, der auch ein ``Restaurant`` ist, so kannst du
+das ``Restaurant`` über das entsprechende kleingeschriebene Attribut von
+``Place`` erreichen::
+
+    >>> p = Place.objects.filter(name="Bob's Cafe")
+    # If Bob's Cafe is a Restaurant object, this will give the child class:
+    >>> p.restaurant
+    <Restaurant: ...>
+
+Wenn ``p`` in diesem Beispiel jedoch *kein* ``Restaurant`` wäre (zum Beispiel
+wenn es direkt als ``Place``-Objekt erzeugt worden wäre), würde der Zugriff
+auf ``p.restaurant`` zu einer ``Restaurant.DoesNotExist``-Exception führen.
+
+``Meta`` und "Multi-Table-Inheritance"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Bei "Multi-Table-Inheritance" macht es für die Subklasse keinen Sinn, die
+:ref:`Meta <meta-options>`-Klasse der Superklasse zu erben. Alle dort
+definierten Optionen wurden dort bereits angewandt und sie nochmals anzuwenden
+würde in der Regel zu widersprüchlichem Verhalten führen (ganz im Gegensatz
+zur abstrakten Basisklasse, wo die Basisklasse eigentlich nicht wirklich
+existiert).
+
+Somit hat die Subklasse keinen Zugriff auf die :ref:`Meta
+<meta-options>`-Klasse der Superklasse. Es gibt jedoch ein paar einzelne
+Fälle, in denen die Subklasse das Verhalten der Superklasse erbt: Wenn das
+Submodell weder das :attr:`django.db.models.Options.ordering`-, noch das
+:attr:`django.db.models.Options.get_latest_by`-Attribut spezifiziert, werden
+diese vom Supermodell geerbt.
+
+Wenn das Supermodell eine Ordnung definiert, die du im Submodell nicht
+verwenden möchtest und keine natürliche Sortierung vorgenommen werden soll,
+kannst du das damit erreichen::
+
+    class ChildModel(ParentModel):
+        ...
+        class Meta:
+            # Entferne die Ordnung des Supermodells
+            ordering = []
+
+Vererbung und umgekehrte Beziehungen
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Da "Multi-Table-Inheritance" implizit ein
+:class:`~django.db.models.fields.OneToOneField` für die Verbindung zwischen
+Super- und Subklasse verwendet, ist es auch möglich von der Superklasse auf
+die Subklasse zu kommen (wie im oberen Beispiel gezeigt). Dabei wird jedoch
+bereits der Standardwert für :attr:`~django.db.models.ForeignKey.related_name`
+verwendet. Wenn du nun einen :class:`django.db.models.fields.ForeignKey` oder
+ein :class:`django.db.models.fields.ManyToManyField` für eine Subklasse eines
+anderen Modells angibst, **musst** du einen
+:attr:`~django.db.models.ForeignKey.related_name` für jedes dieser Felder
+explizit festlegen, ansonsten wird Django einen Fehler werfen, wenn du
+:djadmin:`validate` oder :djadmin:`syncdb` ausführst.
+
+Ausgehend vom vorherigen Beispiel mit ``Place`` könnten wir auch eine neue
+Subklasse erstellen, die ein :class:`~django.db.models.fields.ManyToManyField`
+hat::
+
+    class Supplier(Place):
+        # related_name muss fuer alle Relationen spezifiziert werden.
+        customers = models.ManyToManyField(Restaurant, related_name='provider')
+
+
+Welches Feld soll zur Superklasse verweisen
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Wie bereits erwähnt erstellt Django automatisch ein
+:class:`~django.db.models.fields.OneToOneField`, das deine Subklasse mit einem
+nicht-abstrakten Supermodell verbindet. Wenn du den Namen dieses Feldes selbst
+festlegen möchtest, lege einfach das
+:class:`~django.db.models.fields.OneToOneField` selbst an und setze das
+:attr:`parent_link=True
+<django.db.models.fields.OneToOneField.parent_link>`-Attribut, um Django zu
+zeigen, dass dieses Feld als Referenz zurück zur Superklasse verwendet werden
+soll.
+
+Mehrfachvererbung
+-----------------
+
+Wie auch bei Python selbst, ist es auch bei Djangos Modellen möglich, von
+mehreren Supermodellen zu erben. Bedenke jedoch, dass hierbei die normalen
+Namensauflösungsregeln aus Python gültig sind. Die erste Superklasse, in der
+ein bestimmter Namen aufscheint (z.B.: :ref:`Meta <meta-options>`), wird jene
+sein, die verwendet wird. Das bedeutet u.A., dass sollten mehrere Superklassen
+eine :ref:`Meta <meta-options>`-Klasse enthalten, wird lediglich die erste
+verwendet und alle anderen ignoriert.
+
+In der Regel musst du nicht von mehreren Superklassen erben. Der primäre
+Use-Case hierfür ist die Verwendung von sogenannten "Mix-In"-Klassen. Dabei
+wird ein bestimmtes zusätzliches Feld oder eine bestimmte Methode in jede
+Klasse eingebunden, die vom "Mix-In" erbt. Versuche, deine
+Vererbungshierarchie so einfach wie möglich zu halten, damit du nicht lange
+nachdenken musst, woher eine bestimmte Information nun ursprünglich kommt.
+
+Verstecken von Feldnamen ist nicht erlaubt
+------------------------------------------
+
+Bei der Klassenvererbung in Python ist es zulässig, dass eine Subklasse
+Attribute einer Superklasse überschreibt. In Django ist das für Attribute,
+die :class:`~django.db.models.fields.Field`-Instanzen sind, (zumindest
+derzeit) nicht erlaubt. Wenn eine Basisklasse ein Feld mit dem Namen
+``author`` hat, kannst du in keiner Modellklasse, die von dieser Basisklasse
+erbt, ebenfalls ein Feld mit dem Name ``author`` definieren.
+
+Ein solches Überschreiben führt zu Probleme zum Beispiel beim Anlegen neuer
+Instanzen (welches Feld soll nun in ``Model.__init__`` initialisiert werden)
+oder bei der Serialisierung. Das sind alles Dinge, mit denen die normale
+Vererbung in Python nicht in dieser Art und Weise zu tun hat, somit ist der
+Unterschied zwischen der Modellvererbung in Django und der normalen Vererbung
+von Klassen in Python nicht willkürlich.
+
+Wie bereits angedeutet betrifft diese Einschränkung lediglich Attribute, die
+Instanzen von :class:`~django.db.models.fields.Field` sind. Normale
+Python-Attribute können wie gewohnt überschrieben werden. Die Einschränkung
+betrifft ausserdem nur den Attributnamen, so wie ihn Python sieht: Wenn du den
+Namen der Tabellenspalte händisch angibst, kannst du denselben Spaltennamen
+sowohl im Sub- wie auch in Supermodell der "Multi-Table-Inheritance" haben
+(sie sind ja Spalten in zwei unterschiedlichen Datenbanktabellen).
+
+Django wird eine ``FieldError``-Exception werfen, wenn du irgendein Modellfeld
+in einem beliebigen Supermodell überschreibst.
+
