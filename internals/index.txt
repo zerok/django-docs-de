@@ -1,0 +1,25 @@
+.. _internals-index:
+
+Das Projekt "Django"
+====================
+
+Dieser Teil der Dokumentation soll Leuten helfen, die an Django selbst
+arbeiten möchten. Hier lernst du, wie das Projekt selbst funktioniert und wie
+du helfen kannst, Django noch besser zu machen.
+
+.. warning::
+
+    Überall anders in der Django-Dokumentation wird die Behandlung eines
+    Features fast wie ein Vertrag angesehen: Sobald eine API ihren Weg in die
+    offizielle Dokumentation gefunden hat, wird sie von uns als "stabil"
+    angesehen und wir werden sie nicht ohne sehr gute Gründe ändern. Die APIs,
+    die hier nun behandelt werden, werden als intern angesehen und wir
+    behalten es uns vor, diese zu ändern, wenn wir müssen.
+
+.. toctree::
+   :maxdepth: 1
+   
+   contributing
+   documentation
+   committers
+   release-process
