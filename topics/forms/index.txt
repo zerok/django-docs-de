@@ -1,0 +1,365 @@
+.. _topics-forms-index:
+
+=======================
+Mit Formularen arbeiten
+=======================
+
+.. admonition:: Über dieses Dokument
+
+    Dieses Dokument umfasst eine Einführung zu Djangos
+    Formular-Verarbeitungsfeature. Weiterführende Informationen findest du in
+    der :ref:`ref-forms-api`. Für Informationen zu den verfügbaren Feldern
+    siehe :ref:`ref-forms-fields`.
+
+.. highlightlang:: html+django
+
+``django.forms`` ist Djangos Bibliothek zur Formularverarbeitung.
+
+Es ist zwar natürlich möglich, Formulare einfach über die
+:class:`~django.http.HttpRequest`-Klasse zu verarbeiten, jedoch nimmt dir
+hierbei Djangos Formular-Bibliothek jede Menge Arbeit ab:
+
+    1. Das Anzeigen eines HTML-Formulars mit automatisch generierten Widgets.
+    2. Das Überprüfen übergebener Daten anhand von Validierungsregeln.
+    3. Das erneute Anzeigen des Formulars im Fehlerfall.
+    4. Die Umwandlung der übergebenen Daten in entsprechende Python-Datentypen.
+
+Übersicht
+=========
+
+Die Bibliothek befasst sich mit folgenden Konzepten:
+
+.. glossary::
+
+    Widget
+        Eine Klasse, die einem HTML-Formularelement entspricht (z.B.: 
+        ``<input type="text">`` oder ``<textarea>``). Ein Widget kümmert sich
+        um die Ausgabe des Elements als HTML-Code.
+
+    Field
+        Die Field-Klasse kümmert sich um die Validierung. So stellt zum
+        Beispiel die ``EmailField``-Klasse sicher, dass die Daten gültige 
+        E-Mail-Adressen sind.
+
+    Form
+        Eine Sammlung aus Field-Instanzen, die sich selbst validieren und auch
+        als HTML-Code ausgegeben werden kann.
+
+    Form Media
+        CSS- und JavaScript-Ressourcen, die für die Anzeige des Formulars
+        benötigt werden.
+
+Diese Bibliothek ist unabhängig von anderen Django-Komponenten wie der
+Datenbankebene, den Views oder den Templates. Sie verwendet lediglich
+dieselben Einstellungen sowie ein paar ``django.utils``-Funktionen und Djangos
+Internationalisierungskomponente (welche du aber nicht unbedingt verwenden
+musst, wenn du diese Bibliothek verwendest).
+
+Form-Objekte
+============
+
+Ein Formularobjekt fasst eine Reihe von Fomularfeldern und entsprechende
+Validierungsregel für die übergebenen Daten zusammen. Sie werden als
+Subklassen von ``django.forms.Form`` in einer deklarativen Weise -- ähnlich
+der Beschreibung von Modellen -- erstellt.
+
+Beispielsweise ein Kontaktforumular auf einer privaten Website könnte so
+aussen:
+
+.. code-block:: python
+
+    from django import forms
+
+    class ContactForm(forms.Form):
+        subject = forms.CharField(max_length=100)
+        message = forms.CharField()
+        sender = forms.EmailField()
+        cc_myself = forms.BooleanField(required=False)
+
+Ein Formular besteht aus einzelnen ``Field``-Objekten; in diesem Fall aus
+vier: ``subject``, ``message``, ``sender`` und ``cc_myself``. ``CharField``,
+``EmailField`` und ``BooleanField`` sind nur drei der hierfür verfügbaren
+Feldtypen. Eine vollständige Liste von Feldtypen findest du in
+:ref:`ref-forms-fields`.
+
+Wenn du ein Formular brauchst, über das du direkt Modellobjekte hinzufügen
+oder editieren möchtest, kannst du auch ein :ref:`ModelForm
+<topics-forms-modelforms>` verwenden, womit du dir die doppelte Beschreibung
+der Modellstruktur ersparst.
+
+Formulare in Views
+------------------
+
+In der Regel bindet man ein Formular so in einen View ein:
+
+.. code-block:: python
+
+   def contact(request):
+       if request.method == 'POST': # Wenn das Formular abgeschickt wurde...
+           form = ContactForm(request.POST) # Ein an POST-Daten gebundes Formular
+           if form.is_valid(): # Allen Validierungsregeln entsprochen
+               # Verarbeite die Daten in form.cleaned_data
+               # ...
+               return HttpResponseRedirect('/thanks/')
+       else:
+           form = ContactForm() # Ein leeres Formular
+
+       return render_to_response('contact.html', {
+           'form': form,
+       })
+
+
+In diesem Code gibt es drei Ausführungspfade:
+
+    1. Wenn das Formular noch nicht abgeschickt wurde, dann wird eine
+       ungebundene Instanz von ``ContactForm`` erstellt und dem Template
+       übergeben.
+
+    2. Wenn das Formular bereits ausgefüllt und abgeschickt wurde, wird eine
+       an die in ``request.POST`` enthaltenen Daten gebundene Formularinstanz
+       erstellt. Wenn nun die übergebenen Daten gültig sind, werden sie weiter
+       verarbeitet und der Benutzer wird zu einer "Danke"-Seite weitergeleitet.
+
+    3. Sind die übermittelten Daten nun aber ungültig, wird das befüllte
+       Formular nochmals an das Template weitergeleitet.
+
+.. versionchanged:: 1.0
+    Das ``cleaned_data``-Attribut wurde in früheren Version ``clean_data`` 
+    genannt.
+
+Die Unterschiedung zwischen **gebundenen** und **ungebundenen** Formularen ist
+wichtig. Ein ungebundenes Formular ist mit keinen Daten assoziiert; wird es
+dem Benutzer präsentiert, so erscheinen die einzelnen Felder leer oder
+enthalten lediglich einen Standardwert. Ein gebundenes Formular enthält
+bereits z.B. durch den Benutzer übermittelte Daten und kann dazu verwendet
+werden, um diese Daten zu validieren. Wenn sie ungültig sind, kann das
+Formular-Objekt dem Benutzer erneut präsentiert werden und enthält diesmal
+zusätzlich entsprechende Fehlermeldungen.
+
+Siehe :ref:`ref-forms-api-bound-unbound` für weitere Details zu dieser
+Unterscheidung.
+
+Daten eines Formulars weiterverarbeiten
+---------------------------------------
+
+Sobald ``is_valid()`` ``True`` zurückgibt, kannst du dir sicher sein, dass die
+übermittelten Daten den vom Formular definierten Validierungsregeln
+entsprechen und diese weiterverarbeiten. Natürlich könntest du die Daten auch
+direkt aus ``request.POST`` nehmen, jedoch ist es in diesem Fall besser, sie
+aus ``form.cleaned_data`` zu beziehen. Nicht nur wurden diese Daten validiert,
+sie wurden auch in die jeweiligen Python-Typen umgewandelt. Im Beispiel von
+oben wird ``cc_myself`` ein Boolean-Wert sein, während Felder wie
+``IntegerField`` und ``FloatField`` in die Python-Typen ``int`` bzw. ``float``
+umgewandelt werden. 
+
+Aufbauend auf dem vorherigen Beispiel, könnte man die Formulardaten
+beispielsweise so weiterverarbeiten:
+
+.. code-block:: python
+
+    if form.is_valid():
+        subject = form.cleaned_data['subject']
+        message = form.cleaned_data['message']
+        sender = form.cleaned_data['sender']
+        cc_myself = form.cleaned_data['cc_myself']
+
+        recipients = ['info@example.com']
+        if cc_myself:
+            recipients.append(sender)
+
+        from django.core.mail import send_mail
+        send_mail(subject, message, sender, recipients)
+        return HttpResponseRedirect('/thanks/')
+
+Für mehr Information zum Versenden von E-Mails mit Django, siehe
+:ref:`topics-emails`.
+
+Formulare in Templates
+----------------------
+
+``Form``\s wurden so entwickelt, dass sie auch gut mit Djangos
+Template-Sprache zusammenarbeiten. Im vorherigen Beispiel haben wir unsere
+``ContactForm``-Instanz an das Template als die Variable ``form`` übergeben.
+So könnte nun das entsprechende Template dafür aussehen::
+
+    <form action="/contact/" method="POST">
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+    </form>
+
+Das Formular gibt lediglich seine eigenen Felder aus, somit musst du selbst
+für den ``<form>``-Tag und die gewünschten Knöpfe sorgen.
+
+``form.as_p`` zeigt jedes einzelne Feld mit dem damit assoziierten Label in
+einem Absatz an::
+
+   <form action="/contact/" method="POST">
+   <p><label for="id_subject">Subject:</label>
+       <input id="id_subject" type="text" name="subject" maxlength="100" /></p>
+   <p><label for="id_message">Message:</label>
+       <input type="text" name="message" id="id_message" /></p>
+   <p><label for="id_sender">Sender:</label>
+       <input type="text" name="sender" id="id_sender" /></p>
+   <p><label for="id_cc_myself">Cc myself:</label>
+       <input type="checkbox" name="cc_myself" id="id_cc_myself" /></p>
+   <input type="submit" value="Submit" />
+   </form>
+
+Beachte, dass jedes Feld ein ID-Attribut mit dem Wert ``id_<feldname>`` hat,
+welches im assoziierten Label referenziert wird. Das ist notwendig, damit das
+Formular für Technologien für wie Screen-Reader und anderen
+Accessibility-Hilfsmitteln verwendbar wird. Du kannst aber auch :ref:`selbst
+bestimmen, wie Labels und IDs erzeugt werden
+<ref-forms-api-configuring-label>`.
+
+Neben ``form.as_p`` kannst du mit ``form.as_table`` und ``form.as_p`` das
+Formular auch jeweils als Sammlung von Tabellenspalten oder als Auflistung
+ausgeben.
+
+Das Formular-Template anpassen
+------------------------------
+
+Sollte der vom Formular erzeugte HTML-Code nicht nach deinem Geschmack sein,
+kannst du die Ausgabe auch vollständig durch Verwendung von Djangos
+Template-Sprache anpassen. Aufbauend auf dem vorherigen Beispiel könnte das
+beispielsweise so aussehen::
+
+    <form action="/contact/" method="POST">
+        <div class="fieldWrapper">
+            {{ form.subject.errors }}
+            <label for="id_subject">E-Mail-Betreff:</label>
+            {{ form.subject }}
+        </div>
+        <div class="fieldWrapper">
+            {{ form.message.errors }}
+            <label for="id_message">Deine Nachricht:</label>
+            {{ form.message }}
+        </div>
+        <div class="fieldWrapper">
+            {{ form.sender.errors }}
+            <label for="id_sender">Deine E-Mail-Adresse:</label>
+            {{ form.sender }}
+        </div>
+        <div class="fieldWrapper">
+            {{ form.cc_myself.errors }}
+            <label for="id_cc_myself">Kopie an mich schicken?</label>
+            {{ form.cc_myself }}
+        </div>
+        <p><input type="submit" value="Nachricht abschicken" /></p>
+    </form>
+
+Jedes benannte Formularfeld kann im Template durch ``{{ form.name_des_feldes
+}}`` ausgegeben werden. Hierbei wird der HTML-Code für das Feld-Widget
+produziert. ``{{ form.name_des_feldes.errors }}`` stellt eine Liste der für
+dieses Feld relevanten Fehler als ungeordnete Liste dar. Das könnte so
+aussehen::
+
+   <ul class="errorlist">
+       <li>Sender is required.</li>
+   </ul>
+
+Die erzeugte Liste hat auch die CSS-Klasse ``errorlist``, wodurch du einfach
+ihr Erscheinungsbild anpassen kannst. Wenn du auch das Markup noch weiter
+anpassen möchtest, kannst du über die einzelnen Fehler iterieren::
+
+    {% if form.subject.errors %}
+        <ol>
+        {% for error in form.subject.errors %}
+            <li><strong>{{ error|escape }}</strong></li>
+        {% endfor %}
+        </ol>
+    {% endif %}
+
+Über die Felder eines Formulares iterieren
+-------------------------------------------
+
+Wenn du denselben HTML-Code für jedes deiner Formularfelder verwenden
+möchtest, kannst du auch einfach mit einem ``{% for %}``-Tag über die
+einzelnen Felder iterieren::
+
+    <form action="/contact/" method="POST">
+        {% for field in form %}
+            <div class="fieldWrapper">
+                {{ field.errors }}
+                {{ field.label_tag }}: {{ field }}
+            </div>
+        {% endfor %}
+        <p><input type="submit" value="Nachricht abschicken" /></p>
+    </form>
+
+Innerhalb der Schleife ist ``{{ field }}`` eine Instanz von
+:class:`BoundField`, was die folgenden Attribute hat:
+
+    ``{{ field.label }}``
+        Das Label des Feldes, z.B.: ``E-Mail-Adresse``.
+
+    ``{{ field.label_tag }}``
+        Das Label mitsamt dem entsprechenden ``<label>``-Tag,
+        z.B.: ``<label for="id_email">E-Mail-Adresse</label>``
+
+    ``{{ field.html_name }}``
+        Der Name des Feldes wie er als Name für das Input-Feld verwendet wird.
+        Hierbei wird der Präfix des Formulars mit einbezogen, falls er gesetzt
+        wurde.
+
+    ``{{ field.help_text }}``
+        Der mit dem Feld assoziierte Hilfe-Text.
+
+    ``{{ field.errors }}``
+        Erzeugt ein ``<ul class="errorlist>``-Element, das sämtliche
+        Validierungsfehler des Feldes enthält. Du kannst die Präsentation
+        dieser Fehler auch über eine ``{% for error in field.errors
+        %}``-Schleife anpassen. Hierbei enthält jedes ``error``-Objekt in der
+        Schleife die Fehlermeldung als String.
+
+Wiederverwendbare Formular-Templates
+------------------------------------
+
+Solltest du dieselbe Anzeige-Logik an mehreren Stellen in deiner Seite
+verwenden, speichere die Formular-Schleife in einem eigenen Template und
+inkludieren es mit dem :ttag:`include`-Tag in anderen Templates::
+
+    <form action="/contact/" method="POST">
+        {% include "form_snippet.html" %}
+        <p><input type="submit" value="Nachricht abschicken" /></p>
+    </form>
+
+    # Im form_snippet.html-Template:
+
+    {% for field in form %}
+        <div class="fieldWrapper">
+            {{ field.errors }}
+            {{ field.label_tag }}: {{ field }}
+        </div>
+    {% endfor %}
+
+Wenn das Formularobjekt, das du an das Template übergeben hat, einen anderen
+Namen im Kontext hat, kannst du einfach mit dem :ttag:`with`-Tag einen Alias
+anlegen::
+
+    <form action="/comments/add/" method="POST">
+        {% with comment_form as form %}
+            {% include "form_snippet.html" %}
+        {% endwith %}
+        <p><input type="submit" value="Kommentar abschicken" /></p>
+    </form>
+
+Solltest du so etwas öfters brauchen, könnten du hierfür auch
+:ref:`Inclusion-Tags <howto-custom-template-tags-inclusion-tags>` verwenden.
+
+Weiterführende Themen
+======================
+
+Hier wurden lediglich die Grundlagen behandelt, aber Djangos
+Formularbibliothek kann noch viel mehr:
+
+.. toctree::
+   :maxdepth: 1
+
+   modelforms
+   formsets
+   media
+
+.. seealso::
+
+    Die :ref:`Formular-API-Referenz <ref-forms-index>`.
