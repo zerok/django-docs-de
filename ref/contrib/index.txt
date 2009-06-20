@@ -1,0 +1,208 @@
+.. _ref-contrib-index:
+
+===========================
+Die "django.contrib"-Extras
+===========================
+
+Django versucht, es Python gleich zu tun und liefert eine Reihe von Extras im
+Sinne von optionalen Tools für häufige Problemfälle gleich mit (siehe
+`"Batteries-included"-Philosophie`_). Du findest diese im
+```django/contrib``-Verzeichnis der Django-Distribution.
+
+Dieses Dokument liefert einen kurzen Überblick über allen Pakete in
+``contrib`` zusammen mit den jeweiligen Abhängigkeiten.
+
+.. admonition:: Anmerkung
+
+    Für die meisten dieser Extras -- insbesondere jene, die entweder Modelle
+    oder Template-Tags umfassen -- gilt, dass du sie in deine
+    ``INSTALLED_APPS``-Einstellung eintragen (z.B.:
+    ``"django.contrib.admin"``) und danach ``manage.py syncdb`` ausführen
+    musst.
+
+.. _"Batteries-included"-Philosophie: http://docs.python.org/tut/node12.html#batteries-included
+
+.. toctree::
+   :maxdepth: 1
+
+   admin
+   auth
+   comments/index
+   contenttypes
+   csrf
+   databrowse
+   flatpages
+   formtools/index
+   humanize
+   localflavor
+   redirects
+   sitemaps
+   sites
+   syndication
+   webdesign
+
+admin
+=====
+
+Djangos automatische Administrationsoberfläche. Mehr Informationen darüber
+findest du im :ref:`zweiten Teil des Tutorials <intro-tutorial02>` und in der
+:ref:`Admin-Dokumentation <ref-contrib-admin>`.
+
+Hierfür musst du das auth_- und contenttypes_-Pakete installiert haben.
+
+auth
+====
+
+Djangos Authentifizierungsframework.
+
+Siehe :ref:`topics-auth`.
+
+comments
+========
+
+.. versionchanged:: 1.0
+   Die comments-Applikation wurde neu geschrieben. Für Information bezüglich
+   des Upgrade-Prozesses siehe :ref:`ref-contrib-comments-upgrade`.
+
+Ein einfaches und flexibles Kommentarsystem. Mehr dazu in
+:ref:`ref-contrib-comments-index`.
+
+contenttypes
+============
+
+Ein Mini-Framework, das dir Zugriff auf die unterschiedlichen Content-Typen
+(also die installierten Django-Modelle) bietet.
+
+Siehe :ref:`contenttypes-Dokumentation <ref-contrib-contenttypes>`.
+
+csrf
+====
+
+Eine Middleware gegen Cross Site Request Forgeries.
+
+Siehe :ref:`csrf-Dokumentation <ref-contrib-csrf>`.
+
+flatpages
+=========
+
+Ein Framework zur Verwaltung von einfachem HTML-Content in der Datenbank.
+
+Siehe :ref:`flatpages-Dokumentation <ref-contrib-flatpages>`.
+
+Hierfür muss auch das sites_-Contrib-Package installiert sein.
+
+formtools
+=========
+
+Eine Reihe von Abstraktionstools für Djangos Formularbibliothek
+(django.forms).
+
+django.contrib.formtools.preview
+--------------------------------
+
+Eine Abstraktion folgenden Workflows:
+
+"Zeige ein HTML-Formular an, erzwinge eine Vorschau und mache danach etwas mit
+den übermittelten Daten."
+
+Mehr dazu in der :ref:`form-preview-Dokumentation <ref-contrib-formtools-form-preview>`.
+
+django.contrib.formtools.wizard
+--------------------------------
+
+Teilt Formulare auf mehrere Webseiten auf.
+
+Mehr dazu in der :ref:`Form-Wizard-Dokumentation <ref-contrib-formtools-form-wizard>`.
+
+humanize
+========
+
+Eine Reihe von Template-Filtern, die Daten einfacher lesbar machen sollen.
+
+Siehe :ref:`Humanize-Dokumentation <ref-contrib-humanize>`.
+
+localflavor
+===========
+
+Eine Sammlung von nützlichen Django-Modulen für bestimmte Länder bzw.
+Kulturen. So enthält beispielsweise ``django.contrib.localflavor.us.forms``
+das ``USZipCodeField``, das U.S.-Postleitzahlen validieren kann.
+
+Siehe :ref:`localflavor-Dokumentation <ref-contrib-localflavor>`.
+
+.. _ref-contrib-markup:
+
+markup
+======
+
+Eine Sammlung von Template-Filtern, die gängige Markup-Sprachen implementieren:
+
+    * ``textile`` -- implementiert `Textile`_
+    * ``markdown`` -- implementiert `Markdown`_
+    * ``restructuredtext`` -- implementiert `ReST (ReStructured Text)`_
+
+Diese Filter erwarten entsprechend formatierten Markup-Code als String und
+geben einen konvertierten String zurück. Der ``textile``-Filter wandelt zum
+Beispiel Text, der in Textile formtiert ist, in HTML um.
+
+Um diese Filter zu aktivieren, füge ``'django.contrib.markup'`` zu deiner
+:setting:`INSTALLED_APPS``-Einstellung hinzu. Sobald das erledigt ist, lade
+mit ``{% load markup %}`` die bereitgestellte Tag-Bibliothek und schon hast du
+Zugriff auf die Filter. Für mehr Informtion, lies dir bitte den Code in
+django/contrib/markup/templatetags/markup.py durch.
+
+.. _Textile: http://en.wikipedia.org/wiki/Textile_%28markup_language%29
+.. _Markdown: http://en.wikipedia.org/wiki/Markdown
+.. _ReST (ReStructured Text): http://en.wikipedia.org/wiki/ReStructuredText
+
+redirects
+=========
+
+Ein Framework zur Verwaltung von Weiterleitungen.
+
+Siehe :ref:`redirects-Documentation <ref-contrib-redirects>`.
+
+sessions
+========
+
+Ein Framework um Daten in anonymen Sessions zu speichern.
+
+Siehe :ref:`sessions-Dokumentation <topics-http-sessions>`.
+
+sites
+=====
+
+Ein kleines Framework, das es dir erlaubt, mehrere Webseiten mit ein und
+derselben Datenbank und Django-Installation zu betreiben. Es bietet dir die
+Möglichkeit, Objekte mit einer oder mehreren Seiten zu assoziieren.
+
+Siehe :ref:`sites-Dokumentation <ref-contrib-sites>`.
+
+sitemaps
+========
+
+Eine Bibliothek, um Google-Sitemap-XML-Dateien zu erstellen.
+
+Siehe :ref:`sitemaps-Dokumentation <ref-contrib-sitemaps>`.
+
+syndication
+===========
+
+Ein Framework zur Generierung von RSS- und Atom-Feeds.
+
+Siehe :ref:`syndication-Dokumentation <ref-contrib-syndication>`.
+
+webdesign
+=========
+
+Hilfsfunktionen für Web-Designer (im Gegensatz zu Web-Entwicklern).
+
+Siehe :ref:`Web-Design-Helpers-Dokumentation <ref-contrib-webdesign>`.
+
+Andere Add-Ons
+==============
+
+Wenn du noch eine Idee für ein Contrib-Paket hast, lass es uns wissen!
+Schreibe den Code und schicke ihn an die `django-users-Mailinglist`_.
+
+.. _django-users-Mailinglist: http://groups.google.com/group/django-users
