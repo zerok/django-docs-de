@@ -1,0 +1,290 @@
+.. _internals-committers:
+
+=================
+Django Entwickler
+=================
+
+Das ursprüngliche Team
+=================
+
+Django wurde ursprünglich von World Online, der Web-Abteilung der
+Zeitung `Lawrence Journal-World`_ aus Lawrence, Kansas, USA.
+
+`Adrian Holovaty`_
+    Adrian ist ein Webentwickler mit Wurzeln im Journalismus. In
+    Journalistenkreisen ist er als einer der Pioniere des
+    "Journalismus durch Computerprogrammierung", und in technischen
+    Kreisen als "der Kerl, der Django erfand" bekannt.
+
+    Er war leitender Entwickler bei World Online für zweieinhalb
+    Jahre. Während dieser Zeit wurde Django entwickelt und in den
+    Seiten von World Online implementiert. Mittlerweile ist er der
+    Leiter und Gründer von EveryBlock_, einem "Newsfeed für deine
+    Gegend".
+
+    Adrian lebt in Chicago, USA.
+
+`Simon Willison`_
+    Simon ist ein geschätzter Webentwickler aus England. Während
+    seines einjähigen Praktikums bei World Online entwickelte er mit
+    Adrian Django von Grund auf. Er ist der begeisterungsfähigste
+    Brite, der Dir jemals begegnen wird, er ist leidenschaftlicher
+    Verfechter guter Fachpraxis und betreibt einen gutbesuchten
+    `Blog über Webentwicklung`_.
+
+    Simon lebt in Brighton, England.
+
+`Jacob Kaplan-Moss`_
+    Jacob ist teilhaber bei `Revolution Systems`_, welche
+    Unterstützung für Django und andere verwandte
+    Open-Source-Technologien bereitstellen. Ein großer Teil von Jakobs
+    Arbeitszeit geht an Arbeiten an Django. Vorher arbeitete Jacob bei
+    World Online, wo Django erfunden wurde, als leitender Entwickler
+    von Ellington, einer kommerziellen Webpublishing-Plattform für
+    Medienunternehmen.
+
+    Jacob lebt in Lawrence, Kansas, USA.
+
+`Wilson Miner`_
+    Wilson ist es, dem Django sein hübsches Äußeres zu verdanken
+    hat. Er entwarf die Website, die Du momentan betrachtest, und
+    ebenso Djangos umjubelte Administrationsoberfläche. Wilson ist der
+    Designer für EveryBlock_.
+
+    Wilson lebt in San Francisco, USA.
+
+.. _lawrence journal-world: http://ljworld.com/
+.. _adrian holovaty: http://holovaty.com/
+.. _everyblock: http://everyblock.com/
+.. _simon willison: http://simonwillison.net/
+.. _blog über webentwicklung: `simon willison`_
+.. _jacob kaplan-moss: http://jacobian.org/
+.. _revolution systems: http://revsys.com/
+.. _wilson miner: http://wilsonminer.com/
+
+Aktuelle Entwickler
+==================
+
+Momentan wird Django von einem Team Freiwilliger rund um den Globus
+geführt.
+
+BDFLs
+-----
+
+Adrian and Jacob are the Co-`Benevolent Dictators for Life`_ of Django. When
+"rough consensus and working code" fails, they're the ones who make the tough
+decisions.
+Adrian und Jacob sind die Co-`Benevolent Dictators for Life`_ für
+Django. Falls "grob Übereinstimmung und funktionierender Code"
+fehlschlagen, sind sie diejenigen, die die schwierigen Entscheidungen fällen.
+
+.. _Benevolent Dictators for Life: http://en.wikipedia.org/wiki/Benevolent_Dictator_For_Life
+
+Kernentwickler
+---------------
+
+Dies sind diejenigen die eine Menge Quellcode beigesteuert haben, in
+der Mailingliste oft ausgeholfen haben, und eine starkes Bedürfnis,
+einen Großteil ihrer freien Zeit Django zu widmen. Im Gegenzug wurde
+ihnen das begehrte Beisteuerungsrecht gewährt und haben nun freie Hand an
+allen Teilen Djangos rumzubasteln.
+
+`Malcolm Tredinnick`_
+    Malcolm wollte ursrünglich Mathematiker werden, ist aber irgendwie
+    Softwareentwickler geworden. Er hat bei vielen
+    Open-Source-Projekten mitgewirkt, war Mitglied im Rat der GNOME
+    Foundation und wird dich im Schach alt aussehen lassen.
+
+    Wenn er gerade nicht damit beschäftigt ist, in der Weltgeschichte
+    herumzureisen, lebt er in Sydney, Australien.
+
+.. _malcolm tredinnick: http://www.pointy-stick.com/
+
+`Russell Keith-Magee`_
+    Russel studierte Physik im Grundstudium und promovierte in
+    Neuralen Netzwerken. Sein erste Job war in der
+    Verteidigunsindustrie, wo er Simulationsframeworks entwickelte.
+    Mit der Zeit, vor allem durch seine Arbeit mit Django, wuchs seine
+    Beteiligung an der Webentwicklung.
+
+    Russel hat bei vielen größeren Aspekten bei Django ausgeholfen,
+    darunter eine Reihe großer interner Refaktorisiserungen, die
+    Erstellung des Testsystems und vielem mehr.
+
+    Russel lebt in der isoliertesten Hauptstadt der Welt – Perth,
+    Australien.
+
+.. _russell keith-magee: http://cecinestpasun.com/
+
+Joseph Kocherhans
+    Joseph ist momentan Entwickler bei EveryBlock_, vorher arbeitete
+    er für Lawrence Journa-World wo er den Großteil des Backends für
+    die dortige Marktplatz-Seite entwickelte. Er entschwindet manchmal
+    für mehrere Tage in die Wälder, versucht sich selbst
+    Computerlinguistik beizubringen, und nervt seine Nachbarn wenn er
+    Charango_ spielt.
+
+    Josephs erster Beitrag zu Django war eine Reihe von Verbesserungen
+    im Authorisierungssystem, die dazu führte dass die Authorisierung
+    als Plugin genutzt werden kann. Seitdem hat er am neuen
+    Formularsystem, dessen Einbettung im Administrationsbereich, und
+    vielen kleineren Verbesserungen gearbeitet.
+
+    Joseph lebt in Chicago, USA.
+
+.. _charango: http://en.wikipedia.org/wiki/Charango
+
+`Luke Plant`_
+    An der Univerität sutdierte Luke Physik und Materialwissenschaft,
+    er lernte außerdem `Michael Meeks`_ kennen, der ihn mit Linux und
+    Open-Source bekannt machte und dadurch sein Interesse an
+    Programmierung erneut weckte. Seitdem hat er bei einer Reihe von
+    Open-Source-Projekten mitgewirkt und arbeitet als professioneller
+    Programmierer.
+
+    Luke hat viele ausgezeichnete Verbeserungen zu Django beigetragen,
+    unter anderem auf Datenbankebene, die CSRF-Middleware und viele
+    Unittests.
+
+    Momentan arbeitet Luke für eine Kirche in Bradford, UK, und
+    nebenberuflich als selbsständiger Webentwickler.
+
+.. _luke plant: http://lukeplant.me.uk/
+.. _michael meeks: http://en.wikipedia.org/wiki/Michael_Meeks_(software)
+
+`Brian Rosner`_
+    Brian ist momentan der technische Leiter bei Eldarion_ und
+    verwaltet und entwickelt Django- / Pinax_-basierte Websites. Er
+    lernt gerne mehr über Programmiersprachen und Systemarchitekturen
+    und bei Open-Source-Projekten mitzuwirken. Er veröffentlicht
+    die `Django Dose`_ Podcasts.
+
+    Brian half sehr, Djangos "newforms-admin" Zweig rechtzeitig vor
+    Django 1.0 den letzten Schliff zu verpassen; nun ist er
+    ordentlicher Entwickler und arbeitet daran das Admin- und
+    Forms-System zu verbessern.
+
+    Brian lebt in Denver, Colorado, USA.
+
+.. _brian rosner: http://oebfare.com/
+.. _eldarion: http://eldarion.com/
+.. _django dose: http://djangodose.com/
+
+`Gary Wilson`_
+    Gary begann 2006 Patches für Django beizusteuern während er für
+    die `Universität von Texas`_ Webentwicklungsandwendungen schrieb.
+    Seitdem hat er Verbesserungen an E-Mail- und Forms-System
+    beigesteuert und viele Aufräumarbeiten im Quellcode durchgeführt.
+
+    Gary ist momentan Entwickler und studiert Softwareentwicklung in
+    Texas, wo er mit unermüdlicher Ausdauer die Wege von Python und
+    Django an den Mann zu bringen versucht.
+
+    Gary lebt in Austin, Texas, USA.
+
+.. _Gary Wilson: http://gdub.wordpress.com/
+.. _Universität von Texas: http://www.utexas.edu/
+
+Justin Bronn
+    Justin Bronn ist eine Computerwissenschaftler und auf Geistiges
+    Eigentum und Raumrecht spezialisierter Anwalt.
+
+    Im Jahr 2007 begann Justin ``django.contrib.gis`` in einem Zweig
+    der als GeoDjango_ bekannt ist, zu entwickeln. Dieser wurde
+    rechtzeitig für Django 1.0 mit dem Hauptzweig zusammengeführt.
+    Durch seine Arbeit an GeoDjango erlangte er eine Menge an Wissen
+    über Djangos Interna, darunter das ORM, die Administration und die
+    Oracle-Unterstützung.
+
+    Justin lebt in Houston, Texas.
+
+.. _GeoDjango: http://geodjango.org/
+
+Karen Tracey
+    Karen hat ihre Wurzeln in der Arbeit mit verteilten
+    Betriebssystemen (Graduiertenschule), Kommunikationssoftware
+    (Industrie) und Kreuzworträtselerstellung (Selbsständig).
+    Letztere brachte sie 2006 zu Django als sie ein Webfrontend für
+    ihre Datenbank suchte. Anschließend blieb sie dabei um Fragen in
+    der Django-Gemeinschaft zu beantworten, Fehler zu beheben, etc. --
+    all das, weil Programmierpuzzle mehr Spaß machen als Puzzles mit
+    Worten.
+
+    Karen lebt in Apex, NC, USA.
+
+`Jannis Leidel`_
+    Jannis studierte Mediendesign an der `Bauhaus-Universität Weimar`_,
+    ist der Autor einer Reihe von Django-Anwendungen und steuert gerne
+    etwas bei Open-Source-Projekten wie Pinax_ bei. Momentan arbeitet
+    er als selbstständiger Webentwickler und Designer.
+
+    Jannis lebt in Berlin, Germany.
+
+.. _Jannis Leidel: http://jezdez.com/
+.. _Bauhaus-Universität Weimar: http://www.uni-weimar.de/
+.. _pinax: http://pinaxproject.com/
+
+`James Tauber`_
+    James ist der leitende Entwickler von Pinax_ und der
+    Geschäftsführer bei Eldarion_. Er entwickelt Open-Source-Software
+    seit 1993, Python seit 1998 und Django seit 2006. Er ist
+    Ratsmitglied der Python Software Foundation und nimmt sich gerade
+    eine Auszeit von seinem Linguistikstudium.
+
+    James lebt momentan in Boston, MA, USA, kommt aber ursprünglich
+    aus Perth, Westaustralien, wo er mit Russel Keith-Magee die
+    Oberstufe besuchte.
+
+.. _James Tauber: http://jtauber.com/
+
+Spezialisten
+-----------
+
+`James Bennett`_
+    James ist Djangos Releasemanager; er arbeitet darüberhinaus an der
+    Dokumentation.
+
+    James kam von der Philosophie zur Webentwicklung, da er bemerkte
+    dass sich Programmierer genau so oft streiten, dabei allerdings
+    mehr verdienen. Er lebt in Lawrence, Kansas, wo er Ellington für
+    Journal-World entwickelt. Er betreibt einen `Blog`_, schrieb ein
+    `Buch über Django`_, und genießt Portweine und mit seinem Auto zu
+    reden.
+
+.. _james bennett: http://b-list.org/
+.. _blog: `james bennett`_
+.. _buch über django: http://www.amazon.com/dp/1590599969/?tag=djangoproject-20
+
+Ian Kelly
+    Ian ist für Djangos Oracle-Unterstützung verantwortlich.
+
+Matt Boersma
+    Matt ist ebenfalls für Djangos Oracle-Unterstützung verantwortlich.
+
+Jeremy Dunck
+    Jeremy ist der leitende Entwickler bei Pegasus News, einer
+    personalisierten Lokalseite aus Dallas, Texas. Er trug schon früh
+    zu Greasemonkey und Django bei und sieht Technologie als ein
+    Werkzeug für Kommunikation und Zugang zu Wissen.
+
+    Jeremy half, die GeoDjango-Entwicklung anzustoßen, und ist
+    hauptsächlich für den rasante Geschwindigkeitsgewinn
+    verantwortlich, die Djangos Signale in 1.0 erfuhren.
+
+    Jeremy lebt in Dallas, Texas, USA.
+
+Emeritierte Entwickler
+===================
+
+Georg "Hugo" Bauer
+    Georg entwickelte Djangos Internationalisierungs-System,
+    verwaltete i18n-Beiträge und hat einen Haufen exzellenter
+    Feinjustierungen, Verbesserungen und Fehlerbehebungen
+    beigesteuert.
+
+Robert Wittams
+    Robert war für die *erste* Refaktorisierung von Djangos
+    Administrations-Anwendung verantwortlich, so dass sie zwecks
+    einfacherer Handhabung wiederverwendet werden konnte und hat einen
+    Haufen exzellenter Feinjustierungen, Verbesserungen und
+    Fehlerbehebungen beigesteuert.
