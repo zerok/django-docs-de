@@ -5,7 +5,7 @@ Django Entwickler
 =================
 
 Das ursprüngliche Team
-=================
+======================
 
 Django wurde ursprünglich von World Online, der Web-Abteilung der
 Zeitung `Lawrence Journal-World`_ aus Lawrence, Kansas, USA.
@@ -63,7 +63,7 @@ Zeitung `Lawrence Journal-World`_ aus Lawrence, Kansas, USA.
 .. _wilson miner: http://wilsonminer.com/
 
 Aktuelle Entwickler
-==================
+===================
 
 Momentan wird Django von einem Team Freiwilliger rund um den Globus
 geführt.
@@ -218,7 +218,7 @@ Karen Tracey
     etwas bei Open-Source-Projekten wie Pinax_ bei. Momentan arbeitet
     er als selbstständiger Webentwickler und Designer.
 
-    Jannis lebt in Berlin, Germany.
+    Jannis lebt in Berlin, Deutschland.
 
 .. _Jannis Leidel: http://jezdez.com/
 .. _Bauhaus-Universität Weimar: http://www.uni-weimar.de/
@@ -238,7 +238,7 @@ Karen Tracey
 .. _James Tauber: http://jtauber.com/
 
 Spezialisten
------------
+------------
 
 `James Bennett`_
     James ist Djangos Releasemanager; er arbeitet darüberhinaus an der
@@ -274,7 +274,7 @@ Jeremy Dunck
     Jeremy lebt in Dallas, Texas, USA.
 
 Emeritierte Entwickler
-===================
+======================
 
 Georg "Hugo" Bauer
     Georg entwickelte Djangos Internationalisierungs-System,
